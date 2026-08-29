@@ -103,7 +103,7 @@ export function KioskCheckIn() {
       className="kiosk-shell relative min-h-[100dvh] overflow-hidden text-[#173f42]"
       style={{
         background:
-          "radial-gradient(circle at 8% 0%, rgba(213,235,225,.9), transparent 30%), #f7f6f0",
+          "radial-gradient(circle at 8% 0%, rgba(248,226,228,.95), transparent 30%), #f7f6f0",
         fontFamily: "'DM Sans', ui-sans-serif, system-ui, sans-serif",
       }}
     >
@@ -140,11 +140,11 @@ export function KioskCheckIn() {
           </div>
           <div>
             <p className="text-[17px] font-bold tracking-[-.03em] text-[#174f50]">
-              Harborview Clinic
+              IU Student Health Center
             </p>
             <p className="mt-0.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[.14em] text-[#718789]">
               <span className="h-1.5 w-1.5 rounded-full bg-[#d4865d]" />
-              Riverside Care Center
+              Campus health, made simple
             </p>
           </div>
         </div>
@@ -196,16 +196,16 @@ export function KioskCheckIn() {
           <div className="max-w-[520px]">
             <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#c9ddd1] bg-[#e8f1eb] px-3.5 py-2 text-[11px] font-bold uppercase tracking-[.16em] text-[#3e706a]">
               <Sparkles size={14} className="text-[#d4865d]" />
-              A calm start to your visit
+              Your campus health visit
             </div>
             <h1
               className="max-w-[510px] text-[clamp(2.75rem,5vw,5.15rem)] font-semibold leading-[.98] tracking-[-.065em] text-[#174f50]"
               style={{ fontFamily: "'Fraunces', Georgia, serif" }}
             >
-              Welcome. We&apos;re glad you&apos;re here.
+              Welcome, Hoosier. We&apos;re glad you&apos;re here.
             </h1>
             <p className="mt-6 max-w-[420px] text-[17px] leading-7 text-[#5e7777]">
-              Check in for your appointment in just a few steps. Your information stays private and secure.
+              Check in for your appointment in a few quick steps. Your health information stays private and secure.
             </p>
 
             <div className="mt-10 grid max-w-[500px] grid-cols-1 gap-3 sm:grid-cols-2">
@@ -246,19 +246,19 @@ export function KioskCheckIn() {
               <div className="mb-7 flex h-20 w-20 items-center justify-center rounded-[27px] bg-[#dcebe4] text-[#34766d]">
                 <CircleCheckBig size={42} strokeWidth={1.7} />
               </div>
-              <p className="mb-3 text-xs font-bold uppercase tracking-[.18em] text-[#6f9188]">Check-in complete</p>
+              <p className="mb-3 text-xs font-bold uppercase tracking-[.18em] text-[#6f9188]">You&apos;re checked in</p>
               <h2 className="max-w-[380px] text-[clamp(2rem,4vw,3rem)] font-semibold leading-[1.04] tracking-[-.055em] text-[#174f50]" style={{ fontFamily: "'Fraunces', Georgia, serif" }}>
-                You&apos;re all set.
+                Your visit is ready.
               </h2>
               <p className="mt-5 max-w-[350px] text-[16px] leading-7 text-[#63807c]">
-                Please have a seat in the waiting area. A care team member will be with you shortly.
+                Please take a seat in the waiting area. A Student Health Center team member will be with you shortly.
               </p>
               <div className="mt-8 w-full max-w-[350px] rounded-2xl border border-[#e0e8df] bg-[#f3f7f1] p-4 text-left">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f4ddbb] text-[#9b6149]"><CalendarDays size={17} /></div>
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[.12em] text-[#77908c]">Today&apos;s visit</p>
-                    <p className="mt-0.5 text-sm font-bold text-[#315d5b]">Riverside Care Center</p>
+                    <p className="mt-0.5 text-sm font-bold text-[#315d5b]">IU Student Health Center</p>
                   </div>
                 </div>
               </div>
@@ -307,7 +307,7 @@ export function KioskCheckIn() {
           ) : (
             <div className="kiosk-fade">
               <div className="mb-7">
-                <p className="text-xs font-bold uppercase tracking-[.18em] text-[#77908c]">Let&apos;s get you checked in</p>
+                <p className="text-xs font-bold uppercase tracking-[.18em] text-[#77908c]">Start your check-in</p>
                 <h2 className="mt-3 text-[clamp(2rem,3.5vw,2.8rem)] font-semibold leading-[1.05] tracking-[-.05em] text-[#174f50]" style={{ fontFamily: "'Fraunces', Georgia, serif" }}>
                   How would you like to begin?
                 </h2>
@@ -315,7 +315,7 @@ export function KioskCheckIn() {
 
               <div className="grid grid-cols-2 gap-2 rounded-2xl bg-[#edf3ed] p-1.5" role="tablist" aria-label="Check-in method">
                 <button type="button" role="tab" aria-selected={mode === "phone"} onClick={() => { setMode("phone"); setValue(""); setError(""); }} className={`flex min-h-12 items-center justify-center gap-2 rounded-xl px-2 text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-[#d4865d]/50 ${mode === "phone" ? "bg-[#fbfcf8] text-[#174f50] shadow-[0_3px_10px_rgba(38,75,66,.08)]" : "text-[#73908a] hover:text-[#315d5b]"}`}>
-                  <Phone size={17} /> Mobile number
+                  <Phone size={17} /> Phone number
                 </button>
                 <button type="button" role="tab" aria-selected={mode === "appointment"} onClick={() => { setMode("appointment"); setValue(""); setError(""); }} className={`flex min-h-12 items-center justify-center gap-2 rounded-xl px-2 text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-[#d4865d]/50 ${mode === "appointment" ? "bg-[#fbfcf8] text-[#174f50] shadow-[0_3px_10px_rgba(38,75,66,.08)]" : "text-[#73908a] hover:text-[#315d5b]"}`}>
                   <CalendarDays size={17} /> Appointment code
@@ -324,7 +324,7 @@ export function KioskCheckIn() {
 
               <div className="mt-7">
                 <label htmlFor="checkin-value" className="mb-2.5 block text-sm font-bold text-[#315d5b]">
-                  {mode === "phone" ? "Mobile number" : "Appointment code"}
+                  {mode === "phone" ? "Phone number" : "Appointment code"}
                 </label>
                 <div className="relative">
                   {mode === "phone" ? <Phone size={19} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#78938d]" /> : <CalendarDays size={19} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#78938d]" />}
@@ -335,14 +335,14 @@ export function KioskCheckIn() {
                     autoComplete="off"
                     value={value}
                     onChange={(event) => { setValue(event.target.value); setError(""); }}
-                    placeholder={mode === "phone" ? "(555) 014-8276" : "e.g. HV-48291"}
+                    placeholder={mode === "phone" ? "(812) 555-0147" : "e.g. IU-48291"}
                     className="min-h-14 w-full rounded-2xl border border-[#cadbd1] bg-[#f6f8f3] pl-12 pr-4 text-[16px] font-semibold tracking-[.01em] text-[#174f50] outline-none transition placeholder:text-[#a2b2aa] focus:border-[#d4865d] focus:bg-[#fffaf2] focus:ring-4 focus:ring-[#d4865d]/15"
                     aria-describedby="privacy-note"
                   />
                 </div>
                 {mode === "appointment" && (
-                  <button type="button" onClick={() => { setValue("HV-48291"); setError(""); }} className="mt-2 flex min-h-9 items-center gap-1.5 text-xs font-bold text-[#64827d] hover:text-[#174f50]">
-                    <Sparkles size={13} /> Use sample code HV-48291
+                  <button type="button" onClick={() => { setValue("IU-48291"); setError(""); }} className="mt-2 flex min-h-9 items-center gap-1.5 text-xs font-bold text-[#64827d] hover:text-[#174f50]">
+                    <Sparkles size={13} /> Use sample code IU-48291
                   </button>
                 )}
                 {error && <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-[#b35f51]"><AlertCircle size={16} />{error}</p>}
@@ -359,7 +359,7 @@ export function KioskCheckIn() {
 
               <p id="privacy-note" className="mt-5 flex items-start gap-2 text-xs leading-5 text-[#829a95]">
                 <LockKeyhole size={14} className="mt-0.5 shrink-0" />
-                We&apos;ll use this only to find your visit and verify your identity. No information is stored on this screen.
+                We&apos;ll only use this to find your visit and verify your identity. Nothing is saved on this screen.
               </p>
             </div>
           )}
@@ -370,12 +370,12 @@ export function KioskCheckIn() {
         <div className="fixed bottom-5 right-5 z-40 w-[min(350px,calc(100vw-40px))] rounded-2xl border border-[#d6e4da] bg-[#fbfcf8] p-5 shadow-[0_18px_42px_rgba(31,70,65,.2)]">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-bold text-[#174f50]">A team member can help</p>
-              <p className="mt-1.5 text-sm leading-5 text-[#6b8580]">Please ask the front desk if you need assistance or do not have your phone.</p>
+              <p className="text-sm font-bold text-[#174f50]">Need a hand?</p>
+              <p className="mt-1.5 text-sm leading-5 text-[#6b8580]">Ask a Student Health Center team member if you need assistance or do not have your phone.</p>
             </div>
             <button type="button" aria-label="Close help" onClick={() => setShowHelp(false)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#6d8983] hover:bg-[#e8f1eb]"><span className="text-xl leading-none">×</span></button>
           </div>
-          <div className="mt-4 flex items-center gap-2 rounded-xl bg-[#f2f6f0] px-3 py-2.5 text-xs font-bold text-[#527773]"><Stethoscope size={15} /> Front desk assistance is available.</div>
+          <div className="mt-4 flex items-center gap-2 rounded-xl bg-[#f2f6f0] px-3 py-2.5 text-xs font-bold text-[#527773]"><Stethoscope size={15} /> Student Health Center assistance is available.</div>
         </div>
       )}
     </main>
