@@ -335,12 +335,13 @@ export function KioskCheckIn() {
               <div className="mt-7">
                 {mode === "qr" ? (
                   <div className="rounded-2xl border border-dashed border-[#d9bdb0] bg-[#fffaf1] p-5 text-center">
-                    <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-[#f3e1dc] text-[#990000]">
-                      <ScanLine size={38} strokeWidth={1.6} />
+                    <div className="relative mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-[#f3e1dc] text-[#990000]">
+                      <ScanLine size={42} strokeWidth={1.6} />
+                      <span className="absolute inset-3 rounded-lg border-2 border-[#990000]/35" />
                     </div>
-                    <p className="mt-4 text-sm font-bold text-[#632c2c]">Scan your visit QR code</p>
+                    <p className="mt-4 text-sm font-bold text-[#632c2c]">Scan the QR code from your text</p>
                     <p className="mx-auto mt-1.5 max-w-[300px] text-xs leading-5 text-[#9a8074]">
-                      Use the QR code from your appointment message. It securely identifies your visit without displaying your ID numbers.
+                      Open the message on your phone and hold the code in front of the iPad camera. Your visit is identified securely without displaying your ID numbers.
                     </p>
                   </div>
                 ) : (
@@ -391,7 +392,7 @@ export function KioskCheckIn() {
                      <span className="kiosk-shimmer flex items-center gap-1.5" aria-hidden="true"><span className="h-1.5 w-1.5 rounded-full bg-[#fffaf1]" /><span className="h-1.5 w-1.5 rounded-full bg-[#fffaf1]" /><span className="h-1.5 w-1.5 rounded-full bg-[#fffaf1]" /></span>
                     Preparing your secure check-in
                   </>
-                ) : <>{mode === "qr" ? "Scan and continue" : "Continue securely"} <ArrowRight size={18} /></>}
+                ) : <>{mode === "qr" ? "Scan with iPad camera" : "Continue securely"} <ArrowRight size={18} /></>}
               </button>
 
               <p id="privacy-note" className="mt-5 flex items-start gap-2 text-xs leading-5 text-[#9a8478]">
