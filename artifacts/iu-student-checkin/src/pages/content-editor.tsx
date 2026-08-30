@@ -164,7 +164,7 @@ const defaultContent: EditableContent = {
     noticeSecondParagraph:
       "I also acknowledge receipt of the Notice of Privacy Practices, detailing how my health information may be used and disclosed.",
     agreementLabel: "I have read and agree to the Consent to Treat",
-    signatureLabel: "Type your full name to sign",
+    signatureLabel: "Draw your signature below",
     signaturePlaceholder: "Your name",
     continueButton: "Sign and continue",
   },

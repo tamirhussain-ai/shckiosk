@@ -8,5 +8,9 @@
 import type { QuestionnaireInputAnswers } from './questionnaireInputAnswers';
 
 export interface QuestionnaireInput {
+  /** @maxLength 200 */
+  questionnaireId?: string;
+  /** @maxLength 200 */
+  questionnaireName?: string;
   answers: QuestionnaireInputAnswers;
 }

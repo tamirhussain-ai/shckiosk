@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   AlertCircle,
   ArrowLeft,
@@ -39,6 +39,7 @@ import {
 } from "@workspace/api-client-react";
 import type { CheckInSession, CompletionResult, CheckInIdentificationMethod } from "@workspace/api-client-react";
 import { kioskContentDefaults } from "@/lib/kiosk-content-defaults";
+import { SignaturePad, type SignaturePadRef } from "./SignaturePad";
 
 type CheckInMode = "universityId" | "lastName" | "qr";
 type Coverage = "iu" | "other" | "self";
@@ -161,6 +162,46 @@ const previewSession: CheckInSession = {
     label: "Schedule online",
     message: "Use the self-service scheduler QR code or ask the front desk for help.",
   },
+  consentForms: [
+    {
+      id: "c1",
+      title: "HIPAA Notice of Privacy Practices",
+      description: "I acknowledge that I have received the Notice of Privacy Practices detailing how my medical information may be used and disclosed.",
+      requiresSignature: true,
+      status: "unsigned"
+    },
+    {
+      id: "c2",
+      title: "Release of Information",
+      description: "I authorize the IU Student Health Center to release my medical records to the parties indicated in this form.",
+      requiresSignature: true,
+      status: "unsigned"
+    }
+  ],
+  questionnaires: [
+    {
+      id: "q1",
+      name: "Reason for Visit",
+      status: "not_started",
+      questions: [
+        { id: "rv1", text: "How are you feeling today?", type: "single_select", mandatory: true, options: [{id: "good", label: "Good"}, {id: "okay", label: "Okay"}, {id: "not_well", label: "Not well"}] },
+        { id: "rv2", text: "Do you have any new or worsened symptoms?", type: "free_text", mandatory: false }
+      ]
+    },
+    {
+      id: "q2",
+      name: "PHQ-9 Depression Screening",
+      status: "completed_portal",
+      completedAnswers: {
+        "phq1": "not_at_all",
+        "phq2": "several_days"
+      },
+      questions: [
+        { id: "phq1", text: "Little interest or pleasure in doing things", type: "single_select", mandatory: true, options: [{id: "not_at_all", label: "Not at all"}, {id: "several_days", label: "Several days"}] },
+        { id: "phq2", text: "Feeling down, depressed, or hopeless", type: "single_select", mandatory: true, options: [{id: "not_at_all", label: "Not at all"}, {id: "several_days", label: "Several days"}] }
+      ]
+    }
+  ]
 };
 
 const previewCompletion: CompletionResult = {
@@ -233,8 +274,10 @@ export function CheckInFlow() {
   const [showSchedulingHandoff, setShowSchedulingHandoff] = useState(false);
   const [frontDeskSelected, setFrontDeskSelected] = useState(false);
   const [consentAccepted, setConsentAccepted] = useState(false);
-  const [signatureName, setSignatureName] = useState("");
-  const [answers, setAnswers] = useState<Record<string, Answer>>({});
+  
+  const signaturePadRef = useRef<SignaturePadRef>(null);
+  const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string | null>(null);
+  const [questionnaireAnswers, setQuestionnaireAnswers] = useState<Record<string, string>>({});
 
   const selectPreviewScreen = (nextScreen: Screen) => {
     if (!previewMode) return;
@@ -360,6 +403,10 @@ export function CheckInFlow() {
       setShowInsuranceInfo(false);
       return;
     }
+    if (screen === "questionnaire" && activeQuestionnaireId) {
+      setActiveQuestionnaireId(null);
+      return;
+    }
     const previous: Partial<Record<Screen, Screen>> = {
       appointment: "welcome",
       demographics: "appointment",
@@ -368,7 +415,12 @@ export function CheckInFlow() {
       questionnaire: "consent",
       checking: "questionnaire",
     };
-    const next = previous[screen];
+    let next = previous[screen];
+    
+    if (next === "consent" && session && !session.consentForms?.some(f => f.status === "unsigned")) {
+      next = "coverage";
+    }
+
     if (next) setScreen(next);
   };
 
@@ -381,6 +433,10 @@ export function CheckInFlow() {
       setShowInsuranceInfo(false);
       setShowSchedulingHandoff(false);
       setError("");
+      setConsentAccepted(false);
+      signaturePadRef.current?.clear();
+      setActiveQuestionnaireId(null);
+      setQuestionnaireAnswers({});
       return;
     }
 
@@ -405,8 +461,9 @@ export function CheckInFlow() {
     setShowSchedulingHandoff(false);
     setFrontDeskSelected(false);
     setConsentAccepted(false);
-    setSignatureName("");
-    setAnswers({});
+    signaturePadRef.current?.clear();
+    setActiveQuestionnaireId(null);
+    setQuestionnaireAnswers({});
     clearError();
     setShowHelp(false);
     setLanguageOpen(false);
@@ -468,34 +525,67 @@ export function CheckInFlow() {
     });
   };
 
+  // Consent logic
+  const unsignedConsents = session?.consentForms?.filter(f => f.status === "unsigned") || [];
+  const currentConsent = unsignedConsents[0];
+  const totalConsents = session?.consentForms?.length || 0;
+  const completedConsentsCount = totalConsents - unsignedConsents.length;
+  const currentConsentIndex = completedConsentsCount + 1;
+
   const continueConsent = () => {
-    if (!consentAccepted || signatureName.trim().length < 2) {
+    if (!consentAccepted || signaturePadRef.current?.isEmpty() !== false) {
       setError("Please review the consent and add your signature to continue.");
       return;
     }
-    if (!session?.sessionId) return;
+    if (!session?.sessionId || !currentConsent) return;
     clearError();
 
+    const signatureData = signaturePadRef.current?.getDataUrl() || "";
+
     if (previewMode) {
-      setScreen("questionnaire");
+      const updatedConsentForms = session.consentForms?.map(f => 
+        f.id === currentConsent.id ? { ...f, status: "signed" as const } : f
+      ) || [];
+      
+      const nextSession = { ...session, consentForms: updatedConsentForms };
+      setSession(nextSession);
+      
+      setConsentAccepted(false);
+      signaturePadRef.current?.clear();
+
+      if (!nextSession.consentForms?.some(f => f.status === "unsigned")) {
+        setScreen("questionnaire");
+      }
       return;
     }
 
     saveConsentMutation.mutate({
       sessionId: session.sessionId,
-      data: { accepted: consentAccepted, signatureName }
+      data: { accepted: consentAccepted, formId: currentConsent.id, signatureData }
     }, {
       onSuccess: (data) => {
         setSession(data);
-        setScreen("questionnaire");
+        setConsentAccepted(false);
+        signaturePadRef.current?.clear();
+        
+        if (!data.consentForms?.some(f => f.status === "unsigned")) {
+          setScreen("questionnaire");
+        }
       },
       onError: () => setError("Failed to save consent. Please try again.")
     });
   };
 
+  // Skip consent screen if somehow accessed with no unsigned forms
+  useEffect(() => {
+    if (screen === "consent" && session && !session.consentForms?.some(f => f.status === "unsigned")) {
+      setScreen("questionnaire");
+    }
+  }, [screen, session]);
+
   const continueQuestions = () => {
-    if (Object.keys(answers).length !== questions.length) {
-      setError("Please answer each question before continuing.");
+    if (session?.questionnaires?.some(q => q.status === "not_started")) {
+      setError("Please complete all required questionnaires.");
       return;
     }
     if (!session?.sessionId) return;
@@ -507,27 +597,18 @@ export function CheckInFlow() {
       return;
     }
 
-    saveQuestionnaireMutation.mutate({
-      sessionId: session.sessionId,
-      data: { answers }
+    setScreen("checking");
+    completeMutation.mutate({
+      sessionId: session.sessionId
     }, {
-      onSuccess: (data) => {
-        setSession(data);
-        setScreen("checking");
-        completeMutation.mutate({
-          sessionId: data.sessionId
-        }, {
-          onSuccess: (res) => {
-            setCompletion(res);
-            setScreen("complete");
-          },
-          onError: () => {
-            setScreen("questionnaire");
-            setError("Failed to finalize check-in. Please try again.");
-          }
-        });
+      onSuccess: (res) => {
+        setCompletion(res);
+        setScreen("complete");
       },
-      onError: () => setError("Failed to save questionnaire. Please try again.")
+      onError: () => {
+        setScreen("questionnaire");
+        setError("Failed to finalize check-in. Please try again.");
+      }
     });
   };
 
@@ -543,7 +624,11 @@ export function CheckInFlow() {
     clearError();
 
     if (previewMode) {
-      setScreen("consent");
+      if (!session?.consentForms?.some(f => f.status === "unsigned")) {
+        setScreen("questionnaire");
+      } else {
+        setScreen("consent");
+      }
       return;
     }
 
@@ -559,7 +644,11 @@ export function CheckInFlow() {
     }, {
       onSuccess: (data) => {
         setSession(data);
-        setScreen("consent");
+        if (!data.consentForms?.some(f => f.status === "unsigned")) {
+          setScreen("questionnaire");
+        } else {
+          setScreen("consent");
+        }
       },
       onError: () => setError("Failed to save coverage. Please try again.")
     });
@@ -1478,106 +1567,300 @@ export function CheckInFlow() {
               </div>
             )}
 
-            {screen === "consent" && (
-              <div className="kiosk-fade relative">
-                {renderBack()}
-                <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
-                  {content.consent.heading}
-                </h2>
+            {screen === "consent" && currentConsent && (
+              <div className="kiosk-fade flex h-full flex-col relative">
+                <div className="flex-1">
+                  {renderBack()}
+                  <div className="mb-6 flex items-center justify-between">
+                    <h2 className="text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
+                      {currentConsent.title}
+                    </h2>
+                    {totalConsents > 1 && (
+                      <span className="text-sm font-bold uppercase tracking-wider text-[#a5918a]">
+                        Form {currentConsentIndex} of {totalConsents}
+                      </span>
+                    )}
+                  </div>
 
-                <div className="mb-6 max-h-48 overflow-y-auto rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] p-4 text-sm font-medium leading-relaxed text-[#806960]">
-                  <p className="mb-3">
-                     {content.consent.noticeFirstParagraph}
-                  </p>
-                  <p>
-                     {content.consent.noticeSecondParagraph}
-                  </p>
-                </div>
+                  <div className="mb-6 max-h-48 overflow-y-auto rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] p-4 text-sm font-medium leading-relaxed text-[#806960] whitespace-pre-wrap">
+                    {currentConsent.description}
+                  </div>
 
-                <label className="flex cursor-pointer items-start gap-3">
-                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded border-2 border-[#c1aba0] bg-[#fffaf1] transition-colors focus-within:ring-2 focus-within:ring-[#990000]/50" style={{ borderColor: consentAccepted ? "#990000" : undefined, backgroundColor: consentAccepted ? "#990000" : undefined }}>
-                    {consentAccepted && <Check size={16} className="text-[#fff9ed]" strokeWidth={3} />}
-                    <input
-                      type="checkbox"
-                      data-testid="input-consent"
-                      checked={consentAccepted}
-                      onChange={(e) => {
-                        setConsentAccepted(e.target.checked);
-                        clearError();
-                      }}
-                      className="sr-only"
+                  <label className="flex cursor-pointer items-start gap-3">
+                    <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded border-2 border-[#c1aba0] bg-[#fffaf1] transition-colors focus-within:ring-2 focus-within:ring-[#990000]/50" style={{ borderColor: consentAccepted ? "#990000" : undefined, backgroundColor: consentAccepted ? "#990000" : undefined }}>
+                      {consentAccepted && <Check size={16} className="text-[#fff9ed]" strokeWidth={3} />}
+                      <input
+                        type="checkbox"
+                        data-testid="input-consent"
+                        checked={consentAccepted}
+                        onChange={(e) => {
+                          setConsentAccepted(e.target.checked);
+                          clearError();
+                        }}
+                        className="sr-only"
+                      />
+                    </div>
+                    <span className="text-[15px] font-bold text-[#632f2f]">
+                      {content.consent.agreementLabel}
+                    </span>
+                  </label>
+
+                  <div className="mt-6">
+                    <label className="mb-2 block text-sm font-bold text-[#632f2f]">{content.consent.signatureLabel}</label>
+                    <SignaturePad 
+                      ref={signaturePadRef} 
+                      onBegin={clearError} 
+                      ariaLabel={`Signature pad for ${currentConsent.title}`} 
                     />
                   </div>
-                  <span className="text-[15px] font-bold text-[#632f2f]">
-                    {content.consent.agreementLabel}
-                  </span>
-                </label>
-
-                <div className="mt-6">
-                  <label htmlFor="signature" className="mb-2 block text-sm font-bold text-[#632f2f]">{content.consent.signatureLabel}</label>
-                  <div className="relative">
-                    <PenLine size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#9a8074]" />
-                    <input
-                      id="signature"
-                      type="text"
-                      data-testid="input-signature"
-                      value={signatureName}
-                      onChange={(e) => { setSignatureName(e.target.value); clearError(); }}
-                      placeholder={content.consent.signaturePlaceholder}
-                      className="min-h-14 w-full rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] pl-11 pr-4 font-serif text-[18px] font-medium tracking-wide text-[#632f2f] outline-none transition placeholder:font-sans placeholder:text-sm placeholder:font-semibold placeholder:tracking-normal placeholder:text-[#b7a49a] focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
-                    />
-                  </div>
+                  {renderError()}
                 </div>
 
-                {renderError()}
-
-                <div className="mt-8">
-                  {primaryButton(content.consent.continueButton, continueConsent, !consentAccepted || signatureName.length < 2, undefined, "button-save-consent")}
+                <div className="mt-8 shrink-0">
+                  {primaryButton(content.consent.continueButton, continueConsent, undefined, undefined, "button-save-consent")}
                 </div>
               </div>
             )}
 
-            {screen === "questionnaire" && (
-              <div className="kiosk-fade relative">
-                {renderBack()}
-                <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
-                  {content.questions.heading}
-                </h2>
+            {screen === "questionnaire" && !activeQuestionnaireId && (
+              <div className="kiosk-fade flex h-full flex-col relative">
+                <div className="flex-1">
+                  {renderBack()}
+                  <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
+                    {content.questions.heading}
+                  </h2>
+                  <p className="mb-6 text-sm font-medium leading-relaxed text-[#806960]">
+                    {content.questions.description}
+                  </p>
 
-                <div className="space-y-6">
-                  {questions.map((q, qIndex) => (
-                    <div key={q.id} className="rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] p-5">
-                      <p className="mb-3 text-[15px] font-bold text-[#632f2f]">
-                        {qIndex + 1}. {q.title}
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {q.options.map((opt) => {
-                          const isSelected = answers[q.id] === opt.value;
-                          return (
-                            <button
-                              key={opt.value}
-                              type="button"
-                              data-testid={`question-${q.id}-${opt.value}`}
-                              onClick={() => {
-                                setAnswers({ ...answers, [q.id]: opt.value });
-                                clearError();
-                              }}
-                              className={`rounded-xl border px-4 py-2 text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-[#990000]/30 ${isSelected ? "border-[#990000] bg-[#fff6e8] text-[#990000] shadow-[0_2px_8px_rgba(153,0,0,.08)]" : "border-[#e0c6ba] bg-transparent text-[#806960] hover:bg-[#f4e6d5]"}`}
-                            >
-                              {opt.label}
-                            </button>
-                          );
-                        })}
+                  <div className="space-y-4">
+                    {session?.questionnaires?.map(q => {
+                      const isNotStarted = q.status === "not_started";
+                      const isPortal = q.status === "completed_portal";
+                      const isNow = q.status === "completed_now";
+                      const isCompleted = isPortal || isNow;
+                      
+                      return (
+                        <button
+                          key={q.id}
+                          type="button"
+                          data-testid={`questionnaire-card-${q.id}`}
+                          onClick={() => {
+                            if (isNotStarted || isPortal) {
+                              setActiveQuestionnaireId(q.id);
+                              setQuestionnaireAnswers({});
+                              clearError();
+                            }
+                          }}
+                          disabled={isNow || isMutating}
+                          className={`w-full flex items-center justify-between p-4 rounded-2xl border text-left transition-all ${
+                            isCompleted 
+                              ? "bg-[#fffaf1] border-[#d9c6b5] cursor-default opacity-80" 
+                              : "bg-white border-[#c1aba0] shadow-sm hover:border-[#990000] hover:bg-[#fff6e8] cursor-pointer"
+                          }`}
+                        >
+                          <div className="flex flex-col gap-1">
+                            <span className={`text-[15px] font-bold ${isCompleted ? "text-[#806960]" : "text-[#632f2f]"}`}>
+                              {q.name}
+                            </span>
+                            {isPortal && (
+                              <span className="text-xs font-bold uppercase tracking-wider text-[#806960]">
+                                Completed online
+                              </span>
+                            )}
+                            {isNow && (
+                              <span className="text-xs font-bold uppercase tracking-wider text-[#316148]">
+                                Completed
+                              </span>
+                            )}
+                            {isNotStarted && (
+                              <span className="text-xs font-bold uppercase tracking-wider text-[#990000]">
+                                Required
+                              </span>
+                            )}
+                          </div>
+                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                            isCompleted ? "bg-[#f4e6d5]" : "bg-[#fffaf1] border border-[#c1aba0]"
+                          }`}>
+                            {isCompleted ? (
+                              <CheckCircle2 size={18} className={isNow ? "text-[#316148]" : "text-[#806960]"} />
+                            ) : (
+                              <ArrowRight size={16} className="text-[#990000]" />
+                            )}
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {renderError()}
+                </div>
+                
+                <div className="mt-8 shrink-0">
+                  {primaryButton(
+                    content.questions.continueButton, 
+                    continueQuestions, 
+                    session?.questionnaires?.some(q => q.status === "not_started"),
+                    undefined,
+                    "button-save-questionnaires"
+                  )}
+                </div>
+              </div>
+            )}
+
+            {screen === "questionnaire" && activeQuestionnaireId && (
+              <div className="kiosk-fade flex h-full flex-col relative">
+                {(() => {
+                  const q = session?.questionnaires?.find(x => x.id === activeQuestionnaireId);
+                  if (!q) return null;
+                  
+                  const isReview = q.status === "completed_portal";
+                  
+                  const handleSaveQuestionnaire = () => {
+                     const missing = q.questions.filter(
+                       question =>
+                         question.mandatory &&
+                         !questionnaireAnswers[question.id]?.trim(),
+                     );
+                    if (missing.length > 0) {
+                      setError("Please answer all required questions.");
+                      return;
+                    }
+                    clearError();
+
+                    if (previewMode) {
+                      const updatedQs = session?.questionnaires?.map(x => 
+                        x.id === q.id ? { ...x, status: "completed_now" as const } : x
+                      ) || [];
+                      setSession({ ...session!, questionnaires: updatedQs });
+                      setActiveQuestionnaireId(null);
+                      return;
+                    }
+
+                    saveQuestionnaireMutation.mutate({
+                      sessionId: session!.sessionId,
+                      data: {
+                        questionnaireId: q.id,
+                        questionnaireName: q.name,
+                        answers: questionnaireAnswers
+                      }
+                    }, {
+                      onSuccess: (data) => {
+                        setSession(data);
+                        setActiveQuestionnaireId(null);
+                      },
+                      onError: () => setError("Failed to save answers. Please try again.")
+                    });
+                  };
+
+                  return (
+                    <>
+                      <div className="flex-1 overflow-y-auto pr-1">
+                        <button
+                          type="button"
+                          data-testid="button-back-questionnaire"
+                          onClick={() => { setActiveQuestionnaireId(null); clearError(); }}
+                          className="mb-6 flex min-h-10 items-center gap-2 text-sm font-bold text-[#806259] transition hover:text-[#990000] focus:outline-none focus:ring-2 focus:ring-[#990000]/25"
+                        >
+                          <ArrowLeft size={17} /> Back
+                        </button>
+
+                        <div className="mb-6 pb-4 border-b border-[#d9c6b5]">
+                          <h2 className="text-[clamp(1.5rem,2vw,1.75rem)] font-semibold tracking-tight text-[#990000] font-serif">
+                            {q.name}
+                          </h2>
+                          {isReview && (
+                            <span className="mt-2 inline-block rounded border border-[#d9c6b5] bg-[#fffaf1] px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[#806960]">
+                              Review only · Completed online
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="space-y-8">
+                          {q.questions.map(question => {
+                            const value = isReview ? (q.completedAnswers?.[question.id] || "") : (questionnaireAnswers[question.id] || "");
+                            
+                            return (
+                              <div key={question.id} className="flex flex-col gap-3">
+                                <label className="text-[15px] font-bold text-[#632f2f]">
+                                  {question.text}
+                                  {question.mandatory && !isReview && <span className="ml-1 text-[#990000]">*</span>}
+                                </label>
+                                
+                                {question.type === "single_select" && question.options && (
+                                  <div className="flex flex-wrap gap-2">
+                                    {question.options.map(opt => {
+                                      const isSelected = value === opt.id;
+                                      return (
+                                        <button
+                                          key={opt.id}
+                                          type="button"
+                                          disabled={isReview}
+                                          onClick={() => {
+                                            if (!isReview) {
+                                              setQuestionnaireAnswers(prev => ({ ...prev, [question.id]: opt.id }));
+                                              clearError();
+                                            }
+                                          }}
+                                          className={`rounded-xl border px-4 py-2 text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-[#990000]/30 ${
+                                            isSelected 
+                                              ? (isReview ? "border-[#c1aba0] bg-[#fffaf1] text-[#632f2f]" : "border-[#990000] bg-[#fff6e8] text-[#990000] shadow-[0_2px_8px_rgba(153,0,0,.08)]") 
+                                              : "border-[#e0c6ba] bg-transparent text-[#806960] hover:bg-[#f4e6d5]"
+                                          } ${isReview && !isSelected ? "opacity-50" : ""}`}
+                                        >
+                                          {opt.label}
+                                        </button>
+                                      )
+                                    })}
+                                  </div>
+                                )}
+                                
+                                {question.type === "free_text" && (
+                                  isReview ? (
+                                    <div className="rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] p-4 text-[15px] font-medium text-[#632f2f] min-h-[100px] whitespace-pre-wrap opacity-80">
+                                      {value || <span className="text-[#b7a49a] italic">No answer provided</span>}
+                                    </div>
+                                  ) : (
+                                    <textarea
+                                      rows={4}
+                                      value={value}
+                                      onChange={(e) => {
+                                        setQuestionnaireAnswers(prev => ({ ...prev, [question.id]: e.target.value }));
+                                        clearError();
+                                      }}
+                                      className="w-full rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] p-4 text-[15px] font-medium text-[#632f2f] placeholder:text-[#b7a49a] focus:border-[#990000] focus:bg-[#fff6e8] focus:outline-none focus:ring-4 focus:ring-[#990000]/10"
+                                      placeholder="Type your answer here..."
+                                    />
+                                  )
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                        {renderError()}
                       </div>
-                    </div>
-                  ))}
-                </div>
-
-                {renderError()}
-
-                <div className="mt-8">
-                  {primaryButton(content.questions.continueButton, continueQuestions, Object.keys(answers).length !== questions.length, undefined, "button-save-questionnaire")}
-                </div>
+                      
+                      <div className="mt-8 shrink-0">
+                        {!isReview ? (
+                          primaryButton(
+                            "Save Answers",
+                            handleSaveQuestionnaire,
+                            false,
+                            <Check size={18} />,
+                            "button-save-questionnaire"
+                          )
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setActiveQuestionnaireId(null)}
+                            className="flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl border border-[#c1aba0] bg-[#fffaf1] px-5 text-[15px] font-bold text-[#632f2f] transition hover:bg-[#f4e6d5] focus:outline-none focus:ring-4 focus:ring-[#990000]/20"
+                          >
+                            Return to list
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             )}
 

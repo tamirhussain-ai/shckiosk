@@ -3,10 +3,12 @@ import {
   type CheckInIdentification,
   type CheckInSession,
   type CompletionResult,
+  type ConsentForm,
   type ConsentInput,
   type CoverageSelection,
   type Demographics,
   type HistoryInput,
+  type Questionnaire,
   type QuestionnaireInput,
 } from "@workspace/api-zod";
 
@@ -28,8 +30,8 @@ type SessionRecord = {
   appointmentId?: string;
   coverage?: CoverageSelection["coverage"];
   onFileInsuranceInformation: CheckInSession["onFileInsuranceInformation"];
-  consent?: ConsentInput;
-  questionnaire?: QuestionnaireInput;
+  consentSubmissions: Map<string, ConsentInput>;
+  questionnaireSubmissions: Map<string, QuestionnaireInput>;
   history?: HistoryInput;
 };
 
@@ -66,6 +68,111 @@ export interface CheckInAdapter {
 const wait = (milliseconds: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
 
+const crc32 = (bytes: Uint8Array) => {
+  let crc = 0xffffffff;
+  for (const byte of bytes) {
+    crc ^= byte;
+    for (let bit = 0; bit < 8; bit += 1) {
+      crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
+    }
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+};
+
+const isValidPngDataUrl = (value: string | undefined) => {
+  if (!value || value.length > 100_000) return false;
+  const match = /^data:image\/png;base64,([A-Za-z0-9+/]+={0,2})$/.exec(value);
+  if (!match) return false;
+  const bytes = Buffer.from(match[1], "base64");
+  if (
+    bytes.length < 60 ||
+    bytes.length > 75_000 ||
+    !bytes.subarray(0, 8).equals(
+      Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+    )
+  ) {
+    return false;
+  }
+
+  let offset = 8;
+  let sawHeader = false;
+  let sawImageData = false;
+  while (offset + 12 <= bytes.length) {
+    const length = bytes.readUInt32BE(offset);
+    const chunkEnd = offset + 12 + length;
+    if (length > 75_000 || chunkEnd > bytes.length) return false;
+
+    const type = bytes.toString("ascii", offset + 4, offset + 8);
+    const expectedCrc = bytes.readUInt32BE(offset + 8 + length);
+    const actualCrc = crc32(bytes.subarray(offset + 4, offset + 8 + length));
+    if (expectedCrc !== actualCrc) return false;
+
+    if (!sawHeader) {
+      if (type !== "IHDR" || length !== 13) return false;
+      const width = bytes.readUInt32BE(offset + 8);
+      const height = bytes.readUInt32BE(offset + 12);
+      const bitDepth = bytes[offset + 16];
+      const colorType = bytes[offset + 17];
+      const allowedBitDepths: Record<number, number[]> = {
+        0: [1, 2, 4, 8, 16],
+        2: [8, 16],
+        3: [1, 2, 4, 8],
+        4: [8, 16],
+        6: [8, 16],
+      };
+      if (
+        width < 1 ||
+        height < 1 ||
+        width > 4096 ||
+        height > 4096 ||
+        width * height > 8_000_000 ||
+        !allowedBitDepths[colorType]?.includes(bitDepth) ||
+        bytes[offset + 18] !== 0 ||
+        bytes[offset + 19] !== 0 ||
+        ![0, 1].includes(bytes[offset + 20])
+      ) {
+        return false;
+      }
+      sawHeader = true;
+    } else if (type === "IHDR") {
+      return false;
+    }
+
+    if (type === "IDAT") sawImageData = true;
+    offset = chunkEnd;
+    if (type === "IEND") {
+      return length === 0 && sawHeader && sawImageData && offset === bytes.length;
+    }
+  }
+  return false;
+};
+
+const isValidQuestionnaireAnswers = (
+  questionnaire: Questionnaire,
+  answers: QuestionnaireInput["answers"],
+) => {
+  const questionById = new Map(
+    questionnaire.questions.map((question) => [question.id, question]),
+  );
+  if (
+    Object.keys(answers).length > questionnaire.questions.length ||
+    Object.keys(answers).some((id) => !questionById.has(id))
+  ) {
+    return false;
+  }
+
+  return questionnaire.questions.every((question) => {
+    const answer = answers[question.id];
+    if (question.mandatory && !answer?.trim()) return false;
+    if (answer === undefined) return true;
+    if (answer.length > 2_000) return false;
+    if (question.type === "single_select") {
+      return question.options?.some((option) => option.id === answer) ?? false;
+    }
+    return true;
+  });
+};
+
 const stageOrder: CheckInStage[] = [
   "identified",
   "appointment",
@@ -88,6 +195,167 @@ const providerAccounts = {
 } as const;
 
 const kioskFloor = "Second floor";
+
+const consentFormTemplates: ConsentForm[] = [
+  {
+    id: "hipaa-notice",
+    title: "HIPAA Notice of Privacy Practices",
+    description:
+      "Acknowledge that you received and reviewed the IU Student Health Center Notice of Privacy Practices.",
+    requiresSignature: true,
+    status: "unsigned",
+  },
+  {
+    id: "release-of-information",
+    title: "Release of Information",
+    description:
+      "Authorize the care team to use and share information as described for treatment, payment, and health care operations.",
+    requiresSignature: true,
+    status: "unsigned",
+  },
+];
+
+const phqOptions = [
+  { id: "not_at_all", label: "Not at all" },
+  { id: "several_days", label: "Several days" },
+  { id: "more_than_half", label: "More than half the days" },
+  { id: "nearly_every_day", label: "Nearly every day" },
+];
+
+const questionnaireTemplates: Questionnaire[] = [
+  {
+    id: "reason-for-visit",
+    name: "Reason for Visit",
+    status: "not_started",
+    questions: [
+      {
+        id: "primary-concern",
+        text: "What would you most like help with today?",
+        type: "free_text",
+        mandatory: true,
+      },
+      {
+        id: "symptom-duration",
+        text: "How long has this concern been present?",
+        type: "single_select",
+        mandatory: true,
+        options: [
+          { id: "today", label: "Started today" },
+          { id: "few-days", label: "A few days" },
+          { id: "few-weeks", label: "A few weeks" },
+          { id: "longer", label: "Longer" },
+        ],
+      },
+      {
+        id: "urgent-concern",
+        text: "Is there anything urgent you want your care team to know?",
+        type: "single_select",
+        mandatory: true,
+        options: [
+          { id: "yes", label: "Yes" },
+          { id: "no", label: "No" },
+          { id: "discuss", label: "I’d like to talk about it" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "phq-9",
+    name: "PHQ-9 Depression Screening",
+    status: "completed_portal",
+    questions: [
+      {
+        id: "phq-interest",
+        text: "Little interest or pleasure in doing things",
+        type: "single_select",
+        mandatory: true,
+        options: phqOptions,
+      },
+      {
+        id: "phq-down",
+        text: "Feeling down, depressed, or hopeless",
+        type: "single_select",
+        mandatory: true,
+        options: phqOptions,
+      },
+      {
+        id: "phq-sleep",
+        text: "Trouble falling or staying asleep, or sleeping too much",
+        type: "single_select",
+        mandatory: true,
+        options: phqOptions,
+      },
+      {
+        id: "phq-energy",
+        text: "Feeling tired or having little energy",
+        type: "single_select",
+        mandatory: true,
+        options: phqOptions,
+      },
+      {
+        id: "phq-appetite",
+        text: "Poor appetite or overeating",
+        type: "single_select",
+        mandatory: true,
+        options: phqOptions,
+      },
+      {
+        id: "phq-self",
+        text: "Feeling bad about yourself or that you have let yourself or your family down",
+        type: "single_select",
+        mandatory: true,
+        options: phqOptions,
+      },
+      {
+        id: "phq-focus",
+        text: "Trouble concentrating on things",
+        type: "single_select",
+        mandatory: true,
+        options: phqOptions,
+      },
+      {
+        id: "phq-movement",
+        text: "Moving or speaking slowly, or being unusually fidgety or restless",
+        type: "single_select",
+        mandatory: true,
+        options: phqOptions,
+      },
+      {
+        id: "phq-harm",
+        text: "Thoughts that you would be better off dead or of hurting yourself",
+        type: "single_select",
+        mandatory: true,
+        options: phqOptions,
+      },
+    ],
+    completedAnswers: {
+      "phq-interest": "not_at_all",
+      "phq-down": "not_at_all",
+      "phq-sleep": "several_days",
+      "phq-energy": "several_days",
+      "phq-appetite": "not_at_all",
+      "phq-self": "not_at_all",
+      "phq-focus": "not_at_all",
+      "phq-movement": "not_at_all",
+      "phq-harm": "not_at_all",
+    },
+  },
+];
+
+const createConsentForms = (): ConsentForm[] =>
+  consentFormTemplates.map((form) => ({ ...form }));
+
+const createQuestionnaires = (): Questionnaire[] =>
+  questionnaireTemplates.map((questionnaire) => ({
+    ...questionnaire,
+    questions: questionnaire.questions.map((question) => ({
+      ...question,
+      options: question.options?.map((option) => ({ ...option })),
+    })),
+    completedAnswers: questionnaire.completedAnswers
+      ? { ...questionnaire.completedAnswers }
+      : undefined,
+  }));
 
 const fallbackSchedulingHandoff: CheckInSession["schedulingHandoff"] = {
   mode: "qr-link",
@@ -129,10 +397,24 @@ const invalidateAfter = (record: SessionRecord, stage: CheckInStage) => {
     delete record.coverage;
   }
   if (stageOrder.indexOf(stage) < stageOrder.indexOf("consent")) {
-    delete record.consent;
+    record.consentSubmissions.clear();
+    record.session.consentForms = record.session.consentForms.map((form) => ({
+      ...form,
+      status: "unsigned",
+    }));
   }
   if (stageOrder.indexOf(stage) < stageOrder.indexOf("questionnaire")) {
-    delete record.questionnaire;
+    record.questionnaireSubmissions.clear();
+    record.session.questionnaires = record.session.questionnaires.map(
+      (questionnaire) =>
+        questionnaire.status === "completed_now"
+          ? {
+              ...questionnaire,
+              status: "not_started",
+              completedAnswers: undefined,
+            }
+          : questionnaire,
+    );
   }
   if (stageOrder.indexOf(stage) < stageOrder.indexOf("history")) {
     delete record.history;
@@ -192,6 +474,8 @@ class MockCheckInAdapter implements CheckInAdapter {
       insuranceInformation: { ...onFileInsuranceInformation },
       onFileInsuranceInformation: { ...onFileInsuranceInformation },
       schedulingHandoff: getSchedulingHandoff(),
+      consentForms: createConsentForms(),
+      questionnaires: createQuestionnaires(),
     };
 
     this.sessions.set(sessionId, {
@@ -201,6 +485,8 @@ class MockCheckInAdapter implements CheckInAdapter {
       verificationExpiresAt: Date.now() + 10 * 60 * 1000,
       verificationAttempts: 0,
       onFileInsuranceInformation,
+      consentSubmissions: new Map(),
+      questionnaireSubmissions: new Map(),
     });
 
     return session;
@@ -307,15 +593,38 @@ class MockCheckInAdapter implements CheckInAdapter {
   ): Promise<CheckInSession | null> {
     await wait(180);
     const record = this.sessions.get(sessionId);
+    const hasLegacySignature = (input.signatureName?.trim().length ?? 0) >= 2;
     if (
       !record ||
       !isAtLeast(record, "coverage") ||
       !input.accepted ||
-      input.signatureName.trim().length < 2
+      (!isValidPngDataUrl(input.signatureData) && !hasLegacySignature)
     ) {
       return null;
     }
-    record.consent = input;
+
+    const formId = input.formId?.trim();
+    if (formId) {
+      const nextUnsignedForm = record.session.consentForms.find(
+        (item) => item.status === "unsigned",
+      );
+      if (!nextUnsignedForm || nextUnsignedForm.id !== formId) return null;
+      record.consentSubmissions.set(formId, { ...input, formId });
+      record.session.consentForms = record.session.consentForms.map((item) =>
+        item.id === formId ? { ...item, status: "signed" } : item,
+      );
+    } else {
+      // Legacy clients sent one typed signature without a form identifier.
+      // Treat that request as acceptance of the legacy combined consent.
+      record.session.consentForms = record.session.consentForms.map((form) => ({
+        ...form,
+        status: "signed",
+      }));
+      for (const form of record.session.consentForms) {
+        record.consentSubmissions.set(form.id, { ...input, formId: form.id });
+      }
+    }
+
     invalidateAfter(record, "consent");
     return record.session;
   }
@@ -326,14 +635,53 @@ class MockCheckInAdapter implements CheckInAdapter {
   ): Promise<CheckInSession | null> {
     await wait(180);
     const record = this.sessions.get(sessionId);
-    if (
-      !record ||
-      !isAtLeast(record, "consent") ||
-      Object.keys(input.answers).length < 3
-    ) {
+    if (!record || !isAtLeast(record, "consent")) {
       return null;
     }
-    record.questionnaire = input;
+
+    const questionnaireId = input.questionnaireId?.trim();
+    const questionnaireName = input.questionnaireName?.trim();
+    const questionnaire =
+      record.session.questionnaires.find(
+        (item) =>
+          (questionnaireId && item.id === questionnaireId) ||
+          (questionnaireName && item.name === questionnaireName),
+      ) ??
+      (!questionnaireId && !questionnaireName
+        ? record.session.questionnaires.find(
+            (item) => item.status === "not_started",
+          )
+        : undefined);
+    if (!questionnaire || questionnaire.status === "completed_portal") {
+      return null;
+    }
+
+    const isLegacySubmission = !questionnaireId && !questionnaireName;
+    const legacyAnswerIds = ["feeling", "medications", "safety"];
+    const hasAllRequiredAnswers = isLegacySubmission
+      ? Object.keys(input.answers).length === legacyAnswerIds.length &&
+        legacyAnswerIds.every(
+          (id) =>
+            ["yes", "no", "unsure"].includes(input.answers[id] ?? ""),
+        )
+      : isValidQuestionnaireAnswers(questionnaire, input.answers);
+    if (!hasAllRequiredAnswers) return null;
+
+    record.session.questionnaires = record.session.questionnaires.map((item) =>
+      item.id === questionnaire.id
+        ? {
+            ...item,
+            status: "completed_now",
+            completedAnswers: { ...input.answers },
+          }
+        : item,
+    );
+    record.questionnaireSubmissions.set(questionnaire.id, {
+      ...input,
+      questionnaireId: questionnaire.id,
+      questionnaireName: questionnaire.name,
+      answers: { ...input.answers },
+    });
     invalidateAfter(record, "questionnaire");
     return record.session;
   }
@@ -353,9 +701,16 @@ class MockCheckInAdapter implements CheckInAdapter {
   async complete(sessionId: string): Promise<CompletionResult | null> {
     await wait(500);
     const record = this.sessions.get(sessionId);
+    const questionnairesComplete = record?.session.questionnaires.every(
+      (questionnaire) => questionnaire.status !== "not_started",
+    );
     if (
-      !record?.questionnaire ||
-      (record.stage !== "questionnaire" && record.stage !== "history")
+      !record ||
+      !questionnairesComplete ||
+      !record.session.consentForms.every((form) => form.status === "signed") ||
+      (record.stage !== "questionnaire" &&
+        record.stage !== "history" &&
+        record.stage !== "consent")
     ) {
       return null;
     }

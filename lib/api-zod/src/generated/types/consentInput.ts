@@ -8,5 +8,14 @@
 
 export interface ConsentInput {
   accepted: boolean;
-  signatureName: string;
+  /** @maxLength 200 */
+  signatureName?: string;
+  /** @maxLength 200 */
+  formId?: string;
+  /**
+     * @minLength 100
+     * @maxLength 100000
+     * @pattern ^data:image/png;base64,
+     */
+  signatureData?: string;
 }

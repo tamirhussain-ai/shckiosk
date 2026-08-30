@@ -509,6 +509,65 @@ components:
         url:
           type: string
       required: [mode, available, label, message]
+    ConsentForm:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        requiresSignature:
+          type: boolean
+        status:
+          type: string
+          enum: [unsigned, signed]
+      required: [id, title, description, requiresSignature, status]
+    QuestionnaireOption:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+      required: [id, label]
+    QuestionnaireQuestion:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        type:
+          type: string
+          enum: [single_select, free_text]
+        mandatory:
+          type: boolean
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionnaireOption"
+      required: [id, text, type, mandatory]
+    Questionnaire:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum: [not_started, completed_portal, completed_now]
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionnaireQuestion"
+        completedAnswers:
+          type: object
+          additionalProperties:
+            type: string
+      required: [id, name, status, questions]
     StudentProfile:
       type: object
       properties:
@@ -550,7 +609,15 @@ components:
           $ref: "#/components/schemas/InsuranceInformation"
         schedulingHandoff:
           $ref: "#/components/schemas/SchedulingHandoff"
-      required: [sessionId, requiresVerification, student, appointments, insuranceInformation, onFileInsuranceInformation, schedulingHandoff]
+        consentForms:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConsentForm"
+        questionnaires:
+          type: array
+          items:
+            $ref: "#/components/schemas/Questionnaire"
+      required: [sessionId, requiresVerification, student, appointments, insuranceInformation, onFileInsuranceInformation, schedulingHandoff, consentForms, questionnaires]
     VerificationCode:
       type: object
       properties:
@@ -609,15 +676,30 @@ components:
           type: boolean
         signatureName:
           type: string
-      required: [accepted, signatureName]
+          maxLength: 200
+        formId:
+          type: string
+          maxLength: 200
+        signatureData:
+          type: string
+          minLength: 100
+          maxLength: 100000
+          pattern: "^data:image/png;base64,"
+      required: [accepted]
     QuestionnaireInput:
       type: object
       properties:
+        questionnaireId:
+          type: string
+          maxLength: 200
+        questionnaireName:
+          type: string
+          maxLength: 200
         answers:
           type: object
           additionalProperties:
             type: string
-            enum: [yes, no, unsure]
+            maxLength: 2000
       required: [answers]
     HistoryInput:
       type: object

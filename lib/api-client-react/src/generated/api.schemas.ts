@@ -439,6 +439,62 @@ export interface SchedulingHandoff {
   url?: string;
 }
 
+export type ConsentFormStatus = typeof ConsentFormStatus[keyof typeof ConsentFormStatus];
+
+
+export const ConsentFormStatus = {
+  unsigned: 'unsigned',
+  signed: 'signed',
+} as const;
+
+export interface ConsentForm {
+  id: string;
+  title: string;
+  description: string;
+  requiresSignature: boolean;
+  status: ConsentFormStatus;
+}
+
+export interface QuestionnaireOption {
+  id: string;
+  label: string;
+}
+
+export type QuestionnaireQuestionType = typeof QuestionnaireQuestionType[keyof typeof QuestionnaireQuestionType];
+
+
+export const QuestionnaireQuestionType = {
+  single_select: 'single_select',
+  free_text: 'free_text',
+} as const;
+
+export interface QuestionnaireQuestion {
+  id: string;
+  text: string;
+  type: QuestionnaireQuestionType;
+  mandatory: boolean;
+  options?: QuestionnaireOption[];
+}
+
+export type QuestionnaireStatus = typeof QuestionnaireStatus[keyof typeof QuestionnaireStatus];
+
+
+export const QuestionnaireStatus = {
+  not_started: 'not_started',
+  completed_portal: 'completed_portal',
+  completed_now: 'completed_now',
+} as const;
+
+export type QuestionnaireCompletedAnswers = {[key: string]: string};
+
+export interface Questionnaire {
+  id: string;
+  name: string;
+  status: QuestionnaireStatus;
+  questions: QuestionnaireQuestion[];
+  completedAnswers?: QuestionnaireCompletedAnswers;
+}
+
 export interface StudentProfile {
   firstName: string;
   lastName: string;
@@ -459,6 +515,8 @@ export interface CheckInSession {
   insuranceInformation: InsuranceInformation;
   onFileInsuranceInformation: InsuranceInformation;
   schedulingHandoff: SchedulingHandoff;
+  consentForms: ConsentForm[];
+  questionnaires: Questionnaire[];
 }
 
 export interface VerificationCode {
@@ -505,12 +563,25 @@ export interface CoverageSelection {
 
 export interface ConsentInput {
   accepted: boolean;
-  signatureName: string;
+  /** @maxLength 200 */
+  signatureName?: string;
+  /** @maxLength 200 */
+  formId?: string;
+  /**
+     * @minLength 100
+     * @maxLength 100000
+     * @pattern ^data:image/png;base64,
+     */
+  signatureData?: string;
 }
 
-export type QuestionnaireInputAnswers = {[key: string]: 'yes' | 'no' | 'unsure'};
+export type QuestionnaireInputAnswers = {[key: string]: string};
 
 export interface QuestionnaireInput {
+  /** @maxLength 200 */
+  questionnaireId?: string;
+  /** @maxLength 200 */
+  questionnaireName?: string;
   answers: QuestionnaireInputAnswers;
 }
 

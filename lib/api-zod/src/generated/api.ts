@@ -938,7 +938,30 @@ export const IdentifyCheckInResponse = zod.object({
   "label": zod.string(),
   "message": zod.string(),
   "url": zod.string().optional()
-})
+}),
+  "consentForms": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "requiresSignature": zod.boolean(),
+  "status": zod.enum(['unsigned', 'signed'])
+})),
+  "questionnaires": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "status": zod.enum(['not_started', 'completed_portal', 'completed_now']),
+  "questions": zod.array(zod.object({
+  "id": zod.string(),
+  "text": zod.string(),
+  "type": zod.enum(['single_select', 'free_text']),
+  "mandatory": zod.boolean(),
+  "options": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string()
+})).optional()
+})),
+  "completedAnswers": zod.record(zod.string(), zod.string()).optional()
+}))
 })
 
 
@@ -1021,7 +1044,30 @@ export const SaveCheckInAppointmentResponse = zod.object({
   "label": zod.string(),
   "message": zod.string(),
   "url": zod.string().optional()
-})
+}),
+  "consentForms": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "requiresSignature": zod.boolean(),
+  "status": zod.enum(['unsigned', 'signed'])
+})),
+  "questionnaires": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "status": zod.enum(['not_started', 'completed_portal', 'completed_now']),
+  "questions": zod.array(zod.object({
+  "id": zod.string(),
+  "text": zod.string(),
+  "type": zod.enum(['single_select', 'free_text']),
+  "mandatory": zod.boolean(),
+  "options": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string()
+})).optional()
+})),
+  "completedAnswers": zod.record(zod.string(), zod.string()).optional()
+}))
 })
 
 
@@ -1085,7 +1131,30 @@ export const SaveCheckInDemographicsResponse = zod.object({
   "label": zod.string(),
   "message": zod.string(),
   "url": zod.string().optional()
-})
+}),
+  "consentForms": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "requiresSignature": zod.boolean(),
+  "status": zod.enum(['unsigned', 'signed'])
+})),
+  "questionnaires": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "status": zod.enum(['not_started', 'completed_portal', 'completed_now']),
+  "questions": zod.array(zod.object({
+  "id": zod.string(),
+  "text": zod.string(),
+  "type": zod.enum(['single_select', 'free_text']),
+  "mandatory": zod.boolean(),
+  "options": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string()
+})).optional()
+})),
+  "completedAnswers": zod.record(zod.string(), zod.string()).optional()
+}))
 })
 
 
@@ -1148,7 +1217,30 @@ export const SaveCheckInCoverageResponse = zod.object({
   "label": zod.string(),
   "message": zod.string(),
   "url": zod.string().optional()
-})
+}),
+  "consentForms": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "requiresSignature": zod.boolean(),
+  "status": zod.enum(['unsigned', 'signed'])
+})),
+  "questionnaires": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "status": zod.enum(['not_started', 'completed_portal', 'completed_now']),
+  "questions": zod.array(zod.object({
+  "id": zod.string(),
+  "text": zod.string(),
+  "type": zod.enum(['single_select', 'free_text']),
+  "mandatory": zod.boolean(),
+  "options": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string()
+})).optional()
+})),
+  "completedAnswers": zod.record(zod.string(), zod.string()).optional()
+}))
 })
 
 
@@ -1162,9 +1254,22 @@ export const SaveCheckInConsentParams = zod.object({
   "sessionId": zod.coerce.string().min(1)
 })
 
+export const saveCheckInConsentBodySignatureNameMax = 200;
+
+export const saveCheckInConsentBodyFormIdMax = 200;
+
+export const saveCheckInConsentBodySignatureDataMin = 100;
+export const saveCheckInConsentBodySignatureDataMax = 100000;
+
+
+export const saveCheckInConsentBodySignatureDataRegExp = new RegExp('^data:image/png;base64,');
+
+
 export const SaveCheckInConsentBody = zod.object({
   "accepted": zod.boolean(),
-  "signatureName": zod.string()
+  "signatureName": zod.string().max(saveCheckInConsentBodySignatureNameMax).optional(),
+  "formId": zod.string().max(saveCheckInConsentBodyFormIdMax).optional(),
+  "signatureData": zod.string().min(saveCheckInConsentBodySignatureDataMin).max(saveCheckInConsentBodySignatureDataMax).regex(saveCheckInConsentBodySignatureDataRegExp).optional()
 })
 
 export const SaveCheckInConsentResponse = zod.object({
@@ -1208,7 +1313,30 @@ export const SaveCheckInConsentResponse = zod.object({
   "label": zod.string(),
   "message": zod.string(),
   "url": zod.string().optional()
-})
+}),
+  "consentForms": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "requiresSignature": zod.boolean(),
+  "status": zod.enum(['unsigned', 'signed'])
+})),
+  "questionnaires": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "status": zod.enum(['not_started', 'completed_portal', 'completed_now']),
+  "questions": zod.array(zod.object({
+  "id": zod.string(),
+  "text": zod.string(),
+  "type": zod.enum(['single_select', 'free_text']),
+  "mandatory": zod.boolean(),
+  "options": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string()
+})).optional()
+})),
+  "completedAnswers": zod.record(zod.string(), zod.string()).optional()
+}))
 })
 
 
@@ -1222,8 +1350,18 @@ export const SaveCheckInQuestionnaireParams = zod.object({
   "sessionId": zod.coerce.string().min(1)
 })
 
+export const saveCheckInQuestionnaireBodyQuestionnaireIdMax = 200;
+
+export const saveCheckInQuestionnaireBodyQuestionnaireNameMax = 200;
+
+export const saveCheckInQuestionnaireBodyAnswersMaxOne = 2000;
+
+
+
 export const SaveCheckInQuestionnaireBody = zod.object({
-  "answers": zod.record(zod.string(), zod.enum(['yes', 'no', 'unsure']))
+  "questionnaireId": zod.string().max(saveCheckInQuestionnaireBodyQuestionnaireIdMax).optional(),
+  "questionnaireName": zod.string().max(saveCheckInQuestionnaireBodyQuestionnaireNameMax).optional(),
+  "answers": zod.record(zod.string(), zod.string().max(saveCheckInQuestionnaireBodyAnswersMaxOne))
 })
 
 export const SaveCheckInQuestionnaireResponse = zod.object({
@@ -1267,7 +1405,30 @@ export const SaveCheckInQuestionnaireResponse = zod.object({
   "label": zod.string(),
   "message": zod.string(),
   "url": zod.string().optional()
-})
+}),
+  "consentForms": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "requiresSignature": zod.boolean(),
+  "status": zod.enum(['unsigned', 'signed'])
+})),
+  "questionnaires": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "status": zod.enum(['not_started', 'completed_portal', 'completed_now']),
+  "questions": zod.array(zod.object({
+  "id": zod.string(),
+  "text": zod.string(),
+  "type": zod.enum(['single_select', 'free_text']),
+  "mandatory": zod.boolean(),
+  "options": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string()
+})).optional()
+})),
+  "completedAnswers": zod.record(zod.string(), zod.string()).optional()
+}))
 })
 
 
@@ -1326,7 +1487,30 @@ export const SaveCheckInHistoryResponse = zod.object({
   "label": zod.string(),
   "message": zod.string(),
   "url": zod.string().optional()
-})
+}),
+  "consentForms": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "requiresSignature": zod.boolean(),
+  "status": zod.enum(['unsigned', 'signed'])
+})),
+  "questionnaires": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "status": zod.enum(['not_started', 'completed_portal', 'completed_now']),
+  "questions": zod.array(zod.object({
+  "id": zod.string(),
+  "text": zod.string(),
+  "type": zod.enum(['single_select', 'free_text']),
+  "mandatory": zod.boolean(),
+  "options": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string()
+})).optional()
+})),
+  "completedAnswers": zod.record(zod.string(), zod.string()).optional()
+}))
 })
 
 
