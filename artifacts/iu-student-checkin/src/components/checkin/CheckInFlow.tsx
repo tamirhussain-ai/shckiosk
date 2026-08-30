@@ -103,6 +103,90 @@ const journeySteps = [
   { id: "questionnaire", label: "Questions" },
 ];
 
+const previewScreenOptions: { id: Screen; label: string }[] = [
+  { id: "welcome", label: "Welcome" },
+  { id: "appointment", label: "Appointment" },
+  { id: "demographics", label: "Details" },
+  { id: "coverage", label: "Coverage" },
+  { id: "consent", label: "Consent" },
+  { id: "questionnaire", label: "Questions" },
+  { id: "checking", label: "Checking" },
+  { id: "complete", label: "Complete" },
+];
+
+const previewScreenIds = new Set<Screen>(previewScreenOptions.map((option) => option.id));
+
+const previewSession: CheckInSession = {
+  sessionId: "preview-session",
+  requiresVerification: false,
+  student: {
+    firstName: "Alex",
+    lastName: "Hoosier",
+    phone: "812-555-0199",
+    email: "alex.hoosier@example.edu",
+    addressLine1: "107 S Indiana Avenue",
+    addressLine2: "Room 204",
+    city: "Bloomington",
+    state: "IN",
+    zip: "47405",
+  },
+  appointments: [
+    {
+      id: "preview-appointment",
+      date: "Today",
+      time: "10:30 AM",
+      provider: "Dr. Alvarez",
+      type: "Follow-up visit",
+      location: "IU Student Health Center",
+      addressLine2: "600 N Eagleson Avenue",
+    },
+  ],
+  insuranceInformation: {
+    insuranceCarrier: "IU Student Insurance",
+    memberId: "IU-123456",
+    groupNumber: "IU-HEALTH",
+    subscriberName: "Alex Hoosier",
+  },
+  onFileInsuranceInformation: {
+    insuranceCarrier: "IU Student Insurance",
+    memberId: "IU-123456",
+    groupNumber: "IU-HEALTH",
+    subscriberName: "Alex Hoosier",
+  },
+  schedulingHandoff: {
+    mode: "qr-link",
+    available: false,
+    label: "Schedule online",
+    message: "Use the self-service scheduler QR code or ask the front desk for help.",
+  },
+};
+
+const previewCompletion: CompletionResult = {
+  completed: true,
+  nextStep: "waiting",
+  directions: "Head to the Care team on the first floor.",
+  provider: "Dr. Alvarez",
+  visitType: "Follow-up visit",
+  appointmentTime: "10:30 AM",
+  addressLine2: "600 N Eagleson Avenue",
+  floorLabel: "First floor",
+  waitingArea: "Care team",
+  kioskFloor: "Second floor",
+  isCurrentFloor: false,
+};
+
+function getPreviewScreen(): Screen {
+  if (typeof window === "undefined") return "welcome";
+  const requested = new URLSearchParams(window.location.search).get("screen");
+  return requested && previewScreenIds.has(requested as Screen) ? (requested as Screen) : "welcome";
+}
+
+function isPreviewMode() {
+  if (typeof window === "undefined") return false;
+  const value = new URLSearchParams(window.location.search).get("preview");
+  return value === "1" || value === "true";
+}
+
 function formatDateOfBirth(input: string) {
   const digits = input.replace(/\D/g, "").slice(0, 8);
   if (digits.length <= 2) return digits;
@@ -111,12 +195,16 @@ function formatDateOfBirth(input: string) {
 }
 
 export function CheckInFlow() {
+  const previewMode = isPreviewMode();
+  const initialScreen = previewMode ? getPreviewScreen() : "welcome";
   const [mode, setMode] = useState<CheckInMode>("universityId");
-  const [screen, setScreen] = useState<Screen>("welcome");
+  const [screen, setScreen] = useState<Screen>(initialScreen);
   
   // API State
-  const [session, setSession] = useState<CheckInSession | null>(null);
-  const [completion, setCompletion] = useState<CompletionResult | null>(null);
+  const [session, setSession] = useState<CheckInSession | null>(previewMode ? previewSession : null);
+  const [completion, setCompletion] = useState<CompletionResult | null>(
+    previewMode && initialScreen === "complete" ? previewCompletion : null,
+  );
 
   // Form State
   const [value, setValue] = useState("");
@@ -145,6 +233,19 @@ export function CheckInFlow() {
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [signatureName, setSignatureName] = useState("");
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
+
+  const selectPreviewScreen = (nextScreen: Screen) => {
+    if (!previewMode) return;
+    setScreen(nextScreen);
+    setCompletion(nextScreen === "complete" ? previewCompletion : null);
+    setShowInsuranceInfo(false);
+    setShowSchedulingHandoff(false);
+    setError("");
+    const params = new URLSearchParams(window.location.search);
+    params.set("preview", "1");
+    params.set("screen", nextScreen);
+    window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}${window.location.hash}`);
+  };
   
   // Sync demographics from session when fetched
   useEffect(() => {
@@ -204,6 +305,13 @@ export function CheckInFlow() {
       return;
     }
     clearError();
+
+    if (previewMode) {
+      setSession(previewSession);
+      setSelectedAppointment(previewSession.appointments[0]?.id ?? "");
+      setScreen("appointment");
+      return;
+    }
     
     identifyMutation.mutate({
       data: {
@@ -249,6 +357,17 @@ export function CheckInFlow() {
   };
 
   const startOver = () => {
+    if (previewMode) {
+      setScreen("welcome");
+      setSession(previewSession);
+      setCompletion(null);
+      setSelectedAppointment(previewSession.appointments[0]?.id ?? "");
+      setShowInsuranceInfo(false);
+      setShowSchedulingHandoff(false);
+      setError("");
+      return;
+    }
+
     setScreen("welcome");
     setSession(null);
     setMode("universityId");
@@ -284,6 +403,12 @@ export function CheckInFlow() {
       return;
     }
     clearError();
+
+    if (previewMode) {
+      setScreen("demographics");
+      return;
+    }
+
     saveAppointmentMutation.mutate({
       sessionId: session.sessionId,
       data: { appointmentId: selectedAppointment }
@@ -309,6 +434,12 @@ export function CheckInFlow() {
     }
     if (!session?.sessionId) return;
     clearError();
+
+    if (previewMode) {
+      setScreen("coverage");
+      return;
+    }
+
     saveDemographicsMutation.mutate({
       sessionId: session.sessionId,
       data: { addressLine1, addressLine2, city, state, zip, phone }
@@ -328,6 +459,12 @@ export function CheckInFlow() {
     }
     if (!session?.sessionId) return;
     clearError();
+
+    if (previewMode) {
+      setScreen("questionnaire");
+      return;
+    }
+
     saveConsentMutation.mutate({
       sessionId: session.sessionId,
       data: { accepted: consentAccepted, signatureName }
@@ -347,6 +484,13 @@ export function CheckInFlow() {
     }
     if (!session?.sessionId) return;
     clearError();
+
+    if (previewMode) {
+      setCompletion(previewCompletion);
+      setScreen("complete");
+      return;
+    }
+
     saveQuestionnaireMutation.mutate({
       sessionId: session.sessionId,
       data: { answers }
@@ -381,6 +525,12 @@ export function CheckInFlow() {
       return;
     }
     clearError();
+
+    if (previewMode) {
+      setScreen("consent");
+      return;
+    }
+
     saveCoverageMutation.mutate({
       sessionId: session.sessionId,
       data: {
@@ -559,6 +709,40 @@ export function CheckInFlow() {
           className="h-[min(62vh,580px)] w-auto max-w-[76vw] object-contain opacity-[0.05] sm:h-[min(72vh,700px)]"
         />
       </div>
+
+      {previewMode && (
+        <div className="relative z-40 mx-auto w-full max-w-[1370px] px-6 sm:px-10 lg:px-14">
+          <div className="rounded-2xl border border-[#e2d2bf] bg-[#fffaf1]/95 p-2.5 shadow-[0_12px_30px_rgba(108,35,35,.08)] backdrop-blur-sm">
+            <div className="flex items-center gap-3 overflow-x-auto">
+              <div className="shrink-0 px-2 text-[10px] font-bold uppercase tracking-[.14em] text-[#9a8074]">
+                Screen preview
+              </div>
+              <div className="h-6 w-px shrink-0 bg-[#e7d9c7]" />
+              <div className="flex min-w-max items-center gap-1">
+                {previewScreenOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    data-testid={`preview-${option.id}`}
+                    aria-current={screen === option.id ? "page" : undefined}
+                    onClick={() => selectPreviewScreen(option.id)}
+                    className={`min-h-10 rounded-xl px-3 text-xs font-bold transition focus:outline-none focus:ring-2 focus:ring-[#990000]/25 ${
+                      screen === option.id
+                        ? "bg-[#990000] text-[#fff9ed] shadow-[0_3px_10px_rgba(153,0,0,.14)]"
+                        : "text-[#806259] hover:bg-[#f4e6d5] hover:text-[#632f2f]"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <p className="px-2 pt-2 text-[10px] font-semibold uppercase tracking-[.12em] text-[#9a8074]">
+            Preview mode · sample data only · no check-in is submitted
+          </p>
+        </div>
+      )}
 
       {showHelp && (
         <div
