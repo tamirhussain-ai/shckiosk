@@ -1,0 +1,109 @@
+.destination-emphasis-frame {
+  position: relative;
+  min-height: 100vh;
+}
+
+.destination-attention-banner {
+  position: fixed;
+  left: 22px;
+  top: 182px;
+  z-index: 40;
+  display: grid;
+  min-width: 238px;
+  gap: 3px;
+  border: 2px solid #990000;
+  border-radius: 18px;
+  padding: 13px 18px 15px;
+  background: #990000;
+  color: #fffaf1;
+  box-shadow: 0 12px 30px rgba(108, 35, 35, .22);
+  animation: destination-attention-arrival 4.8s cubic-bezier(.22, 1, .36, 1) 1 both;
+}
+
+.destination-attention-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #f6d8c9;
+  font: 700 11px/1.1 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.destination-attention-beacon {
+  position: relative;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #f6d8c9;
+}
+
+.destination-attention-beacon::after {
+  position: absolute;
+  inset: -7px;
+  border: 1px solid #f6d8c9;
+  border-radius: 50%;
+  content: '';
+  animation: destination-attention-beacon 1.4s ease-out 3;
+}
+
+.destination-attention-banner strong {
+  font: 700 25px/.98 'Fraunces', Georgia, serif;
+  letter-spacing: -.04em;
+  text-transform: uppercase;
+}
+
+.destination-attention-floor {
+  color: #f6d8c9;
+  font: 600 12px/1.2 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.destination-emphasis-frame .completion-motion-destination.completion-motion-waiting,
+.destination-emphasis-frame .completion-motion-destination .completion-motion-pin {
+  animation-duration: 4.8s;
+}
+
+@keyframes destination-attention-arrival {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(.96);
+  }
+  22%, 100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes destination-attention-beacon {
+  0%, 35% {
+    opacity: .78;
+    transform: scale(.7);
+  }
+  75%, 100% {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .destination-attention-banner {
+    animation: none;
+  }
+
+  .destination-attention-beacon::after {
+    animation: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .destination-attention-banner {
+    left: 14px;
+    right: 14px;
+    top: auto;
+    bottom: 76px;
+    min-width: 0;
+  }
+}
