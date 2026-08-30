@@ -994,6 +994,12 @@ export function CheckInFlow() {
                   <CheckCircle2 size={14} />
                   {content.complete.badge}
                 </div>
+                <p
+                  className="mb-4 text-[12px] font-bold uppercase tracking-[.14em] text-[#806960]"
+                  data-testid="text-kiosk-floor"
+                >
+                  {content.complete.kioskFloorPrefix} {completion?.kioskFloor || content.complete.destinationFallback}.
+                </p>
                 <h1
                   className="kiosk-completion-floor-heading kiosk-completion-floor-pulse max-w-full overflow-hidden font-semibold uppercase leading-[.82] tracking-[-.08em] text-[#990000] font-serif"
                   data-testid="text-floor"
@@ -1064,18 +1070,11 @@ export function CheckInFlow() {
                   type="button"
                   data-testid="button-finish"
                   onClick={startOver}
-                  className="kiosk-completion-button mt-5 flex min-h-[68px] w-full max-w-[860px] items-center justify-center gap-3 rounded-[20px] bg-[#990000] px-6 text-[17px] font-bold text-[#fff9ed] shadow-[0_12px_26px_rgba(122,0,0,.2)] transition hover:-translate-y-0.5 hover:bg-[#7d0000] focus:outline-none focus:ring-4 focus:ring-[#990000]/20"
+                  className="kiosk-completion-button mt-5 flex min-h-[68px] w-full max-w-[860px] items-center justify-center rounded-[20px] bg-[#990000] px-6 text-[17px] font-bold text-[#fff9ed] shadow-[0_12px_26px_rgba(122,0,0,.2)] transition hover:-translate-y-0.5 hover:bg-[#7d0000] focus:outline-none focus:ring-4 focus:ring-[#990000]/20"
                 >
                   {content.complete.doneButton}
-                  <ArrowRight size={20} aria-hidden="true" />
                 </button>
-                <p
-                  className="kiosk-completion-meta mt-4 text-[12px] font-medium leading-5 text-[#806960]"
-                  data-testid="text-kiosk-floor"
-                >
-                  {content.complete.kioskFloorPrefix} {completion?.kioskFloor || content.complete.destinationFallback}.
-                </p>
-                <p className="mt-1 text-[11px] leading-5 text-[#9a8074]">
+                <p className="mt-4 text-[11px] leading-5 text-[#9a8074]">
                   {content.complete.demoNotice}
                 </p>
               </div>

@@ -140,7 +140,6 @@
     margin-top: .85rem;
     min-height: 60px;
   }
-  .kiosk-completion-meta { margin-top: .65rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .kiosk-reveal,
