@@ -34,7 +34,12 @@ export const IdentifyCheckInResponse = zod.object({
   "firstName": zod.string(),
   "lastName": zod.string(),
   "phone": zod.string(),
-  "email": zod.string()
+  "email": zod.string(),
+  "addressLine1": zod.string(),
+  "addressLine2": zod.string(),
+  "city": zod.string(),
+  "state": zod.string(),
+  "zip": zod.string()
 }),
   "appointments": zod.array(zod.object({
   "id": zod.string(),
@@ -44,7 +49,26 @@ export const IdentifyCheckInResponse = zod.object({
   "type": zod.string(),
   "location": zod.string(),
   "addressLine2": zod.string()
-}))
+})),
+  "insuranceInformation": zod.object({
+  "insuranceCarrier": zod.string(),
+  "memberId": zod.string(),
+  "groupNumber": zod.string(),
+  "subscriberName": zod.string()
+}),
+  "onFileInsuranceInformation": zod.object({
+  "insuranceCarrier": zod.string(),
+  "memberId": zod.string(),
+  "groupNumber": zod.string(),
+  "subscriberName": zod.string()
+}),
+  "schedulingHandoff": zod.object({
+  "mode": zod.enum(['rest', 'qr-link']),
+  "available": zod.boolean(),
+  "label": zod.string(),
+  "message": zod.string(),
+  "url": zod.string().optional()
+})
 })
 
 
@@ -93,7 +117,12 @@ export const SaveCheckInAppointmentResponse = zod.object({
   "firstName": zod.string(),
   "lastName": zod.string(),
   "phone": zod.string(),
-  "email": zod.string()
+  "email": zod.string(),
+  "addressLine1": zod.string(),
+  "addressLine2": zod.string(),
+  "city": zod.string(),
+  "state": zod.string(),
+  "zip": zod.string()
 }),
   "appointments": zod.array(zod.object({
   "id": zod.string(),
@@ -103,7 +132,26 @@ export const SaveCheckInAppointmentResponse = zod.object({
   "type": zod.string(),
   "location": zod.string(),
   "addressLine2": zod.string()
-}))
+})),
+  "insuranceInformation": zod.object({
+  "insuranceCarrier": zod.string(),
+  "memberId": zod.string(),
+  "groupNumber": zod.string(),
+  "subscriberName": zod.string()
+}),
+  "onFileInsuranceInformation": zod.object({
+  "insuranceCarrier": zod.string(),
+  "memberId": zod.string(),
+  "groupNumber": zod.string(),
+  "subscriberName": zod.string()
+}),
+  "schedulingHandoff": zod.object({
+  "mode": zod.enum(['rest', 'qr-link']),
+  "available": zod.boolean(),
+  "label": zod.string(),
+  "message": zod.string(),
+  "url": zod.string().optional()
+})
 })
 
 
@@ -118,10 +166,12 @@ export const SaveCheckInDemographicsParams = zod.object({
 })
 
 export const SaveCheckInDemographicsBody = zod.object({
-  "firstName": zod.string(),
-  "lastName": zod.string(),
   "phone": zod.string(),
-  "email": zod.string()
+  "addressLine1": zod.string(),
+  "addressLine2": zod.string(),
+  "city": zod.string(),
+  "state": zod.string(),
+  "zip": zod.string()
 })
 
 export const SaveCheckInDemographicsResponse = zod.object({
@@ -131,7 +181,12 @@ export const SaveCheckInDemographicsResponse = zod.object({
   "firstName": zod.string(),
   "lastName": zod.string(),
   "phone": zod.string(),
-  "email": zod.string()
+  "email": zod.string(),
+  "addressLine1": zod.string(),
+  "addressLine2": zod.string(),
+  "city": zod.string(),
+  "state": zod.string(),
+  "zip": zod.string()
 }),
   "appointments": zod.array(zod.object({
   "id": zod.string(),
@@ -141,7 +196,26 @@ export const SaveCheckInDemographicsResponse = zod.object({
   "type": zod.string(),
   "location": zod.string(),
   "addressLine2": zod.string()
-}))
+})),
+  "insuranceInformation": zod.object({
+  "insuranceCarrier": zod.string(),
+  "memberId": zod.string(),
+  "groupNumber": zod.string(),
+  "subscriberName": zod.string()
+}),
+  "onFileInsuranceInformation": zod.object({
+  "insuranceCarrier": zod.string(),
+  "memberId": zod.string(),
+  "groupNumber": zod.string(),
+  "subscriberName": zod.string()
+}),
+  "schedulingHandoff": zod.object({
+  "mode": zod.enum(['rest', 'qr-link']),
+  "available": zod.boolean(),
+  "label": zod.string(),
+  "message": zod.string(),
+  "url": zod.string().optional()
+})
 })
 
 
@@ -156,7 +230,11 @@ export const SaveCheckInCoverageParams = zod.object({
 })
 
 export const SaveCheckInCoverageBody = zod.object({
-  "coverage": zod.enum(['iu', 'other', 'self'])
+  "coverage": zod.enum(['iu', 'other', 'self']),
+  "insuranceCarrier": zod.string().optional(),
+  "memberId": zod.string().optional(),
+  "groupNumber": zod.string().optional(),
+  "subscriberName": zod.string().optional()
 })
 
 export const SaveCheckInCoverageResponse = zod.object({
@@ -166,7 +244,12 @@ export const SaveCheckInCoverageResponse = zod.object({
   "firstName": zod.string(),
   "lastName": zod.string(),
   "phone": zod.string(),
-  "email": zod.string()
+  "email": zod.string(),
+  "addressLine1": zod.string(),
+  "addressLine2": zod.string(),
+  "city": zod.string(),
+  "state": zod.string(),
+  "zip": zod.string()
 }),
   "appointments": zod.array(zod.object({
   "id": zod.string(),
@@ -176,7 +259,26 @@ export const SaveCheckInCoverageResponse = zod.object({
   "type": zod.string(),
   "location": zod.string(),
   "addressLine2": zod.string()
-}))
+})),
+  "insuranceInformation": zod.object({
+  "insuranceCarrier": zod.string(),
+  "memberId": zod.string(),
+  "groupNumber": zod.string(),
+  "subscriberName": zod.string()
+}),
+  "onFileInsuranceInformation": zod.object({
+  "insuranceCarrier": zod.string(),
+  "memberId": zod.string(),
+  "groupNumber": zod.string(),
+  "subscriberName": zod.string()
+}),
+  "schedulingHandoff": zod.object({
+  "mode": zod.enum(['rest', 'qr-link']),
+  "available": zod.boolean(),
+  "label": zod.string(),
+  "message": zod.string(),
+  "url": zod.string().optional()
+})
 })
 
 
@@ -202,7 +304,12 @@ export const SaveCheckInConsentResponse = zod.object({
   "firstName": zod.string(),
   "lastName": zod.string(),
   "phone": zod.string(),
-  "email": zod.string()
+  "email": zod.string(),
+  "addressLine1": zod.string(),
+  "addressLine2": zod.string(),
+  "city": zod.string(),
+  "state": zod.string(),
+  "zip": zod.string()
 }),
   "appointments": zod.array(zod.object({
   "id": zod.string(),
@@ -212,7 +319,26 @@ export const SaveCheckInConsentResponse = zod.object({
   "type": zod.string(),
   "location": zod.string(),
   "addressLine2": zod.string()
-}))
+})),
+  "insuranceInformation": zod.object({
+  "insuranceCarrier": zod.string(),
+  "memberId": zod.string(),
+  "groupNumber": zod.string(),
+  "subscriberName": zod.string()
+}),
+  "onFileInsuranceInformation": zod.object({
+  "insuranceCarrier": zod.string(),
+  "memberId": zod.string(),
+  "groupNumber": zod.string(),
+  "subscriberName": zod.string()
+}),
+  "schedulingHandoff": zod.object({
+  "mode": zod.enum(['rest', 'qr-link']),
+  "available": zod.boolean(),
+  "label": zod.string(),
+  "message": zod.string(),
+  "url": zod.string().optional()
+})
 })
 
 
@@ -237,7 +363,12 @@ export const SaveCheckInQuestionnaireResponse = zod.object({
   "firstName": zod.string(),
   "lastName": zod.string(),
   "phone": zod.string(),
-  "email": zod.string()
+  "email": zod.string(),
+  "addressLine1": zod.string(),
+  "addressLine2": zod.string(),
+  "city": zod.string(),
+  "state": zod.string(),
+  "zip": zod.string()
 }),
   "appointments": zod.array(zod.object({
   "id": zod.string(),
@@ -247,7 +378,26 @@ export const SaveCheckInQuestionnaireResponse = zod.object({
   "type": zod.string(),
   "location": zod.string(),
   "addressLine2": zod.string()
-}))
+})),
+  "insuranceInformation": zod.object({
+  "insuranceCarrier": zod.string(),
+  "memberId": zod.string(),
+  "groupNumber": zod.string(),
+  "subscriberName": zod.string()
+}),
+  "onFileInsuranceInformation": zod.object({
+  "insuranceCarrier": zod.string(),
+  "memberId": zod.string(),
+  "groupNumber": zod.string(),
+  "subscriberName": zod.string()
+}),
+  "schedulingHandoff": zod.object({
+  "mode": zod.enum(['rest', 'qr-link']),
+  "available": zod.boolean(),
+  "label": zod.string(),
+  "message": zod.string(),
+  "url": zod.string().optional()
+})
 })
 
 
@@ -272,7 +422,12 @@ export const SaveCheckInHistoryResponse = zod.object({
   "firstName": zod.string(),
   "lastName": zod.string(),
   "phone": zod.string(),
-  "email": zod.string()
+  "email": zod.string(),
+  "addressLine1": zod.string(),
+  "addressLine2": zod.string(),
+  "city": zod.string(),
+  "state": zod.string(),
+  "zip": zod.string()
 }),
   "appointments": zod.array(zod.object({
   "id": zod.string(),
@@ -282,7 +437,26 @@ export const SaveCheckInHistoryResponse = zod.object({
   "type": zod.string(),
   "location": zod.string(),
   "addressLine2": zod.string()
-}))
+})),
+  "insuranceInformation": zod.object({
+  "insuranceCarrier": zod.string(),
+  "memberId": zod.string(),
+  "groupNumber": zod.string(),
+  "subscriberName": zod.string()
+}),
+  "onFileInsuranceInformation": zod.object({
+  "insuranceCarrier": zod.string(),
+  "memberId": zod.string(),
+  "groupNumber": zod.string(),
+  "subscriberName": zod.string()
+}),
+  "schedulingHandoff": zod.object({
+  "mode": zod.enum(['rest', 'qr-link']),
+  "available": zod.boolean(),
+  "label": zod.string(),
+  "message": zod.string(),
+  "url": zod.string().optional()
+})
 })
 
 
@@ -305,7 +479,9 @@ export const CompleteCheckInResponse = zod.object({
   "appointmentTime": zod.string(),
   "addressLine2": zod.string(),
   "floorLabel": zod.string(),
-  "waitingArea": zod.string()
+  "waitingArea": zod.string(),
+  "kioskFloor": zod.string(),
+  "isCurrentFloor": zod.boolean()
 })
 
 

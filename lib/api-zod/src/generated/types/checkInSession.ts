@@ -6,6 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { Appointment } from './appointment';
+import type { InsuranceInformation } from './insuranceInformation';
+import type { SchedulingHandoff } from './schedulingHandoff';
 import type { StudentProfile } from './studentProfile';
 
 export interface CheckInSession {
@@ -13,4 +15,7 @@ export interface CheckInSession {
   requiresVerification: boolean;
   student: StudentProfile;
   appointments: Appointment[];
+  insuranceInformation: InsuranceInformation;
+  onFileInsuranceInformation: InsuranceInformation;
+  schedulingHandoff: SchedulingHandoff;
 }

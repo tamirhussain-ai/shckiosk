@@ -132,11 +132,20 @@ export function CheckInFlow() {
   const [error, setError] = useState("");
   
   const [selectedAppointment, setSelectedAppointment] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [zip, setZip] = useState("");
   const [coverage, setCoverage] = useState<Coverage>("iu");
+  const [insuranceCarrier, setInsuranceCarrier] = useState("");
+  const [memberId, setMemberId] = useState("");
+  const [groupNumber, setGroupNumber] = useState("");
+  const [subscriberName, setSubscriberName] = useState("");
+  const [showInsuranceInfo, setShowInsuranceInfo] = useState(false);
+  const [showSchedulingHandoff, setShowSchedulingHandoff] = useState(false);
+  const [frontDeskSelected, setFrontDeskSelected] = useState(false);
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [signatureName, setSignatureName] = useState("");
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
@@ -145,10 +154,18 @@ export function CheckInFlow() {
   // Sync demographics from session when fetched
   useEffect(() => {
     if (session?.student) {
-      setFirstName(session.student.firstName || "");
-      setLastName(session.student.lastName || "");
       setPhone(session.student.phone || "");
-      setEmail(session.student.email || "");
+      setAddressLine1(session.student.addressLine1 || "");
+      setAddressLine2(session.student.addressLine2 || "");
+      setCity(session.student.city || "");
+      setState(session.student.state || "");
+      setZip(session.student.zip || "");
+    }
+    if (session?.insuranceInformation) {
+      setInsuranceCarrier(session.insuranceInformation.insuranceCarrier || "");
+      setMemberId(session.insuranceInformation.memberId || "");
+      setGroupNumber(session.insuranceInformation.groupNumber || "");
+      setSubscriberName(session.insuranceInformation.subscriberName || "");
     }
   }, [session]);
 
@@ -206,6 +223,8 @@ export function CheckInFlow() {
       onSuccess: (data) => {
         setSession(data);
         setSelectedAppointment(data.appointments?.[0]?.id ?? "");
+        setShowSchedulingHandoff(false);
+        setFrontDeskSelected(false);
         setScreen("appointment");
       },
       onError: (err: unknown) => {
@@ -216,6 +235,14 @@ export function CheckInFlow() {
 
   const goBack = () => {
     clearError();
+    if (screen === "appointment" && showSchedulingHandoff) {
+      setShowSchedulingHandoff(false);
+      return;
+    }
+    if (screen === "coverage" && showInsuranceInfo) {
+      setShowInsuranceInfo(false);
+      return;
+    }
     const previous: Partial<Record<Screen, Screen>> = {
       appointment: "welcome",
       demographics: "appointment",
@@ -236,7 +263,20 @@ export function CheckInFlow() {
     setValue("");
     setDob("");
     setSelectedAppointment("");
+    setPhone("");
+    setAddressLine1("");
+    setAddressLine2("");
+    setCity("");
+    setState("");
+    setZip("");
     setCoverage("iu");
+    setInsuranceCarrier("");
+    setMemberId("");
+    setGroupNumber("");
+    setSubscriberName("");
+    setShowInsuranceInfo(false);
+    setShowSchedulingHandoff(false);
+    setFrontDeskSelected(false);
     setConsentAccepted(false);
     setSignatureName("");
     setAnswers({});
@@ -244,6 +284,7 @@ export function CheckInFlow() {
     clearError();
     setShowHelp(false);
     setLanguageOpen(false);
+    setCompletion(null);
   };
 
   const continueAppointment = () => {
@@ -265,15 +306,21 @@ export function CheckInFlow() {
   };
 
   const continueDemographics = () => {
-    if (!firstName.trim() || !lastName.trim() || !phone.trim() || !email.trim()) {
-      setError("Please complete each field so we know how to reach you.");
+    if (
+      !addressLine1.trim() ||
+      !city.trim() ||
+      !state.trim() ||
+      !zip.trim() ||
+      !phone.trim()
+    ) {
+      setError("Please complete your address, ZIP, and mobile phone.");
       return;
     }
     if (!session?.sessionId) return;
     clearError();
     saveDemographicsMutation.mutate({
       sessionId: session.sessionId,
-      data: { firstName, lastName, phone, email }
+      data: { addressLine1, addressLine2, city, state, zip, phone }
     }, {
       onSuccess: (data) => {
         setSession(data);
@@ -358,10 +405,23 @@ export function CheckInFlow() {
 
   const continueCoverage = () => {
     if (!session?.sessionId) return;
+    if (
+      coverage === "other" &&
+      (!insuranceCarrier.trim() || !memberId.trim() || !subscriberName.trim())
+    ) {
+      setError("Add the insurance carrier, member ID, and subscriber name.");
+      return;
+    }
     clearError();
     saveCoverageMutation.mutate({
       sessionId: session.sessionId,
-      data: { coverage }
+      data: {
+        coverage,
+        insuranceCarrier: coverage === "other" ? insuranceCarrier : undefined,
+        memberId: coverage === "other" ? memberId : undefined,
+        groupNumber: coverage === "other" ? groupNumber : undefined,
+        subscriberName: coverage === "other" ? subscriberName : undefined,
+      }
     }, {
       onSuccess: (data) => {
         setSession(data);
@@ -659,6 +719,12 @@ export function CheckInFlow() {
                   <CheckCircle2 size={14} />
                   Check-in complete
                 </div>
+                <p
+                  className="mb-5 text-sm font-bold uppercase tracking-[.16em] text-[#806960]"
+                  data-testid="text-kiosk-floor"
+                >
+                  This kiosk is on the {completion?.kioskFloor || "Second floor"}
+                </p>
                 <h1
                   className="max-w-[650px] text-[clamp(4.6rem,10vw,8.8rem)] font-semibold uppercase leading-[.82] tracking-[-.09em] text-[#990000] font-serif"
                   data-testid="text-floor"
@@ -671,7 +737,10 @@ export function CheckInFlow() {
                     {completion?.waitingArea || "Waiting area"}
                   </p>
                 </div>
-                <p className="mt-7 max-w-[560px] text-[17px] leading-7 text-[#806960]" data-testid="text-directions">
+                <p className="mt-7 max-w-[560px] text-[17px] font-bold leading-7 text-[#632f2f]">
+                  Your care team is expecting you.
+                </p>
+                <p className="mt-2 max-w-[560px] text-[17px] leading-7 text-[#806960]" data-testid="text-directions">
                   {completion?.directions}
                 </p>
               </div>
@@ -694,7 +763,7 @@ export function CheckInFlow() {
                 <h1
                   className="mt-3 max-w-[520px] text-[clamp(2.75rem,4.6vw,4.7rem)] font-semibold leading-[.97] tracking-[-.065em] text-[#990000] font-serif"
                 >
-                  {screen === "appointment" && "Let's find your visit."}
+                  {screen === "appointment" && (session?.appointments?.length ? "Let's find your visit." : "Let's find your next step.")}
                   {screen === "demographics" && "Let's make sure we have it right."}
                   {screen === "coverage" && "How will today's visit be covered?"}
                   {screen === "consent" && "A quick review before we begin."}
@@ -702,7 +771,7 @@ export function CheckInFlow() {
                   {screen === "history" && "Anything changed since your last visit?"}
                 </h1>
                 <p className="mt-6 max-w-[430px] text-[16px] leading-7 text-[#806960]">
-                  {screen === "appointment" && "Choose the appointment you're here for today."}
+                  {screen === "appointment" && (session?.appointments?.length ? "Choose the appointment you're here for today." : "The front desk can help, or you can schedule online.")}
                   {screen === "demographics" && "Review your details so we can keep your visit moving smoothly."}
                   {screen === "coverage" && "Choose the option that best describes your plan today."}
                   {screen === "consent" && "Please read the short notice, then sign to acknowledge."}
@@ -821,6 +890,12 @@ export function CheckInFlow() {
                     </div>
                   )}
 
+                  {mode === "universityId" && (
+                    <p className="mt-4 text-center text-xs leading-5 text-[#9a8074]">
+                      Demo: use <span className="font-bold text-[#806259]">iu123456</span> for scheduled visits or <span className="font-bold text-[#806259]">iu000000</span> for no scheduled appointment, with 10/14/2003.
+                    </p>
+                  )}
+
                   {renderError()}
 
                   <div className="mt-8">
@@ -839,65 +914,157 @@ export function CheckInFlow() {
             {screen === "appointment" && (
               <div className="kiosk-fade relative">
                 {renderBack()}
-                <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
-                  Which appointment are you checking in for?
-                </h2>
-
-                <div className="space-y-3">
-                  {session?.appointments?.map((apt) => (
-                    <label
-                      key={apt.id}
-                      data-testid={`appointment-${apt.id}`}
-                      className={`relative flex cursor-pointer items-start gap-4 rounded-2xl border p-4 transition hover:bg-[#fff6e8] ${selectedAppointment === apt.id ? "border-[#990000] bg-[#fff6e8] shadow-[0_4px_14px_rgba(153,0,0,.08)]" : "border-[#d9c6b5] bg-[#fffaf1]"}`}
+                {showSchedulingHandoff ? (
+                  <>
+                    <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
+                      Schedule an appointment online
+                    </h2>
+                    <div
+                      className="rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] p-5 sm:p-6"
+                      data-testid="scheduling-handoff"
                     >
-                      <div className="mt-0.5 flex items-center justify-center">
-                        <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition ${selectedAppointment === apt.id ? "border-[#990000] bg-[#990000]" : "border-[#c1aba0] bg-transparent"}`}>
-                          {selectedAppointment === apt.id && <Check size={14} className="text-[#fff9ed]" strokeWidth={3} />}
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#f3e1dc] text-[#990000]">
+                          <QrCode size={28} />
+                        </div>
+                        <div>
+                          <p className="text-lg font-bold text-[#632f2f]">
+                            {session?.schedulingHandoff.label || "Schedule online"}
+                          </p>
+                          <p className="mt-2 text-sm leading-6 text-[#806960]">
+                            {session?.schedulingHandoff.message}
+                          </p>
                         </div>
                       </div>
-                      <input
-                        type="radio"
-                        name="appointment"
-                        value={apt.id}
-                        checked={selectedAppointment === apt.id}
-                        onChange={(e) => {
-                          setSelectedAppointment(e.target.value);
+                      {session?.schedulingHandoff.available && session.schedulingHandoff.url ? (
+                        <a
+                          href={session.schedulingHandoff.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          data-testid="link-online-scheduler"
+                          className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#990000] px-5 text-sm font-bold text-[#fff9ed] transition hover:bg-[#7d0000] focus:outline-none focus:ring-4 focus:ring-[#990000]/20"
+                        >
+                          Open online scheduler <ArrowRight size={17} />
+                        </a>
+                      ) : (
+                        <div className="mt-6 rounded-xl bg-[#f4e6d5] p-4 text-sm font-semibold leading-6 text-[#632f2f]">
+                          The scheduler connection is not available on this kiosk. Ask the front desk for the current scheduling QR code or link.
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      data-testid="button-back-to-appointment-options"
+                      onClick={() => setShowSchedulingHandoff(false)}
+                      className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-5 text-sm font-bold text-[#632f2f] transition hover:bg-[#f4e6d5] focus:outline-none focus:ring-4 focus:ring-[#990000]/15"
+                    >
+                      <ArrowLeft size={17} /> Back to appointment options
+                    </button>
+                  </>
+                ) : session?.appointments?.length ? (
+                  <>
+                    <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
+                      Which appointment are you checking in for?
+                    </h2>
+                    <div className="space-y-3">
+                      {session.appointments.map((apt) => (
+                        <label
+                          key={apt.id}
+                          data-testid={`appointment-${apt.id}`}
+                          className={`relative flex cursor-pointer items-start gap-4 rounded-2xl border p-4 transition hover:bg-[#fff6e8] ${selectedAppointment === apt.id ? "border-[#990000] bg-[#fff6e8] shadow-[0_4px_14px_rgba(153,0,0,.08)]" : "border-[#d9c6b5] bg-[#fffaf1]"}`}
+                        >
+                          <div className="mt-0.5 flex items-center justify-center">
+                            <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition ${selectedAppointment === apt.id ? "border-[#990000] bg-[#990000]" : "border-[#c1aba0] bg-transparent"}`}>
+                              {selectedAppointment === apt.id && <Check size={14} className="text-[#fff9ed]" strokeWidth={3} />}
+                            </div>
+                          </div>
+                          <input
+                            type="radio"
+                            name="appointment"
+                            value={apt.id}
+                            checked={selectedAppointment === apt.id}
+                            onChange={(e) => {
+                              setSelectedAppointment(e.target.value);
+                              clearError();
+                            }}
+                            className="sr-only"
+                          />
+                          <div className="flex-1">
+                            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                              <p className="text-base font-bold text-[#632f2f]">{apt.time}</p>
+                              <span className="inline-flex items-center rounded-full bg-[#f4e6d5] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[.1em] text-[#7f4d4d]">
+                                {apt.date}
+                              </span>
+                            </div>
+                            <p className="mt-1 text-sm font-semibold text-[#806960]">{apt.type}</p>
+                            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-[#9a8074]">
+                              <div className="flex items-center gap-1.5">
+                                <Stethoscope size={14} /> {apt.provider}
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <MapPin size={14} /> {apt.location}
+                              </div>
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                    {renderError()}
+                    <div className="mt-8">
+                      {primaryButton("Confirm appointment", continueAppointment, !selectedAppointment, undefined, "button-save-appointment")}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <h2 className="mb-3 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
+                      No scheduled appointment found
+                    </h2>
+                    <p className="mb-6 text-sm leading-6 text-[#806960]">
+                      You can still get help today. Choose the option that works best for you.
+                    </p>
+                    <div className="grid gap-3" data-testid="no-appointment-options">
+                      <button
+                        type="button"
+                        data-testid="button-front-desk-option"
+                        onClick={() => {
+                          setFrontDeskSelected(true);
                           clearError();
                         }}
-                        className="sr-only"
-                      />
-                      <div className="flex-1">
-                        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-                          <p className="text-base font-bold text-[#632f2f]">{apt.time}</p>
-                          <span className="inline-flex items-center rounded-full bg-[#f4e6d5] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[.1em] text-[#7f4d4d]">
-                            {apt.date}
-                          </span>
-                        </div>
-                        <p className="mt-1 text-sm font-semibold text-[#806960]">{apt.type}</p>
-                        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-[#9a8074]">
-                          <div className="flex items-center gap-1.5">
-                            <Stethoscope size={14} /> {apt.provider}
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <MapPin size={14} /> {apt.location}
-                          </div>
-                        </div>
-                      </div>
-                    </label>
-                  ))}
-                  
-                  {(!session?.appointments || session.appointments.length === 0) && (
-                    <div className="p-8 text-center text-[#806960] border border-[#d9c6b5] rounded-2xl bg-[#fffaf1]">
-                      No upcoming appointments found for today.
+                        className="flex min-h-20 items-center gap-4 rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] p-4 text-left transition hover:border-[#c9a69a] hover:bg-[#fff6e8] focus:outline-none focus:ring-4 focus:ring-[#990000]/15"
+                      >
+                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#f4e6d5] text-[#990000]">
+                          <Stethoscope size={21} />
+                        </span>
+                        <span>
+                          <span className="block font-bold text-[#632f2f]">Visit the front desk</span>
+                          <span className="mt-1 block text-xs leading-5 text-[#806960]">A team member can look for your visit or help you make an appointment.</span>
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        data-testid="button-online-scheduling"
+                        onClick={() => {
+                          setShowSchedulingHandoff(true);
+                          setFrontDeskSelected(false);
+                        }}
+                        className="flex min-h-20 items-center gap-4 rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] p-4 text-left transition hover:border-[#c9a69a] hover:bg-[#fff6e8] focus:outline-none focus:ring-4 focus:ring-[#990000]/15"
+                      >
+                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#f3e1dc] text-[#990000]">
+                          <QrCode size={21} />
+                        </span>
+                        <span>
+                          <span className="block font-bold text-[#632f2f]">Schedule online</span>
+                          <span className="mt-1 block text-xs leading-5 text-[#806960]">Use the self-service scheduler QR code or link.</span>
+                        </span>
+                      </button>
                     </div>
-                  )}
-                </div>
-
-                {renderError()}
-
-                <div className="mt-8">
-                  {primaryButton("Confirm appointment", continueAppointment, !selectedAppointment, undefined, "button-save-appointment")}
-                </div>
+                    {frontDeskSelected && (
+                      <div className="mt-5 rounded-xl bg-[#e6f0e5] p-4 text-sm font-semibold leading-6 text-[#316148]" role="status">
+                        Please take your student ID to the front desk. You do not need to enter more information here.
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             )}
 
@@ -909,27 +1076,70 @@ export function CheckInFlow() {
                 </h2>
                 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label htmlFor="demo-first" className="mb-2 block text-sm font-bold text-[#632f2f]">First name</label>
+                  <div className="sm:col-span-2">
+                    <label htmlFor="demo-address-1" className="mb-2 block text-sm font-bold text-[#632f2f]">Address line 1</label>
                     <input
-                      id="demo-first"
+                      id="demo-address-1"
                       type="text"
-                      data-testid="input-first-name"
-                      value={firstName}
-                      onChange={(e) => { setFirstName(e.target.value); clearError(); }}
+                      autoComplete="address-line1"
+                      data-testid="input-address-line-1"
+                      value={addressLine1}
+                      onChange={(e) => { setAddressLine1(e.target.value); clearError(); }}
+                      className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label htmlFor="demo-address-2" className="mb-2 block text-sm font-bold text-[#632f2f]">Address line 2</label>
+                    <input
+                      id="demo-address-2"
+                      type="text"
+                      autoComplete="address-line2"
+                      data-testid="input-address-line-2"
+                      value={addressLine2}
+                      onChange={(e) => { setAddressLine2(e.target.value); clearError(); }}
+                      placeholder="Apartment, suite, or residence hall"
                       className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
                     />
                   </div>
                   <div>
-                    <label htmlFor="demo-last" className="mb-2 block text-sm font-bold text-[#632f2f]">Last name</label>
+                    <label htmlFor="demo-city" className="mb-2 block text-sm font-bold text-[#632f2f]">City</label>
                     <input
-                      id="demo-last"
+                      id="demo-city"
                       type="text"
-                      data-testid="input-last-name"
-                      value={lastName}
-                      onChange={(e) => { setLastName(e.target.value); clearError(); }}
+                      autoComplete="address-level2"
+                      data-testid="input-city"
+                      value={city}
+                      onChange={(e) => { setCity(e.target.value); clearError(); }}
                       className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
                     />
+                  </div>
+                  <div className="grid grid-cols-[.65fr_1fr] gap-3">
+                    <div>
+                      <label htmlFor="demo-state" className="mb-2 block text-sm font-bold text-[#632f2f]">State</label>
+                      <input
+                        id="demo-state"
+                        type="text"
+                        autoComplete="address-level1"
+                        data-testid="input-state"
+                        value={state}
+                        maxLength={2}
+                        onChange={(e) => { setState(e.target.value.toUpperCase()); clearError(); }}
+                        className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold uppercase text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="demo-zip" className="mb-2 block text-sm font-bold text-[#632f2f]">ZIP</label>
+                      <input
+                        id="demo-zip"
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="postal-code"
+                        data-testid="input-zip"
+                        value={zip}
+                        onChange={(e) => { setZip(e.target.value); clearError(); }}
+                        className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
+                      />
+                    </div>
                   </div>
                   <div className="sm:col-span-2">
                     <label htmlFor="demo-phone" className="mb-2 block text-sm font-bold text-[#632f2f]">Mobile phone</label>
@@ -942,28 +1152,18 @@ export function CheckInFlow() {
                       className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
                     />
                   </div>
-                  <div className="sm:col-span-2">
-                    <label htmlFor="demo-email" className="mb-2 block text-sm font-bold text-[#632f2f]">Email address</label>
-                    <input
-                      id="demo-email"
-                      type="email"
-                      data-testid="input-email"
-                      value={email}
-                      onChange={(e) => { setEmail(e.target.value); clearError(); }}
-                      className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-5 rounded-xl bg-[#f4e6d5] p-3 text-xs font-semibold leading-5 text-[#806259]">
-                  <Info size={14} className="mr-1.5 inline -translate-y-[1px]" />
-                  Need to update your preferred name or pronouns? You can do that securely through the Student Portal or at the front desk.
                 </div>
 
                 {renderError()}
 
                 <div className="mt-8">
-                  {primaryButton("Looks good", continueDemographics, !firstName || !lastName || !phone || !email, undefined, "button-save-demographics")}
+                  {primaryButton(
+                    "Looks good",
+                    continueDemographics,
+                    !addressLine1 || !city || !state || !zip || !phone,
+                    undefined,
+                    "button-save-demographics",
+                  )}
                 </div>
               </div>
             )}
@@ -971,50 +1171,147 @@ export function CheckInFlow() {
             {screen === "coverage" && (
               <div className="kiosk-fade relative">
                 {renderBack()}
-                <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
-                  Billing & Coverage
-                </h2>
-
-                <div className="space-y-3">
-                  {([
-                    ["iu", "Bill IU Student Insurance", "We have your plan on file."],
-                    ["other", "Bill a different insurance plan", "You'll be asked to provide your card."],
-                    ["self", "I will pay out of pocket", "No insurance will be billed."],
-                  ] as const).map(([val, title, desc]) => (
-                    <label
-                      key={val}
-                      className={`relative flex cursor-pointer items-start gap-4 rounded-2xl border p-4 transition hover:bg-[#fff6e8] ${coverage === val ? "border-[#990000] bg-[#fff6e8] shadow-[0_4px_14px_rgba(153,0,0,.08)]" : "border-[#d9c6b5] bg-[#fffaf1]"}`}
-                    >
-                      <div className="mt-0.5 flex items-center justify-center">
-                        <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition ${coverage === val ? "border-[#990000] bg-[#990000]" : "border-[#c1aba0] bg-transparent"}`}>
-                          {coverage === val && <Check size={14} className="text-[#fff9ed]" strokeWidth={3} />}
+                {showInsuranceInfo ? (
+                  <>
+                    <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
+                      Insurance information
+                    </h2>
+                    <div className="rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] p-5" data-testid="insurance-information">
+                      {coverage === "self" ? (
+                        <div className="flex items-start gap-3">
+                          <CreditCard size={20} className="mt-0.5 shrink-0 text-[#990000]" />
+                          <div>
+                            <p className="font-bold text-[#632f2f]">Self Pay</p>
+                            <p className="mt-1 text-sm leading-6 text-[#806960]">No insurance plan will be billed for this visit.</p>
+                          </div>
                         </div>
-                      </div>
-                      <input
-                        type="radio"
-                        name="coverage"
-                        data-testid={`coverage-${val}`}
-                        value={val}
-                        checked={coverage === val}
-                        onChange={(e) => {
-                          setCoverage(e.target.value as Coverage);
-                          clearError();
-                        }}
-                        className="sr-only"
-                      />
-                      <div className="flex-1">
-                        <p className="text-base font-bold text-[#632f2f]">{title}</p>
-                        <p className="mt-1 text-sm font-medium text-[#806960]">{desc}</p>
-                      </div>
-                    </label>
-                  ))}
-                </div>
+                      ) : (
+                        <dl className="divide-y divide-[#e7d9c7]">
+                          {[
+                            ["Insurance carrier", coverage === "iu" ? session?.onFileInsuranceInformation.insuranceCarrier : insuranceCarrier],
+                            ["Member ID", coverage === "iu" ? session?.onFileInsuranceInformation.memberId : memberId],
+                            ["Group number", coverage === "iu" ? session?.onFileInsuranceInformation.groupNumber : groupNumber],
+                            ["Subscriber name", coverage === "iu" ? session?.onFileInsuranceInformation.subscriberName : subscriberName],
+                          ].map(([label, detail]) => (
+                            <div key={label} className="grid gap-1 py-3 first:pt-0 last:pb-0 sm:grid-cols-[150px_1fr]">
+                              <dt className="text-xs font-bold uppercase tracking-[.1em] text-[#9a8074]">{label}</dt>
+                              <dd className="text-sm font-bold text-[#632f2f]">{detail || "Not provided"}</dd>
+                            </div>
+                          ))}
+                        </dl>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      data-testid="button-update-insurance"
+                      onClick={() => {
+                        setShowInsuranceInfo(false);
+                        clearError();
+                      }}
+                      className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-5 text-sm font-bold text-[#632f2f] transition hover:bg-[#f4e6d5] focus:outline-none focus:ring-4 focus:ring-[#990000]/15"
+                    >
+                      <PenLine size={17} /> Return and update insurance information
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
+                      Billing & Coverage
+                    </h2>
 
-                {renderError()}
+                    <div className="space-y-3">
+                      {([
+                        ["iu", "Bill IU Student Insurance", "We have your plan on file."],
+                        ["other", "Bill a different insurance plan", "Enter the information from your insurance card."],
+                        ["self", "Self Pay", "No insurance will be billed."],
+                      ] as const).map(([val, title, desc]) => (
+                        <label
+                          key={val}
+                          className={`relative flex cursor-pointer items-start gap-4 rounded-2xl border p-4 transition hover:bg-[#fff6e8] ${coverage === val ? "border-[#990000] bg-[#fff6e8] shadow-[0_4px_14px_rgba(153,0,0,.08)]" : "border-[#d9c6b5] bg-[#fffaf1]"}`}
+                        >
+                          <div className="mt-0.5 flex items-center justify-center">
+                            <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition ${coverage === val ? "border-[#990000] bg-[#990000]" : "border-[#c1aba0] bg-transparent"}`}>
+                              {coverage === val && <Check size={14} className="text-[#fff9ed]" strokeWidth={3} />}
+                            </div>
+                          </div>
+                          <input
+                            type="radio"
+                            name="coverage"
+                            data-testid={`coverage-${val}`}
+                            value={val}
+                            checked={coverage === val}
+                            onChange={(e) => {
+                              const nextCoverage = e.target.value as Coverage;
+                              if (nextCoverage === "other" && coverage !== "other") {
+                                setInsuranceCarrier("");
+                                setMemberId("");
+                                setGroupNumber("");
+                                setSubscriberName("");
+                              }
+                              setCoverage(nextCoverage);
+                              clearError();
+                            }}
+                            className="sr-only"
+                          />
+                          <div className="flex-1">
+                            <p className="text-base font-bold text-[#632f2f]">{title}</p>
+                            <p className="mt-1 text-sm font-medium text-[#806960]">{desc}</p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
 
-                <div className="mt-8">
-                  {primaryButton("Confirm coverage", continueCoverage, !coverage, undefined, "button-save-coverage")}
-                </div>
+                    {coverage === "other" && (
+                      <div className="mt-5 grid gap-4 rounded-2xl border border-[#e7d9c7] bg-[#fff6e8] p-4 sm:grid-cols-2">
+                        {[
+                          ["insurance-carrier", "Insurance carrier", insuranceCarrier, setInsuranceCarrier],
+                          ["member-id", "Member ID", memberId, setMemberId],
+                          ["group-number", "Group number", groupNumber, setGroupNumber],
+                          ["subscriber-name", "Subscriber name", subscriberName, setSubscriberName],
+                        ].map(([id, label, fieldValue, setter]) => (
+                          <div key={id as string}>
+                            <label htmlFor={id as string} className="mb-2 block text-sm font-bold text-[#632f2f]">{label as string}</label>
+                            <input
+                              id={id as string}
+                              type="text"
+                              data-testid={`input-${id}`}
+                              value={fieldValue as string}
+                              onChange={(event) => {
+                                (setter as (value: string) => void)(event.target.value);
+                                clearError();
+                              }}
+                              className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:ring-4 focus:ring-[#990000]/10"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      data-testid="button-view-insurance"
+                      onClick={() => {
+                        setShowInsuranceInfo(true);
+                        clearError();
+                      }}
+                      className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-5 text-sm font-bold text-[#632f2f] transition hover:bg-[#f4e6d5] focus:outline-none focus:ring-4 focus:ring-[#990000]/15"
+                    >
+                      <Info size={17} /> View insurance information
+                    </button>
+
+                    {renderError()}
+
+                    <div className="mt-6">
+                      {primaryButton(
+                        "Confirm coverage",
+                        continueCoverage,
+                        !coverage || (coverage === "other" && (!insuranceCarrier || !memberId || !subscriberName)),
+                        undefined,
+                        "button-save-coverage",
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             )}
 

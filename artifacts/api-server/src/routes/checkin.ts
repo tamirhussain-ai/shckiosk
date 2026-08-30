@@ -43,9 +43,14 @@ router.post("/checkin/sessions", async (req, res): Promise<void> => {
   const normalizedValue = value?.trim().toLowerCase();
   const normalizedDob = dateOfBirth?.replace(/\s/g, "");
   const isQrValid = method === "qr" && qrToken === "demo-qr-token";
+  const isNoAppointmentDemo =
+    normalizedValue === "iu000000" ||
+    normalizedValue === "noappointment" ||
+    normalizedValue === "no-appointment";
   const isManualValid =
     normalizedDob === "10/14/2003" &&
-    ((method === "universityId" && normalizedValue === "iu123456") ||
+    ((method === "universityId" &&
+      (normalizedValue === "iu123456" || isNoAppointmentDemo)) ||
       (method === "lastName" && normalizedValue === "johnson"));
 
   if (!isQrValid && !isManualValid) {
@@ -110,7 +115,7 @@ router.patch(
     const params = SaveCheckInDemographicsParams.safeParse(req.params);
     const body = SaveCheckInDemographicsBody.safeParse(req.body);
     if (!params.success || !body.success) {
-      res.status(400).json(invalidRequest("Complete each contact field."));
+      res.status(400).json(invalidRequest("Complete each address and mobile phone field."));
       return;
     }
 
@@ -133,6 +138,19 @@ router.patch(
     const body = SaveCheckInCoverageBody.safeParse(req.body);
     if (!params.success || !body.success) {
       res.status(400).json(invalidRequest("Choose a coverage option."));
+      return;
+    }
+    if (
+      body.data.coverage === "other" &&
+      (!body.data.insuranceCarrier?.trim() ||
+        !body.data.memberId?.trim() ||
+        !body.data.subscriberName?.trim())
+    ) {
+      res.status(400).json(
+        invalidRequest(
+          "Add the insurance carrier, member ID, and subscriber name.",
+        ),
+      );
       return;
     }
 

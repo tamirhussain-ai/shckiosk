@@ -103,7 +103,8 @@ export function GiantFloorDirective() {
               </p>
             </div>
             <p className="mt-7 max-w-[560px] text-base leading-7 text-[var(--iu-muted)] sm:text-[17px]">
-              Your care team is expecting you. Take the elevator or stairs to the first floor, then find the waiting area.
+              <span className="font-bold text-[var(--iu-ink)]">Your care team is expecting you.</span>{" "}
+              This kiosk is on the second floor. Proceed to the first floor and Primary Care waiting area.
             </p>
           </section>
 
@@ -140,7 +141,7 @@ export function GiantFloorDirective() {
           </aside>
         </div>
         <footer className="border-t border-[var(--iu-border)] pt-4 text-center text-xs font-medium text-[var(--iu-muted)]">
-          For your privacy, this screen will clear when you tap Done.
+          Kiosk location: Second floor · For your privacy, this screen will clear when you tap Done.
         </footer>
       </div>
     </main>

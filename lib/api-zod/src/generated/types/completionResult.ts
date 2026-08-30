@@ -16,4 +16,6 @@ export interface CompletionResult {
   addressLine2: string;
   floorLabel: string;
   waitingArea: string;
+  kioskFloor: string;
+  isCurrentFloor: boolean;
 }

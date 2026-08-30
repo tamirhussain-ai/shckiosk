@@ -39,11 +39,39 @@ export interface Appointment {
   addressLine2: string;
 }
 
+export interface InsuranceInformation {
+  insuranceCarrier: string;
+  memberId: string;
+  groupNumber: string;
+  subscriberName: string;
+}
+
+export type SchedulingHandoffMode = typeof SchedulingHandoffMode[keyof typeof SchedulingHandoffMode];
+
+
+export const SchedulingHandoffMode = {
+  rest: 'rest',
+  'qr-link': 'qr-link',
+} as const;
+
+export interface SchedulingHandoff {
+  mode: SchedulingHandoffMode;
+  available: boolean;
+  label: string;
+  message: string;
+  url?: string;
+}
+
 export interface StudentProfile {
   firstName: string;
   lastName: string;
   phone: string;
   email: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  state: string;
+  zip: string;
 }
 
 export interface CheckInSession {
@@ -51,6 +79,9 @@ export interface CheckInSession {
   requiresVerification: boolean;
   student: StudentProfile;
   appointments: Appointment[];
+  insuranceInformation: InsuranceInformation;
+  onFileInsuranceInformation: InsuranceInformation;
+  schedulingHandoff: SchedulingHandoff;
 }
 
 export interface VerificationCode {
@@ -70,10 +101,12 @@ export interface AppointmentSelection {
 }
 
 export interface Demographics {
-  firstName: string;
-  lastName: string;
   phone: string;
-  email: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  state: string;
+  zip: string;
 }
 
 export type CoverageSelectionCoverage = typeof CoverageSelectionCoverage[keyof typeof CoverageSelectionCoverage];
@@ -87,6 +120,10 @@ export const CoverageSelectionCoverage = {
 
 export interface CoverageSelection {
   coverage: CoverageSelectionCoverage;
+  insuranceCarrier?: string;
+  memberId?: string;
+  groupNumber?: string;
+  subscriberName?: string;
 }
 
 export interface ConsentInput {
@@ -122,5 +159,7 @@ export interface CompletionResult {
   addressLine2: string;
   floorLabel: string;
   waitingArea: string;
+  kioskFloor: string;
+  isCurrentFloor: boolean;
 }
 

@@ -7,8 +7,10 @@
  */
 
 export interface Demographics {
-  firstName: string;
-  lastName: string;
   phone: string;
-  email: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  state: string;
+  zip: string;
 }

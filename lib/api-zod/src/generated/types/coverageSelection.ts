@@ -9,4 +9,8 @@ import type { CoverageSelectionCoverage } from './coverageSelectionCoverage';
 
 export interface CoverageSelection {
   coverage: CoverageSelectionCoverage;
+  insuranceCarrier?: string;
+  memberId?: string;
+  groupNumber?: string;
+  subscriberName?: string;
 }

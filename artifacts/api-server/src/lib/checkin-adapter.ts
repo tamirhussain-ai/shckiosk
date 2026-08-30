@@ -27,6 +27,7 @@ type SessionRecord = {
   verificationAttempts: number;
   appointmentId?: string;
   coverage?: CoverageSelection["coverage"];
+  onFileInsuranceInformation: CheckInSession["onFileInsuranceInformation"];
   consent?: ConsentInput;
   questionnaire?: QuestionnaireInput;
   history?: HistoryInput;
@@ -86,6 +87,40 @@ const providerAccounts = {
   },
 } as const;
 
+const kioskFloor = "Second floor";
+
+const fallbackSchedulingHandoff: CheckInSession["schedulingHandoff"] = {
+  mode: "qr-link",
+  available: false,
+  label: "Schedule online",
+  message:
+    "Scan the online scheduler QR code or use the scheduling link provided by the front desk.",
+};
+
+// This adapter is intentionally the seam for the shared scheduler integration.
+// A connected implementation can return a REST-backed handoff without changing
+// the check-in flow or its API contract.
+const getSchedulingHandoff = (): CheckInSession["schedulingHandoff"] => {
+  const schedulerUrl = process.env.ONLINE_SCHEDULER_URL?.trim();
+  if (!schedulerUrl) return fallbackSchedulingHandoff;
+  return {
+    mode: "rest",
+    available: true,
+    label: "Open online scheduler",
+    message: "Continue in IU's online appointment scheduler.",
+    url: schedulerUrl,
+  };
+};
+
+const isNoAppointmentDemo = (input: CheckInIdentification) => {
+  const normalizedValue = input.value?.trim().toLowerCase();
+  return (
+    normalizedValue === "iu000000" ||
+    normalizedValue === "noappointment" ||
+    normalizedValue === "no-appointment"
+  );
+};
+
 const isAtLeast = (record: SessionRecord, stage: CheckInStage) =>
   stageOrder.indexOf(record.stage) >= stageOrder.indexOf(stage);
 
@@ -112,6 +147,12 @@ class MockCheckInAdapter implements CheckInAdapter {
     await wait(300);
 
     const sessionId = crypto.randomUUID();
+    const onFileInsuranceInformation = {
+      insuranceCarrier: "IU Student Insurance",
+      memberId: "IU-104928",
+      groupNumber: "IUSHC-2025",
+      subscriberName: "Avery Johnson",
+    };
     const session: CheckInSession = {
       sessionId,
       requiresVerification: false,
@@ -120,8 +161,15 @@ class MockCheckInAdapter implements CheckInAdapter {
         lastName: "Johnson",
         phone: "(812) 555-0148",
         email: "avery.johnson@iu.edu",
+        addressLine1: "123 Sample Street",
+        addressLine2: "Apartment 4B",
+        city: "Bloomington",
+        state: "IN",
+        zip: "47406",
       },
-      appointments: [
+      appointments: isNoAppointmentDemo(input)
+        ? []
+        : [
         {
           id: "primary-care-1030",
           date: "Today, October 14",
@@ -140,7 +188,10 @@ class MockCheckInAdapter implements CheckInAdapter {
           location: "Student Health Center · Second floor",
           addressLine2: providerAccounts.jordanLewis.addressLine2,
         },
-      ],
+          ],
+      insuranceInformation: { ...onFileInsuranceInformation },
+      onFileInsuranceInformation: { ...onFileInsuranceInformation },
+      schedulingHandoff: getSchedulingHandoff(),
     };
 
     this.sessions.set(sessionId, {
@@ -149,6 +200,7 @@ class MockCheckInAdapter implements CheckInAdapter {
       stage: "identified",
       verificationExpiresAt: Date.now() + 10 * 60 * 1000,
       verificationAttempts: 0,
+      onFileInsuranceInformation,
     });
 
     return session;
@@ -205,7 +257,7 @@ class MockCheckInAdapter implements CheckInAdapter {
     ) {
       return null;
     }
-    record.session.student = { ...input };
+    record.session.student = { ...record.session.student, ...input };
     invalidateAfter(record, "demographics");
     return record.session;
   }
@@ -217,7 +269,34 @@ class MockCheckInAdapter implements CheckInAdapter {
     await wait(180);
     const record = this.sessions.get(sessionId);
     if (!record || !isAtLeast(record, "demographics")) return null;
+    if (
+      input.coverage === "other" &&
+      (!input.insuranceCarrier?.trim() ||
+        !input.memberId?.trim() ||
+        !input.subscriberName?.trim())
+    ) {
+      return null;
+    }
     record.coverage = input.coverage;
+    if (input.coverage === "other") {
+      record.session.insuranceInformation = {
+        insuranceCarrier: input.insuranceCarrier?.trim() || "",
+        memberId: input.memberId?.trim() || "",
+        groupNumber: input.groupNumber?.trim() || "",
+        subscriberName: input.subscriberName?.trim() || "",
+      };
+    } else if (input.coverage === "iu") {
+      record.session.insuranceInformation = {
+        ...record.onFileInsuranceInformation,
+      };
+    } else {
+      record.session.insuranceInformation = {
+        insuranceCarrier: "",
+        memberId: "",
+        groupNumber: "",
+        subscriberName: "",
+      };
+    }
     invalidateAfter(record, "coverage");
     return record.session;
   }
@@ -283,17 +362,24 @@ class MockCheckInAdapter implements CheckInAdapter {
       .split("·")
       .map((part) => part.trim());
     if (!floorLabel || !waitingArea) return null;
+    const isCurrentFloor = floorLabel.toLowerCase() === kioskFloor.toLowerCase();
     this.sessions.delete(sessionId);
     return {
       completed: true,
-      nextStep: `Go to the ${waitingArea}`,
-      directions: `Take the elevator or stairs to the ${floorLabel.toLowerCase()}, then follow signs for the ${waitingArea}.`,
+      nextStep: isCurrentFloor
+        ? `You’re on the right floor. Take a seat in the ${waitingArea}.`
+        : `Proceed to the ${floorLabel} and ${waitingArea}.`,
+      directions: isCurrentFloor
+        ? `You’re on the right floor. Take a seat in the ${waitingArea}.`
+        : `Proceed to the ${floorLabel.toLowerCase()} and ${waitingArea}.`,
       provider: appointment.provider,
       visitType: appointment.type,
       appointmentTime: appointment.time,
       addressLine2: appointment.addressLine2,
       floorLabel,
       waitingArea,
+      kioskFloor,
+      isCurrentFloor,
     };
   }
 }

@@ -306,6 +306,33 @@ components:
         addressLine2:
           type: string
       required: [id, date, time, provider, type, location, addressLine2]
+    InsuranceInformation:
+      type: object
+      properties:
+        insuranceCarrier:
+          type: string
+        memberId:
+          type: string
+        groupNumber:
+          type: string
+        subscriberName:
+          type: string
+      required: [insuranceCarrier, memberId, groupNumber, subscriberName]
+    SchedulingHandoff:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum: [rest, qr-link]
+        available:
+          type: boolean
+        label:
+          type: string
+        message:
+          type: string
+        url:
+          type: string
+      required: [mode, available, label, message]
     StudentProfile:
       type: object
       properties:
@@ -317,7 +344,17 @@ components:
           type: string
         email:
           type: string
-      required: [firstName, lastName, phone, email]
+        addressLine1:
+          type: string
+        addressLine2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip:
+          type: string
+      required: [firstName, lastName, phone, email, addressLine1, addressLine2, city, state, zip]
     CheckInSession:
       type: object
       properties:
@@ -331,7 +368,13 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Appointment"
-      required: [sessionId, requiresVerification, student, appointments]
+        insuranceInformation:
+          $ref: "#/components/schemas/InsuranceInformation"
+        onFileInsuranceInformation:
+          $ref: "#/components/schemas/InsuranceInformation"
+        schedulingHandoff:
+          $ref: "#/components/schemas/SchedulingHandoff"
+      required: [sessionId, requiresVerification, student, appointments, insuranceInformation, onFileInsuranceInformation, schedulingHandoff]
     VerificationCode:
       type: object
       properties:
@@ -355,21 +398,33 @@ components:
     Demographics:
       type: object
       properties:
-        firstName:
-          type: string
-        lastName:
-          type: string
         phone:
           type: string
-        email:
+        addressLine1:
           type: string
-      required: [firstName, lastName, phone, email]
+        addressLine2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip:
+          type: string
+      required: [phone, addressLine1, addressLine2, city, state, zip]
     CoverageSelection:
       type: object
       properties:
         coverage:
           type: string
           enum: [iu, other, self]
+        insuranceCarrier:
+          type: string
+        memberId:
+          type: string
+        groupNumber:
+          type: string
+        subscriberName:
+          type: string
       required: [coverage]
     ConsentInput:
       type: object
@@ -416,5 +471,9 @@ components:
           type: string
         waitingArea:
           type: string
-      required: [completed, nextStep, directions, provider, visitType, appointmentTime, addressLine2, floorLabel, waitingArea]
+        kioskFloor:
+          type: string
+        isCurrentFloor:
+          type: boolean
+      required: [completed, nextStep, directions, provider, visitType, appointmentTime, addressLine2, floorLabel, waitingArea, kioskFloor, isCurrentFloor]
 
