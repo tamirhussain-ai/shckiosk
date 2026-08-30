@@ -353,7 +353,12 @@ class MockCheckInAdapter implements CheckInAdapter {
   async complete(sessionId: string): Promise<CompletionResult | null> {
     await wait(500);
     const record = this.sessions.get(sessionId);
-    if (!record?.history || record.stage !== "history") return null;
+    if (
+      !record?.questionnaire ||
+      (record.stage !== "questionnaire" && record.stage !== "history")
+    ) {
+      return null;
+    }
     const appointment = record.session.appointments.find(
       (item) => item.id === record.appointmentId,
     );

@@ -8,7 +8,6 @@ import {
   Check,
   CheckCircle2,
   ChevronDown,
-  CircleCheckBig,
   ClipboardList,
   Clock3,
   CreditCard,
@@ -34,7 +33,6 @@ import {
   useSaveCheckInCoverage,
   useSaveCheckInConsent,
   useSaveCheckInQuestionnaire,
-  useSaveCheckInHistory,
   useCompleteCheckIn,
   useHealthCheck,
 } from "@workspace/api-client-react";
@@ -50,7 +48,6 @@ type Screen =
   | "coverage"
   | "consent"
   | "questionnaire"
-  | "history"
   | "checking"
   | "complete";
 
@@ -104,7 +101,6 @@ const journeySteps = [
   { id: "coverage", label: "Coverage" },
   { id: "consent", label: "Consent" },
   { id: "questionnaire", label: "Questions" },
-  { id: "history", label: "History" },
 ];
 
 function formatDateOfBirth(input: string) {
@@ -149,7 +145,6 @@ export function CheckInFlow() {
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [signatureName, setSignatureName] = useState("");
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
-  const [historyChoice, setHistoryChoice] = useState<"same" | "update" | "">("");
   
   // Sync demographics from session when fetched
   useEffect(() => {
@@ -177,7 +172,6 @@ export function CheckInFlow() {
   const saveCoverageMutation = useSaveCheckInCoverage();
   const saveConsentMutation = useSaveCheckInConsent();
   const saveQuestionnaireMutation = useSaveCheckInQuestionnaire();
-  const saveHistoryMutation = useSaveCheckInHistory();
   const completeMutation = useCompleteCheckIn();
 
   const isMutating = 
@@ -187,7 +181,6 @@ export function CheckInFlow() {
     saveCoverageMutation.isPending ||
     saveConsentMutation.isPending ||
     saveQuestionnaireMutation.isPending ||
-    saveHistoryMutation.isPending ||
     completeMutation.isPending;
 
   const activeStepIndex = journeySteps.findIndex((step) => step.id === screen);
@@ -249,8 +242,7 @@ export function CheckInFlow() {
       coverage: "demographics",
       consent: "coverage",
       questionnaire: "consent",
-      history: "questionnaire",
-      checking: "history",
+      checking: "questionnaire",
     };
     const next = previous[screen];
     if (next) setScreen(next);
@@ -280,7 +272,6 @@ export function CheckInFlow() {
     setConsentAccepted(false);
     setSignatureName("");
     setAnswers({});
-    setHistoryChoice("");
     clearError();
     setShowHelp(false);
     setLanguageOpen(false);
@@ -362,44 +353,21 @@ export function CheckInFlow() {
     }, {
       onSuccess: (data) => {
         setSession(data);
-        setScreen("history");
-      },
-      onError: () => setError("Failed to save questionnaire. Please try again.")
-    });
-  };
-
-  const continueHistory = () => {
-    if (!historyChoice) {
-      setError("Choose an option so your care team has the latest information.");
-      return;
-    }
-    if (!session?.sessionId) return;
-    clearError();
-    setScreen("checking");
-    
-    saveHistoryMutation.mutate({
-      sessionId: session.sessionId,
-      data: { choice: historyChoice }
-    }, {
-      onSuccess: (data) => {
-        setSession(data);
+        setScreen("checking");
         completeMutation.mutate({
-          sessionId: session!.sessionId
+          sessionId: data.sessionId
         }, {
           onSuccess: (res) => {
             setCompletion(res);
             setScreen("complete");
           },
           onError: () => {
-            setScreen("history");
+            setScreen("questionnaire");
             setError("Failed to finalize check-in. Please try again.");
           }
         });
       },
-      onError: () => {
-        setScreen("history");
-        setError("Failed to save history. Please try again.");
-      }
+      onError: () => setError("Failed to save questionnaire. Please try again.")
     });
   };
 
@@ -688,7 +656,7 @@ export function CheckInFlow() {
                 <p className="mt-7 max-w-[480px] text-[17px] leading-7 text-[#806960]">
                   Check in for your visit in a few simple steps. Take your time — your health information stays private throughout.
                 </p>
-                <div className="mt-10 grid max-w-[570px] grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="mt-10 max-w-[270px]">
                   <div className="flex items-start gap-3 rounded-2xl border border-[#e7d9c7] bg-[#fffaf1]/80 p-4">
                     <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#f2d9bd] text-[#8b3a3a]">
                       <Clock3 size={17} />
@@ -696,15 +664,6 @@ export function CheckInFlow() {
                     <div>
                       <p className="text-sm font-bold text-[#632f2f]">About 2 minutes</p>
                       <p className="mt-1 text-xs leading-5 text-[#9a8074]">No paperwork to carry.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 rounded-2xl border border-[#e7d9c7] bg-[#fffaf1]/80 p-4">
-                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#f3e1dc] text-[#9a5147]">
-                      <ShieldCheck size={18} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-[#632f2f]">Private by design</p>
-                      <p className="mt-1 text-xs leading-5 text-[#9a8074]">This screen clears when done.</p>
                     </div>
                   </div>
                 </div>
@@ -761,7 +720,6 @@ export function CheckInFlow() {
                   {screen === "coverage" && "How will today's visit be covered?"}
                   {screen === "consent" && "A quick review before we begin."}
                   {screen === "questionnaire" && "A few things for your care team."}
-                  {screen === "history" && "Anything changed since your last visit?"}
                 </h1>
                 <p className="mt-6 max-w-[430px] text-[16px] leading-7 text-[#806960]">
                   {screen === "appointment" && (session?.appointments?.length ? "Choose the appointment you're here for today." : "The front desk can help, or you can schedule online.")}
@@ -769,7 +727,6 @@ export function CheckInFlow() {
                   {screen === "coverage" && "Choose the option that best describes your plan today."}
                   {screen === "consent" && "Please read the short notice, then sign to acknowledge."}
                   {screen === "questionnaire" && "Your answers help us prepare for a more useful conversation."}
-                  {screen === "history" && "A quick confirmation helps us keep your record current."}
                 </p>
               </div>
             )}
@@ -1414,59 +1371,6 @@ export function CheckInFlow() {
               </div>
             )}
 
-            {screen === "history" && (
-              <div className="kiosk-fade relative">
-                {renderBack()}
-                <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
-                  Medical history
-                </h2>
-
-                <div className="mb-6 rounded-2xl bg-[#f4e6d5] p-5 text-[15px] font-medium leading-relaxed text-[#806259]">
-                  Please let us know if there have been any major changes to your medical history, surgeries, or family history since your last visit.
-                </div>
-
-                <div className="space-y-3">
-                  {([
-                    ["same", "No changes", "My history is exactly the same as my last visit."],
-                    ["update", "I have updates", "I need to add or change something in my record."],
-                  ] as const).map(([val, title, desc]) => (
-                    <label
-                      key={val}
-                      className={`relative flex cursor-pointer items-start gap-4 rounded-2xl border p-4 transition hover:bg-[#fff6e8] ${historyChoice === val ? "border-[#990000] bg-[#fff6e8] shadow-[0_4px_14px_rgba(153,0,0,.08)]" : "border-[#d9c6b5] bg-[#fffaf1]"}`}
-                    >
-                      <div className="mt-0.5 flex items-center justify-center">
-                        <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition ${historyChoice === val ? "border-[#990000] bg-[#990000]" : "border-[#c1aba0] bg-transparent"}`}>
-                          {historyChoice === val && <Check size={14} className="text-[#fff9ed]" strokeWidth={3} />}
-                        </div>
-                      </div>
-                      <input
-                        type="radio"
-                        name="history"
-                        value={val}
-                        data-testid={`history-${val}`}
-                        checked={historyChoice === val}
-                        onChange={(e) => {
-                          setHistoryChoice(e.target.value as any);
-                          clearError();
-                        }}
-                        className="sr-only"
-                      />
-                      <div className="flex-1">
-                        <p className="text-base font-bold text-[#632f2f]">{title}</p>
-                        <p className="mt-1 text-sm font-medium text-[#806960]">{desc}</p>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-
-                {renderError()}
-
-                <div className="mt-8">
-                  {primaryButton("Complete check-in", continueHistory, !historyChoice, <CircleCheckBig size={18} />, "button-complete-checkin")}
-                </div>
-              </div>
-            )}
-            
             {screen === "checking" && (
               <div className="kiosk-fade flex min-h-[400px] flex-col items-center justify-center text-center">
                 <span className="kiosk-pulse flex items-center gap-2 mb-6" aria-hidden="true">
