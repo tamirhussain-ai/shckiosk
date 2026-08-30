@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;600;700&family=Fraunces:opsz,wght@9..144,400;500;600;700&display=swap');
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Fraunces', Georgia, serif;
+}
+
+:root {
+  --background: 43 62% 94%; /* #fbf5e8 */
+  --foreground: 0 23% 19%; /* #3d2626 */
+  --border: 33 46% 85%; /* #e7d9c7 */
+  --input: 33 46% 85%;
+  --ring: 0 100% 30%; /* #990000 */
+  
+  --primary: 0 100% 30%; /* #990000 */
+  --primary-foreground: 40 100% 96%; /* #fff9ed */
+}
+
+.dark {
+  /* Minimal dark mode for completeness, though iPad kiosk defaults to light */
+  --background: 0 23% 10%;
+  --foreground: 43 62% 94%;
+  --border: 0 23% 20%;
+  --input: 0 23% 20%;
+  --ring: 0 100% 40%;
+  --primary: 0 100% 40%;
+  --primary-foreground: 40 100% 96%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* Animations from Sandbox */
+.kiosk-shell { isolation: isolate; }
+.kiosk-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .2;
+  background-image: radial-gradient(rgba(153,0,0,.13) .7px, transparent .7px);
+  background-size: 18px 18px;
+  mask-image: linear-gradient(145deg, black, transparent 68%);
+  z-index: -1;
+}
+.kiosk-reveal { animation: kiosk-reveal .55s cubic-bezier(.22,.8,.32,1) both; }
+.kiosk-card { animation: kiosk-card .65s cubic-bezier(.22,.8,.32,1) .05s both; }
+.kiosk-fade { animation: kiosk-fade .32s ease both; }
+.kiosk-pulse { animation: kiosk-pulse 1.15s ease-in-out infinite; }
+@keyframes kiosk-reveal { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
+@keyframes kiosk-card { from { opacity: 0; transform: translateY(16px) scale(.987) } to { opacity: 1; transform: translateY(0) scale(1) } }
+@keyframes kiosk-fade { from { opacity: 0; transform: translateX(9px) } to { opacity: 1; transform: translateX(0) } }
+@keyframes kiosk-pulse { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
+@media (prefers-reduced-motion: reduce) {
+  .kiosk-reveal, .kiosk-card, .kiosk-fade, .kiosk-pulse { animation: none; }
+}

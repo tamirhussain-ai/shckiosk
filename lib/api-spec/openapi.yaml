@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: check-in
+    description: Student health center check-in operations
 paths:
   /healthz:
     get:
@@ -24,7 +26,241 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /checkin/sessions:
+    post:
+      operationId: identifyCheckIn
+      tags: [check-in]
+      summary: Start a student check-in session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckInIdentification"
+      responses:
+        "200":
+          description: Check-in session started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckInSession"
+        "400":
+          description: Invalid identification
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /checkin/sessions/{sessionId}/verify:
+    post:
+      operationId: verifyCheckIn
+      tags: [check-in]
+      summary: Verify the secure code sent to the student
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerificationCode"
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationResult"
+        "400":
+          description: Invalid code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /checkin/sessions/{sessionId}/appointment:
+    patch:
+      operationId: saveCheckInAppointment
+      tags: [check-in]
+      summary: Select the appointment for a check-in session
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppointmentSelection"
+      responses:
+        "200":
+          description: Appointment selection saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckInSession"
+        "400":
+          description: Invalid session or appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /checkin/sessions/{sessionId}/demographics:
+    patch:
+      operationId: saveCheckInDemographics
+      tags: [check-in]
+      summary: Save student contact details
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Demographics"
+      responses:
+        "200":
+          description: Demographics saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckInSession"
+        "400":
+          description: Invalid session or demographics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /checkin/sessions/{sessionId}/coverage:
+    patch:
+      operationId: saveCheckInCoverage
+      tags: [check-in]
+      summary: Save insurance or self-pay selection
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CoverageSelection"
+      responses:
+        "200":
+          description: Coverage selection saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckInSession"
+        "400":
+          description: Invalid session or coverage selection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /checkin/sessions/{sessionId}/consent:
+    post:
+      operationId: saveCheckInConsent
+      tags: [check-in]
+      summary: Save consent and signature
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConsentInput"
+      responses:
+        "200":
+          description: Consent saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckInSession"
+        "400":
+          description: Invalid session or consent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /checkin/sessions/{sessionId}/questionnaire:
+    post:
+      operationId: saveCheckInQuestionnaire
+      tags: [check-in]
+      summary: Save questionnaire answers
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionnaireInput"
+      responses:
+        "200":
+          description: Questionnaire saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckInSession"
+        "400":
+          description: Invalid session or questionnaire
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /checkin/sessions/{sessionId}/history:
+    post:
+      operationId: saveCheckInHistory
+      tags: [check-in]
+      summary: Save medical history confirmation
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HistoryInput"
+      responses:
+        "200":
+          description: Medical history saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckInSession"
+        "400":
+          description: Invalid session or history selection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /checkin/sessions/{sessionId}/complete:
+    post:
+      operationId: completeCheckIn
+      tags: [check-in]
+      summary: Complete student check-in
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "200":
+          description: Check-in completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompletionResult"
+        "400":
+          description: Invalid or incomplete check-in session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
+  parameters:
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +269,138 @@ components:
           type: string
       required:
         - status
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    CheckInIdentification:
+      type: object
+      properties:
+        method:
+          type: string
+          enum: [universityId, lastName, qr]
+        value:
+          type: string
+        dateOfBirth:
+          type: string
+        qrToken:
+          type: string
+      required: [method]
+    Appointment:
+      type: object
+      properties:
+        id:
+          type: string
+        date:
+          type: string
+        time:
+          type: string
+        provider:
+          type: string
+        type:
+          type: string
+        location:
+          type: string
+      required: [id, date, time, provider, type, location]
+    StudentProfile:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+      required: [firstName, lastName, phone, email]
+    CheckInSession:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        requiresVerification:
+          type: boolean
+        student:
+          $ref: "#/components/schemas/StudentProfile"
+        appointments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Appointment"
+      required: [sessionId, requiresVerification, student, appointments]
+    VerificationCode:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 6
+          maxLength: 6
+      required: [code]
+    VerificationResult:
+      type: object
+      properties:
+        verified:
+          type: boolean
+      required: [verified]
+    AppointmentSelection:
+      type: object
+      properties:
+        appointmentId:
+          type: string
+      required: [appointmentId]
+    Demographics:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+      required: [firstName, lastName, phone, email]
+    CoverageSelection:
+      type: object
+      properties:
+        coverage:
+          type: string
+          enum: [iu, other, self]
+      required: [coverage]
+    ConsentInput:
+      type: object
+      properties:
+        accepted:
+          type: boolean
+        signatureName:
+          type: string
+      required: [accepted, signatureName]
+    QuestionnaireInput:
+      type: object
+      properties:
+        answers:
+          type: object
+          additionalProperties:
+            type: string
+            enum: [yes, no, unsure]
+      required: [answers]
+    HistoryInput:
+      type: object
+      properties:
+        choice:
+          type: string
+          enum: [same, update]
+      required: [choice]
+    CompletionResult:
+      type: object
+      properties:
+        completed:
+          type: boolean
+        nextStep:
+          type: string
+        directions:
+          type: string
+      required: [completed, nextStep, directions]
 

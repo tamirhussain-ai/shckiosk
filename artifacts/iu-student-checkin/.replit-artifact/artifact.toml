@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "IU Student Check-In"
+description = "A calm, touch-first iPad check-in experience for IU Student Health Center students, covering identity verification, appointment details, consent, questionnaires, and completion guidance."
+version = "1.0.0"
+id = "artifacts/iu-student-checkin"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23851
+
+[services.development]
+run = "pnpm --filter @workspace/iu-student-checkin run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/iu-student-checkin", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/iu-student-checkin/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23851"
+BASE_PATH = "/"
