@@ -807,13 +807,19 @@ export function CheckInFlow() {
       </header>
 
       <div
-        className="pointer-events-none absolute left-[25%] top-[55%] z-0 -translate-x-1/2 -translate-y-1/2"
+        className={`pointer-events-none absolute z-0 -translate-x-1/2 -translate-y-1/2 ${
+          screen === "complete" ? "left-1/2 top-[54%]" : "left-[25%] top-[55%]"
+        }`}
         aria-hidden="true"
       >
         <img
           src="/iu-trident-crimson-cropped.png"
           alt=""
-          className="h-[min(62vh,580px)] w-auto max-w-[76vw] object-contain opacity-[0.05] sm:h-[min(72vh,700px)]"
+          className={`w-auto max-w-[82vw] object-contain opacity-[0.05] ${
+            screen === "complete"
+              ? "h-[min(72vh,730px)]"
+              : "h-[min(62vh,580px)] sm:h-[min(72vh,700px)]"
+          }`}
         />
       </div>
 
@@ -945,8 +951,20 @@ export function CheckInFlow() {
           </nav>
         )}
 
-        <div className={`grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,.82fr)_minmax(540px,1.18fr)] lg:gap-16 ${isJourney ? "lg:items-start" : "lg:items-center"}`}>
-          <section className="kiosk-reveal kiosk-completion-copy relative z-10 min-w-0 flex flex-col justify-center lg:min-h-[590px]">
+        <div
+          className={
+            screen === "complete"
+              ? "grid grid-cols-1"
+              : `grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,.82fr)_minmax(540px,1.18fr)] lg:gap-16 ${
+                  isJourney ? "lg:items-start" : "lg:items-center"
+                }`
+          }
+        >
+          <section
+            className={`kiosk-reveal kiosk-completion-copy relative z-10 flex min-w-0 flex-col justify-center ${
+              screen === "complete" ? "kiosk-completion-panel mx-auto w-full items-center" : "lg:min-h-[590px]"
+            }`}
+          >
             {screen === "welcome" ? (
               <div className="max-w-[610px]">
                 <h1
@@ -971,22 +989,13 @@ export function CheckInFlow() {
                 </div>
               </div>
             ) : screen === "complete" ? (
-              <div className="max-w-[560px]">
-                <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#c9ddcd] bg-[#e6f0e5] px-3.5 py-2 text-[11px] font-bold uppercase tracking-[.16em] text-[#316148]">
+              <div className="kiosk-fade mx-auto flex w-full max-w-[980px] flex-col items-center text-center">
+                <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#c9ddcd] bg-[#e6f0e5] px-3.5 py-2 text-[11px] font-bold uppercase tracking-[.16em] text-[#316148]">
                   <CheckCircle2 size={14} />
                   {content.complete.badge}
                 </div>
-                <p
-                  className="mb-5 text-sm font-bold uppercase tracking-[.16em] text-[#806960]"
-                  data-testid="text-kiosk-floor"
-                >
-                  {content.complete.kioskFloorPrefix} {completion?.kioskFloor || content.complete.destinationFallback}.
-                </p>
-                <p className="mb-7 max-w-[560px] text-[17px] font-bold leading-7 text-[#632f2f]" data-testid="text-directions">
-                  {completion?.directions} {content.complete.directionsSuffix}
-                </p>
                 <h1
-                  className="kiosk-completion-floor-heading kiosk-completion-floor-pulse max-w-full overflow-hidden font-semibold uppercase leading-[.82] tracking-[-.09em] text-[#990000] font-serif"
+                  className="kiosk-completion-floor-heading kiosk-completion-floor-pulse max-w-full overflow-hidden font-semibold uppercase leading-[.82] tracking-[-.08em] text-[#990000] font-serif"
                   data-testid="text-floor"
                   aria-label={completionFloorLabel}
                 >
@@ -998,12 +1007,77 @@ export function CheckInFlow() {
                     </>
                   ) : null}
                 </h1>
-                <div className="mt-7 flex items-center gap-4 border-l-[5px] border-[#990000] pl-5">
-                  <MapPin size={32} className="shrink-0 text-[#990000]" />
-                  <p className="text-[clamp(1.8rem,3.3vw,3rem)] font-bold leading-none tracking-[-.05em] text-[#3d2626]" data-testid="text-waiting-area">
-                    {completion?.waitingArea || content.complete.waitingAreaFallback}
-                  </p>
-                </div>
+                <p
+                  className="kiosk-completion-waiting mt-2 text-[clamp(2.5rem,6vw,5.8rem)] font-semibold leading-none tracking-[-.055em] text-[#bd5b48] font-serif"
+                  data-testid="text-waiting-area"
+                >
+                  {completion?.waitingArea || content.complete.waitingAreaFallback}
+                </p>
+                <p
+                  className="kiosk-completion-directions mt-5 max-w-[660px] text-[17px] font-bold leading-7 text-[#632f2f]"
+                  data-testid="text-directions"
+                >
+                  {completion?.directions} {content.complete.directionsSuffix}
+                </p>
+
+                <dl
+                  className="kiosk-completion-summary mt-9 grid w-full max-w-[860px] grid-cols-1 overflow-hidden rounded-[22px] border border-[#e6d6c4] bg-[#fffaf1]/85 text-left shadow-[0_18px_42px_rgba(108,35,35,.09)] sm:grid-cols-2 lg:grid-cols-[1.35fr_1fr_1.1fr_.8fr]"
+                  aria-label="Visit summary"
+                  data-testid="visit-summary"
+                >
+                  <div className="border-b border-[#eadbca] bg-[#f5e1d5]/50 p-4 sm:border-r lg:border-b-0">
+                    <dt className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[.14em] text-[#a26b5f]">
+                      <MapPin size={13} aria-hidden="true" />
+                      Location
+                    </dt>
+                    <dd className="mt-2 text-[15px] font-bold text-[#990000]" data-testid="text-location">
+                      {completionFloorLabel} · {completion?.waitingArea || content.complete.waitingAreaFallback}
+                    </dd>
+                  </div>
+                  <div className="border-b border-[#eadbca] p-4 lg:border-r lg:border-b-0">
+                    <dt className="text-[10px] font-bold uppercase tracking-[.14em] text-[#a26b5f]">
+                      {content.complete.providerLabel}
+                    </dt>
+                    <dd className="mt-2 text-[15px] font-bold text-[#512e2b]" data-testid="text-provider">
+                      {completion?.provider}
+                    </dd>
+                  </div>
+                  <div className="border-b border-[#eadbca] p-4 sm:border-r sm:border-b-0 lg:border-r">
+                    <dt className="text-[10px] font-bold uppercase tracking-[.14em] text-[#a26b5f]">
+                      {content.complete.visitLabel}
+                    </dt>
+                    <dd className="mt-2 text-[15px] font-bold text-[#512e2b]" data-testid="text-visit-type">
+                      {completion?.visitType}
+                    </dd>
+                  </div>
+                  <div className="p-4">
+                    <dt className="text-[10px] font-bold uppercase tracking-[.14em] text-[#a26b5f]">
+                      {content.complete.timeLabel}
+                    </dt>
+                    <dd className="mt-2 text-[15px] font-bold text-[#512e2b]" data-testid="text-appointment-time">
+                      {completion?.appointmentTime}
+                    </dd>
+                  </div>
+                </dl>
+
+                <button
+                  type="button"
+                  data-testid="button-finish"
+                  onClick={startOver}
+                  className="kiosk-completion-button mt-5 flex min-h-[68px] w-full max-w-[860px] items-center justify-center gap-3 rounded-[20px] bg-[#990000] px-6 text-[17px] font-bold text-[#fff9ed] shadow-[0_12px_26px_rgba(122,0,0,.2)] transition hover:-translate-y-0.5 hover:bg-[#7d0000] focus:outline-none focus:ring-4 focus:ring-[#990000]/20"
+                >
+                  {content.complete.doneButton}
+                  <ArrowRight size={20} aria-hidden="true" />
+                </button>
+                <p
+                  className="kiosk-completion-meta mt-4 text-[12px] font-medium leading-5 text-[#806960]"
+                  data-testid="text-kiosk-floor"
+                >
+                  {content.complete.kioskFloorPrefix} {completion?.kioskFloor || content.complete.destinationFallback}.
+                </p>
+                <p className="mt-1 text-[11px] leading-5 text-[#9a8074]">
+                  {content.complete.demoNotice}
+                </p>
               </div>
             ) : screen === "checking" ? (
                <div className="max-w-[560px]">
@@ -1048,7 +1122,8 @@ export function CheckInFlow() {
             )}
           </section>
 
-          <section className="kiosk-card relative isolate min-h-[580px] rounded-[30px] border border-[#e7d9c7] bg-[#fffaf1] p-6 shadow-[0_25px_65px_rgba(108,35,35,.12)] sm:p-9 lg:min-h-[610px] lg:p-11">
+          {screen !== "complete" && (
+            <section className="kiosk-card relative isolate min-h-[580px] rounded-[30px] border border-[#e7d9c7] bg-[#fffaf1] p-6 shadow-[0_25px_65px_rgba(108,35,35,.12)] sm:p-9 lg:min-h-[610px] lg:p-11">
             {screen === "welcome" && (
               <div className="kiosk-fade relative">
                 <div className="mb-7">
@@ -1905,40 +1980,8 @@ export function CheckInFlow() {
               </div>
             )}
 
-            {screen === "complete" && (
-              <div className="kiosk-fade flex min-h-[510px] flex-col">
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-[#806960]">
-                  <Check size={16} className="text-[#316148]" />
-                  {content.complete.visitConfirmed}
-                </div>
-                <dl className="mt-6 divide-y divide-[#e7d9c7]">
-                  <div className="py-4 first:pt-0">
-                    <dt className="text-xs font-semibold uppercase tracking-[.12em] text-[#806960]">{content.complete.providerLabel}</dt>
-                    <dd className="mt-1 text-lg font-bold text-[#3d2626]" data-testid="text-provider">{completion?.provider}</dd>
-                  </div>
-                  <div className="py-4">
-                    <dt className="text-xs font-semibold uppercase tracking-[.12em] text-[#806960]">{content.complete.visitLabel}</dt>
-                    <dd className="mt-1 text-lg font-bold text-[#3d2626]" data-testid="text-visit-type">{completion?.visitType}</dd>
-                  </div>
-                  <div className="py-4">
-                    <dt className="text-xs font-semibold uppercase tracking-[.12em] text-[#806960]">{content.complete.timeLabel}</dt>
-                    <dd className="mt-1 text-lg font-bold text-[#3d2626]" data-testid="text-appointment-time">{completion?.appointmentTime}</dd>
-                  </div>
-                </dl>
-                <button
-                  type="button"
-                  data-testid="button-finish"
-                  onClick={startOver}
-                  className="mt-auto flex min-h-14 w-full items-center justify-center rounded-2xl bg-[#990000] px-6 text-[16px] font-bold text-[#fff9ed] shadow-[0_10px_22px_rgba(122,0,0,.18)] transition hover:-translate-y-0.5 hover:bg-[#7d0000] focus:outline-none focus:ring-4 focus:ring-[#990000]/20"
-                >
-                  {content.complete.doneButton}
-                </button>
-                <p className="mt-4 text-center text-[11px] leading-5 text-[#806960]">
-                  {content.complete.demoNotice}
-                </p>
-              </div>
-            )}
-          </section>
+            </section>
+          )}
         </div>
       </div>
 

@@ -68,6 +68,7 @@
 .kiosk-fade { animation: kiosk-fade .32s ease both; }
 .kiosk-pulse { animation: kiosk-pulse 1.15s ease-in-out infinite; }
 .kiosk-completion-copy { container-type: inline-size; }
+.kiosk-completion-panel { min-height: 690px; }
 .kiosk-completion-floor-heading {
   font-size: clamp(4.2rem, 10.8vw, 11.04rem);
   font-size: clamp(4.2rem, min(12vw, 24cqi), 11.04rem);
@@ -76,7 +77,7 @@
 }
 .kiosk-completion-floor-pulse {
   animation: kiosk-completion-floor-pulse 10s cubic-bezier(.22, 1, .36, 1) 1 both;
-  transform-origin: left center;
+  transform-origin: center center;
   will-change: transform, color, text-shadow;
 }
 .kiosk-completion-floor-accent {
@@ -123,6 +124,23 @@
   28% { color: #bd5b48; }
   48% { color: #990000; }
   68% { color: #c64535; }
+}
+@media (max-height: 850px) and (min-width: 900px) {
+  .kiosk-completion-panel { min-height: 540px; }
+  .kiosk-completion-floor-heading {
+    font-size: clamp(3.6rem, min(8.6vw, 18cqi), 7.5rem);
+  }
+  .kiosk-completion-waiting {
+    margin-top: .25rem;
+    font-size: clamp(2.1rem, 4.2vw, 3.75rem);
+  }
+  .kiosk-completion-directions { margin-top: .75rem; }
+  .kiosk-completion-summary { margin-top: 1.25rem; }
+  .kiosk-completion-button {
+    margin-top: .85rem;
+    min-height: 60px;
+  }
+  .kiosk-completion-meta { margin-top: .65rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .kiosk-reveal,
