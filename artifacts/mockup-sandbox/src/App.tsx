@@ -1,6 +1,7 @@
 import { useEffect, useState, type ComponentType } from "react";
 
 import { modules as discoveredModules } from "./.generated/mockup-components";
+import { DestinationHero } from "./components/mockups/completion-destination-hero/DestinationHero";
 
 type ModuleMap = Record<string, () => Promise<Record<string, unknown>>>;
 
@@ -129,6 +130,9 @@ function getPreviewPath(): string | null {
 }
 
 function App() {
+  if (window.location.pathname === "/") {
+    return <DestinationHero />;
+  }
   const previewPath = getPreviewPath();
 
   if (previewPath) {
