@@ -805,7 +805,7 @@ export function CheckInFlow() {
       data-testid="button-back"
       disabled={isMutating}
       onClick={goBack}
-      className="mb-6 flex min-h-10 items-center gap-2 text-sm font-bold text-[#806259] transition hover:text-[#990000] focus:outline-none focus:ring-2 focus:ring-[#990000]/25 disabled:opacity-50"
+      className="kiosk-back-button mb-6 flex min-h-10 items-center gap-2 text-sm font-bold text-[#806259] transition hover:text-[#990000] focus:outline-none focus:ring-2 focus:ring-[#990000]/25 disabled:opacity-50"
     >
       <ArrowLeft size={17} /> Back
     </button>
@@ -1222,7 +1222,7 @@ export function CheckInFlow() {
 
           {screen !== "complete" && (
             <section
-              className={`kiosk-card relative isolate min-h-0 rounded-[30px] border border-[#e7d9c7] bg-[#fffaf1] p-6 shadow-[0_25px_65px_rgba(108,35,35,.12)] sm:p-9 lg:p-11 ${
+              className={`kiosk-card ${screen === "demographics" ? "kiosk-contact-panel" : ""} relative isolate min-h-0 rounded-[30px] border border-[#e7d9c7] bg-[#fffaf1] p-6 shadow-[0_25px_65px_rgba(108,35,35,.12)] sm:p-9 lg:p-11 ${
                 isLongFormStage
                   ? "kiosk-long-form-panel flex h-full flex-col overflow-hidden"
                   : "kiosk-card-scroll h-full overflow-y-auto overscroll-contain"
@@ -1504,12 +1504,12 @@ export function CheckInFlow() {
             {screen === "demographics" && (
               <div className="kiosk-fade relative">
                 {renderBack()}
-                <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
+                <h2 className="kiosk-contact-heading mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
                   {content.details.heading}
                 </h2>
 
                 <div
-                  className="mb-7 rounded-2xl border border-[#e7d9c7] bg-[#f8efe3] p-5"
+                  className="kiosk-contact-identity mb-7 rounded-2xl border border-[#e7d9c7] bg-[#f8efe3] p-5"
                   data-testid="identity-summary"
                   role="group"
                   aria-label="Verified identity information"
@@ -1518,7 +1518,7 @@ export function CheckInFlow() {
                     <BadgeCheck size={16} className="text-[#316148]" />
                     Verified identity
                   </div>
-                  <dl className="grid gap-x-5 gap-y-4 sm:grid-cols-2">
+                  <dl className="grid gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
                     {[
                       ["First name", session?.student.firstName, "text-identity-first-name"],
                       ["Last name", session?.student.lastName, "text-identity-last-name"],
@@ -1535,8 +1535,8 @@ export function CheckInFlow() {
                   </dl>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="sm:col-span-2">
+                <div className="kiosk-contact-fields grid gap-4 sm:grid-cols-2 lg:grid-cols-6 lg:gap-3">
+                  <div className="sm:col-span-2 lg:col-span-3">
                     <label htmlFor="demo-address-1" className="mb-2 block text-sm font-bold text-[#632f2f]">Address line 1</label>
                     <input
                       id="demo-address-1"
@@ -1548,7 +1548,7 @@ export function CheckInFlow() {
                       className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
                     />
                   </div>
-                  <div className="sm:col-span-2">
+                  <div className="sm:col-span-2 lg:col-span-3">
                     <label htmlFor="demo-address-2" className="mb-2 block text-sm font-bold text-[#632f2f]">Address line 2</label>
                     <input
                       id="demo-address-2"
@@ -1561,20 +1561,21 @@ export function CheckInFlow() {
                       className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
                     />
                   </div>
-                  <div>
-                    <label htmlFor="demo-city" className="mb-2 block text-sm font-bold text-[#632f2f]">City</label>
-                    <input
-                      id="demo-city"
-                      type="text"
-                      autoComplete="address-level2"
-                      data-testid="input-city"
-                      value={city}
-                      onChange={(e) => { setCity(e.target.value); clearError(); }}
-                      className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
-                    />
-                  </div>
-                  <div className="grid grid-cols-[.65fr_1fr] gap-3">
-                    <div>
+                  <div className="sm:col-span-2 sm:grid sm:grid-cols-2 sm:gap-4 lg:grid-cols-[minmax(0,1fr)_4.25rem_6rem_minmax(0,1fr)] lg:gap-3">
+                    <div className="sm:col-span-1 lg:col-span-1">
+                      <label htmlFor="demo-city" className="mb-2 block text-sm font-bold text-[#632f2f]">City</label>
+                      <input
+                        id="demo-city"
+                        type="text"
+                        autoComplete="address-level2"
+                        data-testid="input-city"
+                        value={city}
+                        onChange={(e) => { setCity(e.target.value); clearError(); }}
+                        className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 sm:col-span-1 lg:contents">
+                      <div className="lg:col-span-1">
                       <label htmlFor="demo-state" className="mb-2 block text-sm font-bold text-[#632f2f]">State</label>
                       <input
                         id="demo-state"
@@ -1586,8 +1587,8 @@ export function CheckInFlow() {
                         onChange={(e) => { setState(e.target.value.toUpperCase()); clearError(); }}
                         className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold uppercase text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
                       />
-                    </div>
-                    <div>
+                      </div>
+                      <div className="lg:col-span-1">
                       <label htmlFor="demo-zip" className="mb-2 block text-sm font-bold text-[#632f2f]">ZIP</label>
                       <input
                         id="demo-zip"
@@ -1599,24 +1600,25 @@ export function CheckInFlow() {
                         onChange={(e) => { setZip(e.target.value); clearError(); }}
                         className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
                       />
+                      </div>
                     </div>
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label htmlFor="demo-phone" className="mb-2 block text-sm font-bold text-[#632f2f]">Mobile phone</label>
-                    <input
-                      id="demo-phone"
-                      type="tel"
-                      data-testid="input-phone"
-                      value={phone}
-                      onChange={(e) => { setPhone(e.target.value); clearError(); }}
-                      className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
-                    />
+                    <div className="sm:col-span-2 lg:col-span-1">
+                      <label htmlFor="demo-phone" className="mb-2 block text-sm font-bold text-[#632f2f]">Mobile phone</label>
+                      <input
+                        id="demo-phone"
+                        type="tel"
+                        data-testid="input-phone"
+                        value={phone}
+                        onChange={(e) => { setPhone(e.target.value); clearError(); }}
+                        className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 {renderError()}
 
-                <div className="mt-8">
+                <div className="kiosk-contact-actions mt-8">
                   {primaryButton(
                      content.details.continueButton,
                     continueDemographics,

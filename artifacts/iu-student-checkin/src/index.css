@@ -98,6 +98,46 @@
 .kiosk-completion-floor-accent {
   animation: kiosk-completion-floor-accent 10s cubic-bezier(.22, 1, .36, 1) 1 both;
 }
+@media (max-height: 850px) and (min-width: 900px) {
+  .kiosk-contact-panel {
+    padding: 1.25rem 2.5rem 1rem;
+  }
+  .kiosk-contact-panel .kiosk-back-button {
+    min-height: 2rem;
+    margin-bottom: .5rem;
+  }
+  .kiosk-contact-panel .kiosk-contact-heading {
+    margin-bottom: .75rem;
+  }
+  .kiosk-contact-panel .kiosk-contact-identity {
+    margin-bottom: .75rem;
+    padding: .75rem 1rem;
+  }
+  .kiosk-contact-panel .kiosk-contact-identity > div:first-child {
+    margin-bottom: .45rem;
+  }
+  .kiosk-contact-panel .kiosk-contact-identity dl {
+    row-gap: .4rem;
+  }
+  .kiosk-contact-panel .kiosk-contact-identity dd {
+    margin-top: .15rem;
+  }
+  .kiosk-contact-panel .kiosk-contact-fields {
+    row-gap: .5rem;
+  }
+  .kiosk-contact-panel .kiosk-contact-fields label {
+    margin-bottom: .15rem;
+  }
+  .kiosk-contact-panel .kiosk-contact-fields input {
+    min-height: 2.75rem;
+  }
+  .kiosk-contact-panel .kiosk-contact-actions {
+    margin-top: .75rem;
+  }
+  .kiosk-contact-panel .kiosk-contact-actions button {
+    min-height: 2.75rem;
+  }
+}
 @keyframes kiosk-reveal { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
 @keyframes kiosk-card { from { opacity: 0; transform: translateY(16px) scale(.987) } to { opacity: 1; transform: translateY(0) scale(1) } }
 @keyframes kiosk-fade { from { opacity: 0; transform: translateX(9px) } to { opacity: 1; transform: translateX(0) } }
