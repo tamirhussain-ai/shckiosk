@@ -1103,7 +1103,7 @@ export function CheckInFlow() {
                   {content.complete.kioskFloorPrefix} {completion?.kioskFloor || content.complete.destinationFallback}.
                 </p>
                 <h1
-                  className="kiosk-completion-floor-heading kiosk-completion-floor-pulse max-w-full overflow-hidden font-semibold uppercase leading-[.82] tracking-[-.08em] text-[#990000] font-serif"
+                   className="kiosk-completion-floor-heading kiosk-completion-floor-pulse max-w-full font-semibold uppercase leading-[.82] tracking-[-.08em] text-[#990000] font-serif"
                   data-testid="text-floor"
                   aria-label={completionFloorLabel}
                 >

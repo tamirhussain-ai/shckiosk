@@ -144,7 +144,12 @@
   .kiosk-long-form-panel {
     padding: 2rem 2.5rem;
   }
-  .kiosk-completion-panel { min-height: 540px; }
+  .kiosk-completion-panel {
+    min-height: 540px;
+    justify-content: flex-start;
+    padding-top: .75rem;
+    padding-bottom: 1.5rem;
+  }
   .kiosk-completion-floor-heading {
     font-size: clamp(3.6rem, min(8.6vw, 18cqi), 7.5rem);
   }
