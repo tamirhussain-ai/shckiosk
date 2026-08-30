@@ -288,6 +288,13 @@ function formatDateOfBirth(input: string) {
   return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
 }
 
+function formatPhoneNumber(input: string) {
+  const digits = input.replace(/\D/g, "").slice(0, 10);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
+
 export function CheckInFlow() {
   const previewMode = isPreviewMode();
   const initialScreen = previewMode ? getPreviewScreen() : "welcome";
@@ -347,7 +354,7 @@ export function CheckInFlow() {
   // Sync demographics from session when fetched
   useEffect(() => {
     if (session?.student) {
-      setPhone(session.student.phone || "");
+      setPhone(formatPhoneNumber(session.student.phone || ""));
       setAddressLine1(session.student.addressLine1 || "");
       setAddressLine2(session.student.addressLine2 || "");
       setCity(session.student.city || "");
@@ -1536,7 +1543,7 @@ export function CheckInFlow() {
                 </div>
 
                 <div className="kiosk-contact-fields grid gap-4 sm:grid-cols-4 lg:grid-cols-[minmax(0,1.4fr)_4.25rem_6.25rem_minmax(0,1.6fr)] lg:gap-3">
-                  <div className="sm:col-span-4 lg:col-span-2">
+                  <div className="sm:col-span-4 lg:col-span-4">
                     <label htmlFor="demo-address-1" className="mb-2 block text-sm font-bold text-[#632f2f]">Address line 1</label>
                     <input
                       id="demo-address-1"
@@ -1548,7 +1555,7 @@ export function CheckInFlow() {
                       className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
                     />
                   </div>
-                  <div className="sm:col-span-4 lg:col-span-2">
+                  <div className="sm:col-span-4 lg:col-span-4">
                     <label htmlFor="demo-address-2" className="mb-2 block text-sm font-bold text-[#632f2f]">Address line 2</label>
                     <input
                       id="demo-address-2"
@@ -1606,7 +1613,7 @@ export function CheckInFlow() {
                         type="tel"
                         data-testid="input-phone"
                         value={phone}
-                        onChange={(e) => { setPhone(e.target.value); clearError(); }}
+                        onChange={(e) => { setPhone(formatPhoneNumber(e.target.value)); clearError(); }}
                         className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
                       />
                   </div>
