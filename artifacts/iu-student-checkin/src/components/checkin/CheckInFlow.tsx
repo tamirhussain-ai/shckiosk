@@ -700,7 +700,7 @@ export function CheckInFlow() {
       </header>
 
       <div
-        className="pointer-events-none absolute left-[75%] top-[55%] z-0 -translate-x-1/2 -translate-y-1/2"
+        className="pointer-events-none absolute left-[25%] top-[55%] z-0 -translate-x-1/2 -translate-y-1/2"
         aria-hidden="true"
       >
         <img
