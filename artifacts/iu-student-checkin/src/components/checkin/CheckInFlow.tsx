@@ -1535,8 +1535,8 @@ export function CheckInFlow() {
                   </dl>
                 </div>
 
-                <div className="kiosk-contact-fields grid gap-4 sm:grid-cols-2 lg:grid-cols-6 lg:gap-3">
-                  <div className="sm:col-span-2 lg:col-span-3">
+                <div className="kiosk-contact-fields grid gap-4 sm:grid-cols-4 lg:grid-cols-[minmax(0,1.4fr)_4.25rem_6.25rem_minmax(0,1.6fr)] lg:gap-3">
+                  <div className="sm:col-span-4 lg:col-span-2">
                     <label htmlFor="demo-address-1" className="mb-2 block text-sm font-bold text-[#632f2f]">Address line 1</label>
                     <input
                       id="demo-address-1"
@@ -1548,7 +1548,7 @@ export function CheckInFlow() {
                       className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
                     />
                   </div>
-                  <div className="sm:col-span-2 lg:col-span-3">
+                  <div className="sm:col-span-4 lg:col-span-2">
                     <label htmlFor="demo-address-2" className="mb-2 block text-sm font-bold text-[#632f2f]">Address line 2</label>
                     <input
                       id="demo-address-2"
@@ -1561,8 +1561,7 @@ export function CheckInFlow() {
                       className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
                     />
                   </div>
-                  <div className="sm:col-span-2 sm:grid sm:grid-cols-2 sm:gap-4 lg:grid-cols-[minmax(0,1fr)_4.25rem_6rem_minmax(0,1fr)] lg:gap-3">
-                    <div className="sm:col-span-1 lg:col-span-1">
+                  <div className="sm:col-span-2 lg:col-span-1">
                       <label htmlFor="demo-city" className="mb-2 block text-sm font-bold text-[#632f2f]">City</label>
                       <input
                         id="demo-city"
@@ -1573,9 +1572,8 @@ export function CheckInFlow() {
                         onChange={(e) => { setCity(e.target.value); clearError(); }}
                         className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
                       />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 sm:col-span-1 lg:contents">
-                      <div className="lg:col-span-1">
+                  </div>
+                  <div className="sm:col-span-1 lg:col-span-1">
                       <label htmlFor="demo-state" className="mb-2 block text-sm font-bold text-[#632f2f]">State</label>
                       <input
                         id="demo-state"
@@ -1587,8 +1585,8 @@ export function CheckInFlow() {
                         onChange={(e) => { setState(e.target.value.toUpperCase()); clearError(); }}
                         className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold uppercase text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
                       />
-                      </div>
-                      <div className="lg:col-span-1">
+                  </div>
+                  <div className="sm:col-span-1 lg:col-span-1">
                       <label htmlFor="demo-zip" className="mb-2 block text-sm font-bold text-[#632f2f]">ZIP</label>
                       <input
                         id="demo-zip"
@@ -1600,9 +1598,8 @@ export function CheckInFlow() {
                         onChange={(e) => { setZip(e.target.value); clearError(); }}
                         className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
                       />
-                      </div>
-                    </div>
-                    <div className="sm:col-span-2 lg:col-span-1">
+                  </div>
+                  <div className="sm:col-span-2 lg:col-span-1">
                       <label htmlFor="demo-phone" className="mb-2 block text-sm font-bold text-[#632f2f]">Mobile phone</label>
                       <input
                         id="demo-phone"
@@ -1612,7 +1609,6 @@ export function CheckInFlow() {
                         onChange={(e) => { setPhone(e.target.value); clearError(); }}
                         className="min-h-12 w-full rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-4 text-[15px] font-semibold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
                       />
-                    </div>
                   </div>
                 </div>
 
