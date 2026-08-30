@@ -42,7 +42,7 @@
 }
 
 .completion-motion-glow {
-  animation: completion-soft-glow 3.2s ease-out 1 both;
+  animation: completion-soft-glow 4.8s ease-out 1 both;
 }
 
 .completion-motion-pulse {
@@ -50,6 +50,7 @@
   transform-origin: left center;
 }
 
+.completion-motion-destination.completion-motion-waiting,
 .completion-motion-destination .completion-motion-waiting {
   animation: completion-destination-emphasis 2.8s ease-out 1 both;
 }
@@ -104,6 +105,7 @@
 @media (prefers-reduced-motion: reduce) {
   .completion-motion-glow,
   .completion-motion-pulse,
+  .completion-motion-destination.completion-motion-waiting,
   .completion-motion-destination .completion-motion-waiting,
   .completion-motion-destination .completion-motion-pin {
     animation: none;

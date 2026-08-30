@@ -1,2 +1,3 @@
 - [Check-in verification boundary](checkin-verification-boundary.md) — no OTP screen in the demo, but keep server authorization state and the legacy verification API compatible.
 - [Kiosk API client sync](kiosk-api-client-sync.md) — regenerate OpenAPI clients after content-contract changes before trusting frontend typechecks or Vite reloads.
+- [Canvas motion replay](canvas-motion-replay.md) — Canvas selection does not reload one-time animations; motion comparisons need visible replay controls.
