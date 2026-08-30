@@ -79,7 +79,7 @@ const stageOrder: CheckInStage[] = [
 const providerAccounts = {
   mayaPatel: {
     displayName: "Maya Patel, MD",
-    addressLine2: "First floor · Primary Care waiting area",
+    addressLine2: "First floor · Care team",
   },
   jordanLewis: {
     displayName: "Jordan Lewis, NP",
@@ -175,7 +175,7 @@ class MockCheckInAdapter implements CheckInAdapter {
           date: "Today, October 14",
           time: "10:30 AM",
           provider: providerAccounts.mayaPatel.displayName,
-          type: "Primary care visit",
+          type: "Care team visit",
           location: "Student Health Center · First floor",
           addressLine2: providerAccounts.mayaPatel.addressLine2,
         },
@@ -364,14 +364,15 @@ class MockCheckInAdapter implements CheckInAdapter {
     if (!floorLabel || !waitingArea) return null;
     const isCurrentFloor = floorLabel.toLowerCase() === kioskFloor.toLowerCase();
     this.sessions.delete(sessionId);
+    const directions = isCurrentFloor
+      ? `You’re on the right floor. Please have a seat in the ${waitingArea} waiting area.`
+      : `Proceed to the ${floorLabel.toLowerCase()} waiting area.`;
     return {
       completed: true,
       nextStep: isCurrentFloor
-        ? `You’re on the right floor. Take a seat in the ${waitingArea}.`
-        : `Proceed to the ${floorLabel} and ${waitingArea}.`,
-      directions: isCurrentFloor
-        ? `You’re on the right floor. Take a seat in the ${waitingArea}.`
-        : `Proceed to the ${floorLabel.toLowerCase()} and ${waitingArea}.`,
+        ? directions
+        : directions,
+      directions,
       provider: appointment.provider,
       visitType: appointment.type,
       appointmentTime: appointment.time,

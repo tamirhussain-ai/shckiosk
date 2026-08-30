@@ -719,7 +719,10 @@ export function CheckInFlow() {
                   className="mb-5 text-sm font-bold uppercase tracking-[.16em] text-[#806960]"
                   data-testid="text-kiosk-floor"
                 >
-                  This kiosk is on the {completion?.kioskFloor || "Second floor"}
+                  This kiosk is on the {completion?.kioskFloor || "Second floor"}.
+                </p>
+                <p className="mb-7 max-w-[560px] text-[17px] font-bold leading-7 text-[#632f2f]" data-testid="text-directions">
+                  {completion?.directions} Your Care team is expecting you.
                 </p>
                 <h1
                   className="max-w-[650px] text-[clamp(4.6rem,10vw,8.8rem)] font-semibold uppercase leading-[.82] tracking-[-.09em] text-[#990000] font-serif"
@@ -733,12 +736,6 @@ export function CheckInFlow() {
                     {completion?.waitingArea || "Waiting area"}
                   </p>
                 </div>
-                <p className="mt-7 max-w-[560px] text-[17px] font-bold leading-7 text-[#632f2f]">
-                  Your care team is expecting you.
-                </p>
-                <p className="mt-2 max-w-[560px] text-[17px] leading-7 text-[#806960]" data-testid="text-directions">
-                  {completion?.directions}
-                </p>
               </div>
             ) : screen === "checking" ? (
                <div className="max-w-[560px]">
