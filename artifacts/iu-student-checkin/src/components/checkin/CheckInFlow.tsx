@@ -14,7 +14,6 @@ import {
   CreditCard,
   FileCheck2,
   Globe2,
-  HeartPulse,
   HelpCircle,
   Info,
   LockKeyhole,
@@ -439,7 +438,11 @@ export function CheckInFlow() {
       <header className="relative z-20 flex items-center justify-between px-6 py-5 sm:px-10 lg:px-14">
         <div className="flex items-center gap-3.5">
           <div className="flex h-11 w-11 items-center justify-center rounded-[15px] bg-[#990000] text-[#fff9ed] shadow-[0_8px_20px_rgba(153,0,0,.16)]">
-            <HeartPulse size={23} strokeWidth={2.4} />
+              <img
+                src="/iu-trident-reverse.png"
+                alt="Indiana University trident"
+                className="h-8 w-8 object-contain"
+              />
           </div>
           <div>
             <p className="text-[17px] font-bold tracking-[-.035em] text-[#990000]">
