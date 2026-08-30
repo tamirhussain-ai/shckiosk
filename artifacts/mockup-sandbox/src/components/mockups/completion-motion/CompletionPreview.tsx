@@ -75,7 +75,8 @@ export function CompletionPreview({ motion }: { motion: Motion }) {
             <h1
               className={`max-w-[650px] text-[clamp(4.6rem,10vw,8.8rem)] font-semibold uppercase leading-[.82] tracking-[-.09em] text-[#990000] font-serif ${floorClass}`}
             >
-              First floor
+              <span className="block">First</span>
+              <span className="completion-motion-floor-accent block">floor</span>
             </h1>
             <div className={`completion-motion-waiting mt-7 flex items-center gap-4 border-l-[5px] border-[#990000] pl-5 ${motion === 'destination' ? 'completion-motion-destination' : ''}`}>
               <MapPin size={32} className={`completion-motion-pin shrink-0 text-[#990000] ${motion === 'destination' ? 'completion-motion-pin' : ''}`} />

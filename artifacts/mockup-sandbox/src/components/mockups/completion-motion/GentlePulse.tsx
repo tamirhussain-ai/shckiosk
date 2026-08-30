@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { CompletionPreview } from './CompletionPreview';
 import './ReplayControl.css';
+import './GentlePulse.css';
 
 export function GentlePulse() {
   const [replayKey, setReplayKey] = useState(0);
 
   return (
-    <div className="completion-motion-frame">
+    <div className="completion-motion-frame gentle-pulse-frame">
       <CompletionPreview key={replayKey} motion="pulse" />
       <button
         type="button"
@@ -16,7 +17,7 @@ export function GentlePulse() {
         aria-label="Replay the gentle pulse animation"
       >
         <RotateCcw size={15} />
-        Replay pulse
+        Replay 10-second pulse
       </button>
     </div>
   );

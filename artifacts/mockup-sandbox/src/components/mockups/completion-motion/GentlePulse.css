@@ -1,0 +1,66 @@
+.gentle-pulse-frame .completion-motion-pulse {
+  animation: gentle-pulse-attention 10s cubic-bezier(.22, 1, .36, 1) 1 both;
+  transform-origin: left center;
+  will-change: transform, color, text-shadow;
+}
+
+.gentle-pulse-frame .completion-motion-pulse .completion-motion-floor-accent {
+  animation: gentle-pulse-accent 10s cubic-bezier(.22, 1, .36, 1) 1 both;
+}
+
+@keyframes gentle-pulse-attention {
+  0%, 100% {
+    color: #990000;
+    text-shadow: 0 0 0 rgba(153, 0, 0, 0);
+    transform: scale(1);
+  }
+  13% {
+    color: #c64535;
+    text-shadow:
+      0 0 12px rgba(198, 69, 53, .25),
+      0 0 34px rgba(189, 91, 72, .18);
+    transform: scale(1.055);
+  }
+  28% {
+    color: #990000;
+    text-shadow: 0 0 0 rgba(153, 0, 0, 0);
+    transform: scale(1);
+  }
+  48% {
+    color: #7d0000;
+    text-shadow:
+      0 0 14px rgba(125, 0, 0, .24),
+      0 0 40px rgba(189, 91, 72, .2);
+    transform: scale(1.075);
+  }
+  68% {
+    color: #a91f17;
+    text-shadow: 0 0 9px rgba(169, 31, 23, .16);
+    transform: scale(1.018);
+  }
+}
+
+@keyframes gentle-pulse-accent {
+  0%, 100% {
+    color: #bd5b48;
+  }
+  13% {
+    color: #e18469;
+  }
+  28% {
+    color: #bd5b48;
+  }
+  48% {
+    color: #990000;
+  }
+  68% {
+    color: #c64535;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gentle-pulse-frame .completion-motion-pulse,
+  .gentle-pulse-frame .completion-motion-pulse .completion-motion-floor-accent {
+    animation: none;
+  }
+}
