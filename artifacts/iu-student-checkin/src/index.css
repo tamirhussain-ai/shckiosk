@@ -67,6 +67,13 @@
 .kiosk-card { animation: kiosk-card .65s cubic-bezier(.22,.8,.32,1) .05s both; }
 .kiosk-fade { animation: kiosk-fade .32s ease both; }
 .kiosk-pulse { animation: kiosk-pulse 1.15s ease-in-out infinite; }
+.kiosk-completion-copy { container-type: inline-size; }
+.kiosk-completion-floor-heading {
+  font-size: clamp(3.25rem, 8.5vw, 8.8rem);
+  font-size: clamp(3.25rem, min(10vw, 18cqi), 8.8rem);
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
 .kiosk-completion-floor-pulse {
   animation: kiosk-completion-floor-pulse 10s cubic-bezier(.22, 1, .36, 1) 1 both;
   transform-origin: left center;

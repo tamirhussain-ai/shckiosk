@@ -81,7 +81,7 @@ export const kioskContentDefaults: KioskContent = {
     providerLabel: "Provider",
     visitLabel: "Visit",
     timeLabel: "Time",
-    doneButton: "Done",
+    doneButton: "Complete",
     demoNotice: "Demo / sample data only. No patient information is displayed.",
   },
 };

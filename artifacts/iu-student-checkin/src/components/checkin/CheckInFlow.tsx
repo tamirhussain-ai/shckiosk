@@ -855,7 +855,7 @@ export function CheckInFlow() {
         )}
 
         <div className={`grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,.82fr)_minmax(540px,1.18fr)] lg:gap-16 ${isJourney ? "lg:items-start" : "lg:items-center"}`}>
-          <section className="kiosk-reveal relative z-10 min-w-0 flex flex-col justify-center lg:min-h-[590px]">
+          <section className="kiosk-reveal kiosk-completion-copy relative z-10 min-w-0 flex flex-col justify-center lg:min-h-[590px]">
             {screen === "welcome" ? (
               <div className="max-w-[610px]">
                 <h1
@@ -895,7 +895,7 @@ export function CheckInFlow() {
                   {completion?.directions} {content.complete.directionsSuffix}
                 </p>
                 <h1
-                  className="kiosk-completion-floor-pulse max-w-[650px] text-[clamp(4.6rem,10vw,8.8rem)] font-semibold uppercase leading-[.82] tracking-[-.09em] text-[#990000] font-serif"
+                  className="kiosk-completion-floor-heading kiosk-completion-floor-pulse max-w-full overflow-hidden font-semibold uppercase leading-[.82] tracking-[-.09em] text-[#990000] font-serif"
                   data-testid="text-floor"
                   aria-label={completionFloorLabel}
                 >
@@ -1617,10 +1617,9 @@ export function CheckInFlow() {
                   type="button"
                   data-testid="button-finish"
                   onClick={startOver}
-                  className="mt-auto flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#990000] px-6 text-[16px] font-bold text-[#fff9ed] shadow-[0_10px_22px_rgba(122,0,0,.18)] transition hover:-translate-y-0.5 hover:bg-[#7d0000] focus:outline-none focus:ring-4 focus:ring-[#990000]/20"
+                  className="mt-auto flex min-h-14 w-full items-center justify-center rounded-2xl bg-[#990000] px-6 text-[16px] font-bold text-[#fff9ed] shadow-[0_10px_22px_rgba(122,0,0,.18)] transition hover:-translate-y-0.5 hover:bg-[#7d0000] focus:outline-none focus:ring-4 focus:ring-[#990000]/20"
                 >
                   {content.complete.doneButton}
-                  <ArrowRight size={18} />
                 </button>
                 <p className="mt-4 text-center text-[11px] leading-5 text-[#806960]">
                   {content.complete.demoNotice}
