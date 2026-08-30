@@ -624,7 +624,7 @@ export function CheckInFlow() {
                   className="max-w-[590px] text-[clamp(3.15rem,5.4vw,5.55rem)] font-semibold leading-[.95] tracking-[-.07em] text-[#990000] font-serif"
                 >
                   Welcome, Hoosier.
-                  <span className="block text-[#bd5b48]">We're glad you're here.</span>
+                  <span className="block text-[#bd5b48]">Thank you for trusting us with your care.</span>
                 </h1>
                 <p className="mt-7 max-w-[480px] text-[17px] leading-7 text-[#806960]">
                   Check in for your visit in a few simple steps. Take your time — your health information stays private throughout.
