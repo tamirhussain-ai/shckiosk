@@ -499,18 +499,14 @@ export function CheckInFlow() {
         <div className="flex items-center gap-3.5">
           <div className="flex h-11 w-11 items-center justify-center rounded-[15px] bg-[#990000] text-[#fff9ed] shadow-[0_8px_20px_rgba(153,0,0,.16)]">
               <img
-                src="/iu-trident-reverse.png"
+                src="/iu-trident-reverse-cropped.png"
                 alt="Indiana University trident"
-                className="h-8 w-8 object-contain"
+                className="h-9 w-9 object-contain"
               />
           </div>
           <div>
             <p className="text-[17px] font-bold tracking-[-.035em] text-[#990000]">
               IU Student Health Center
-            </p>
-            <p className="mt-0.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[.14em] text-[#8d756b]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#bd5b48]" />
-              Bloomington campus
             </p>
             <p data-testid="status-demo" className="mt-1 text-[10px] font-bold uppercase tracking-[.12em] text-[#9a5147]">
               Demo mode · sample data only
@@ -789,10 +785,13 @@ export function CheckInFlow() {
             )}
           </section>
 
-          <section className="kiosk-card relative min-h-[580px] rounded-[30px] border border-[#e7d9c7] bg-[#fffaf1] p-6 shadow-[0_25px_65px_rgba(108,35,35,.12)] sm:p-9 lg:min-h-[610px] lg:p-11">
-            <div className="absolute right-0 top-0 h-32 w-32 overflow-hidden rounded-tr-[30px]">
-              <div className="absolute -right-16 -top-16 h-36 w-36 rounded-full border-[18px] border-[#f4e6d5]" />
-              <div className="absolute -right-10 -top-10 h-20 w-20 rounded-full border-[12px] border-[#f2d9bd]" />
+          <section className="kiosk-card relative isolate min-h-[580px] rounded-[30px] border border-[#e7d9c7] bg-[#fffaf1] p-6 shadow-[0_25px_65px_rgba(108,35,35,.12)] sm:p-9 lg:min-h-[610px] lg:p-11">
+            <div className="pointer-events-none absolute right-0 top-0 z-0 h-48 w-48 overflow-hidden rounded-tr-[30px]" aria-hidden="true">
+              <img
+                src="/iu-trident-crimson-cropped.png"
+                alt=""
+                className="absolute -right-2 -top-3 h-44 w-40 object-contain opacity-[0.065]"
+              />
             </div>
 
             {screen === "welcome" && (
