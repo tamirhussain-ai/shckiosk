@@ -69,8 +69,8 @@
 .kiosk-pulse { animation: kiosk-pulse 1.15s ease-in-out infinite; }
 .kiosk-completion-copy { container-type: inline-size; }
 .kiosk-completion-floor-heading {
-  font-size: clamp(3.5rem, 9vw, 9.2rem);
-  font-size: clamp(3.5rem, min(10vw, 20cqi), 9.2rem);
+  font-size: clamp(4.2rem, 10.8vw, 11.04rem);
+  font-size: clamp(4.2rem, min(12vw, 24cqi), 11.04rem);
   max-width: 100%;
   overflow-wrap: break-word;
 }

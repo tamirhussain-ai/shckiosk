@@ -903,6 +903,8 @@ export const IdentifyCheckInResponse = zod.object({
   "student": zod.object({
   "firstName": zod.string(),
   "lastName": zod.string(),
+  "universityId": zod.string(),
+  "dateOfBirth": zod.string(),
   "phone": zod.string(),
   "email": zod.string(),
   "addressLine1": zod.string(),
@@ -1009,6 +1011,8 @@ export const SaveCheckInAppointmentResponse = zod.object({
   "student": zod.object({
   "firstName": zod.string(),
   "lastName": zod.string(),
+  "universityId": zod.string(),
+  "dateOfBirth": zod.string(),
   "phone": zod.string(),
   "email": zod.string(),
   "addressLine1": zod.string(),
@@ -1096,6 +1100,8 @@ export const SaveCheckInDemographicsResponse = zod.object({
   "student": zod.object({
   "firstName": zod.string(),
   "lastName": zod.string(),
+  "universityId": zod.string(),
+  "dateOfBirth": zod.string(),
   "phone": zod.string(),
   "email": zod.string(),
   "addressLine1": zod.string(),
@@ -1182,6 +1188,8 @@ export const SaveCheckInCoverageResponse = zod.object({
   "student": zod.object({
   "firstName": zod.string(),
   "lastName": zod.string(),
+  "universityId": zod.string(),
+  "dateOfBirth": zod.string(),
   "phone": zod.string(),
   "email": zod.string(),
   "addressLine1": zod.string(),
@@ -1278,6 +1286,8 @@ export const SaveCheckInConsentResponse = zod.object({
   "student": zod.object({
   "firstName": zod.string(),
   "lastName": zod.string(),
+  "universityId": zod.string(),
+  "dateOfBirth": zod.string(),
   "phone": zod.string(),
   "email": zod.string(),
   "addressLine1": zod.string(),
@@ -1370,6 +1380,8 @@ export const SaveCheckInQuestionnaireResponse = zod.object({
   "student": zod.object({
   "firstName": zod.string(),
   "lastName": zod.string(),
+  "universityId": zod.string(),
+  "dateOfBirth": zod.string(),
   "phone": zod.string(),
   "email": zod.string(),
   "addressLine1": zod.string(),
@@ -1452,6 +1464,8 @@ export const SaveCheckInHistoryResponse = zod.object({
   "student": zod.object({
   "firstName": zod.string(),
   "lastName": zod.string(),
+  "universityId": zod.string(),
+  "dateOfBirth": zod.string(),
   "phone": zod.string(),
   "email": zod.string(),
   "addressLine1": zod.string(),

@@ -575,6 +575,10 @@ components:
           type: string
         lastName:
           type: string
+        universityId:
+          type: string
+        dateOfBirth:
+          type: string
         phone:
           type: string
         email:
@@ -589,7 +593,7 @@ components:
           type: string
         zip:
           type: string
-      required: [firstName, lastName, phone, email, addressLine1, addressLine2, city, state, zip]
+      required: [firstName, lastName, universityId, dateOfBirth, phone, email, addressLine1, addressLine2, city, state, zip]
     CheckInSession:
       type: object
       properties:

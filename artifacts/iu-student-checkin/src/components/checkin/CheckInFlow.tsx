@@ -99,8 +99,8 @@ const questions = [
 ];
 
 const journeySteps = [
+  { id: "demographics", label: "Contact" },
   { id: "appointment", label: "Visit" },
-  { id: "demographics", label: "Details" },
   { id: "coverage", label: "Coverage" },
   { id: "consent", label: "Consent" },
   { id: "questionnaire", label: "Questions" },
@@ -125,6 +125,8 @@ const previewSession: CheckInSession = {
   student: {
     firstName: "Alex",
     lastName: "Hoosier",
+    universityId: "iu123456",
+    dateOfBirth: "10/14/2003",
     phone: "812-555-0199",
     email: "alex.hoosier@example.edu",
     addressLine1: "107 S Indiana Avenue",
@@ -368,7 +370,7 @@ export function CheckInFlow() {
     if (previewMode) {
       setSession(previewSession);
       setSelectedAppointment(previewSession.appointments[0]?.id ?? "");
-      setScreen("appointment");
+      setScreen("demographics");
       return;
     }
     
@@ -385,7 +387,7 @@ export function CheckInFlow() {
         setSelectedAppointment(data.appointments?.[0]?.id ?? "");
         setShowSchedulingHandoff(false);
         setFrontDeskSelected(false);
-        setScreen("appointment");
+        setScreen("demographics");
       },
       onError: (err: unknown) => {
         setError(getApiErrorMessage(err, "We couldn't find a matching demo visit. Use the sample details shown on this screen."));
@@ -408,9 +410,9 @@ export function CheckInFlow() {
       return;
     }
     const previous: Partial<Record<Screen, Screen>> = {
-      appointment: "welcome",
-      demographics: "appointment",
-      coverage: "demographics",
+      appointment: "demographics",
+      demographics: "welcome",
+      coverage: "appointment",
       consent: "coverage",
       questionnaire: "consent",
       checking: "questionnaire",
@@ -478,7 +480,7 @@ export function CheckInFlow() {
     clearError();
 
     if (previewMode) {
-      setScreen("demographics");
+      setScreen("coverage");
       return;
     }
 
@@ -488,7 +490,7 @@ export function CheckInFlow() {
     }, {
       onSuccess: (data) => {
         setSession(data);
-        setScreen("demographics");
+        setScreen("coverage");
       },
       onError: () => setError("Failed to save appointment. Please try again.")
     });
@@ -509,7 +511,7 @@ export function CheckInFlow() {
     clearError();
 
     if (previewMode) {
-      setScreen("coverage");
+      setScreen("appointment");
       return;
     }
 
@@ -519,7 +521,7 @@ export function CheckInFlow() {
     }, {
       onSuccess: (data) => {
         setSession(data);
-        setScreen("coverage");
+        setScreen("appointment");
       },
       onError: () => setError("Failed to save details. Please try again.")
     });
@@ -1326,7 +1328,34 @@ export function CheckInFlow() {
                 <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
                   {content.details.heading}
                 </h2>
-                
+
+                <div
+                  className="mb-7 rounded-2xl border border-[#e7d9c7] bg-[#f8efe3] p-5"
+                  data-testid="identity-summary"
+                  role="group"
+                  aria-label="Verified identity information"
+                >
+                  <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-[.14em] text-[#806960]">
+                    <BadgeCheck size={16} className="text-[#316148]" />
+                    Verified identity
+                  </div>
+                  <dl className="grid gap-x-5 gap-y-4 sm:grid-cols-2">
+                    {[
+                      ["First name", session?.student.firstName, "text-identity-first-name"],
+                      ["Last name", session?.student.lastName, "text-identity-last-name"],
+                      ["University ID", session?.student.universityId, "text-identity-university-id"],
+                      ["Date of birth", session?.student.dateOfBirth, "text-identity-date-of-birth"],
+                    ].map(([label, detail, testId]) => (
+                      <div key={label}>
+                        <dt className="text-[10px] font-bold uppercase tracking-[.12em] text-[#9a8074]">{label}</dt>
+                        <dd className="mt-1 text-[15px] font-bold text-[#632f2f]" data-testid={testId}>
+                          {detail || "Not provided"}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="sm:col-span-2">
                     <label htmlFor="demo-address-1" className="mb-2 block text-sm font-bold text-[#632f2f]">Address line 1</label>

@@ -498,6 +498,8 @@ export interface Questionnaire {
 export interface StudentProfile {
   firstName: string;
   lastName: string;
+  universityId: string;
+  dateOfBirth: string;
   phone: string;
   email: string;
   addressLine1: string;

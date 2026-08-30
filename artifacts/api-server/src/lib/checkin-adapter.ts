@@ -175,8 +175,8 @@ const isValidQuestionnaireAnswers = (
 
 const stageOrder: CheckInStage[] = [
   "identified",
-  "appointment",
   "demographics",
+  "appointment",
   "coverage",
   "consent",
   "questionnaire",
@@ -393,6 +393,9 @@ const isAtLeast = (record: SessionRecord, stage: CheckInStage) =>
   stageOrder.indexOf(record.stage) >= stageOrder.indexOf(stage);
 
 const invalidateAfter = (record: SessionRecord, stage: CheckInStage) => {
+  if (stageOrder.indexOf(stage) < stageOrder.indexOf("appointment")) {
+    delete record.appointmentId;
+  }
   if (stageOrder.indexOf(stage) < stageOrder.indexOf("coverage")) {
     delete record.coverage;
   }
@@ -441,6 +444,8 @@ class MockCheckInAdapter implements CheckInAdapter {
       student: {
         firstName: "Avery",
         lastName: "Johnson",
+        universityId: "iu123456",
+        dateOfBirth: "10/14/2003",
         phone: "(812) 555-0148",
         email: "avery.johnson@iu.edu",
         addressLine1: "123 Sample Street",
@@ -515,7 +520,7 @@ class MockCheckInAdapter implements CheckInAdapter {
   ): Promise<CheckInSession | null> {
     await wait(180);
     const record = this.sessions.get(sessionId);
-    if (!record || !record.verified || !isAtLeast(record, "identified")) {
+    if (!record || !record.verified || !isAtLeast(record, "demographics")) {
       return null;
     }
     if (
@@ -537,9 +542,9 @@ class MockCheckInAdapter implements CheckInAdapter {
     await wait(180);
     const record = this.sessions.get(sessionId);
     if (
-      !record?.appointmentId ||
+      !record ||
       !record.verified ||
-      !isAtLeast(record, "appointment")
+      !isAtLeast(record, "identified")
     ) {
       return null;
     }
@@ -554,7 +559,13 @@ class MockCheckInAdapter implements CheckInAdapter {
   ): Promise<CheckInSession | null> {
     await wait(180);
     const record = this.sessions.get(sessionId);
-    if (!record || !isAtLeast(record, "demographics")) return null;
+    if (
+      !record ||
+      !record.verified ||
+      !isAtLeast(record, "appointment")
+    ) {
+      return null;
+    }
     if (
       input.coverage === "other" &&
       (!input.insuranceCarrier?.trim() ||
