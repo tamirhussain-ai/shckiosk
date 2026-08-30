@@ -644,7 +644,7 @@ export function CheckInFlow() {
         )}
 
         <div className={`grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,.82fr)_minmax(540px,1.18fr)] lg:gap-16 ${isJourney ? "lg:items-start" : "lg:items-center"}`}>
-          <section className="kiosk-reveal flex flex-col justify-center lg:min-h-[590px]">
+          <section className="kiosk-reveal relative z-10 min-w-0 flex flex-col justify-center lg:min-h-[590px]">
             {screen === "welcome" ? (
               <div className="max-w-[610px]">
                 <h1
