@@ -549,6 +549,17 @@ export function CheckInFlow() {
         </div>
       </header>
 
+      <div
+        className="pointer-events-none absolute left-1/2 top-[55%] z-0 -translate-x-1/2 -translate-y-1/2"
+        aria-hidden="true"
+      >
+        <img
+          src="/iu-trident-crimson-cropped.png"
+          alt=""
+          className="h-[min(62vh,580px)] w-auto max-w-[76vw] object-contain opacity-[0.05] sm:h-[min(72vh,700px)]"
+        />
+      </div>
+
       {showHelp && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-[#3d2626]/35 p-5 backdrop-blur-sm"
@@ -603,7 +614,7 @@ export function CheckInFlow() {
         </div>
       )}
 
-      <div className="mx-auto w-full max-w-[1370px] px-6 pb-9 sm:px-10 lg:px-14 lg:pb-14">
+      <div className="relative z-10 mx-auto w-full max-w-[1370px] px-6 pb-9 sm:px-10 lg:px-14 lg:pb-14">
         {isJourney && (
           <nav
             aria-label="Check-in progress"
@@ -740,14 +751,6 @@ export function CheckInFlow() {
           </section>
 
           <section className="kiosk-card relative isolate min-h-[580px] rounded-[30px] border border-[#e7d9c7] bg-[#fffaf1] p-6 shadow-[0_25px_65px_rgba(108,35,35,.12)] sm:p-9 lg:min-h-[610px] lg:p-11">
-            <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[30px]" aria-hidden="true">
-              <img
-                src="/iu-trident-crimson-cropped.png"
-                alt=""
-                className="absolute right-0 top-0 h-[128%] w-auto translate-x-[12%] object-contain opacity-[0.065]"
-              />
-            </div>
-
             {screen === "welcome" && (
               <div className="kiosk-fade relative">
                 <div className="mb-7">
