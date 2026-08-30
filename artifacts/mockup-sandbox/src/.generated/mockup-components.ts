@@ -2,10 +2,10 @@
 type ModuleMap = Record<string, () => Promise<Record<string, unknown>>>;
 export const modules: ModuleMap = {
   "./components/mockups/completion-confirmation-ticket/ConfirmationTicket.tsx": () => import("../components/mockups/completion-confirmation-ticket/ConfirmationTicket.tsx"),
-  "./components/mockups/completion-destination-hero/DestinationHero.tsx": () => import("../components/mockups/completion-destination-hero/DestinationHero.tsx"),
   "./components/mockups/completion-directions/GiantFloorDirective.tsx": () => import("../components/mockups/completion-directions/GiantFloorDirective.tsx"),
   "./components/mockups/completion-directions/VisitTicketDestination.tsx": () => import("../components/mockups/completion-directions/VisitTicketDestination.tsx"),
   "./components/mockups/completion-directions/WayfindingRoute.tsx": () => import("../components/mockups/completion-directions/WayfindingRoute.tsx"),
+  "./components/mockups/completion-destination-hero/DestinationHero.tsx": () => import("../components/mockups/completion-destination-hero/DestinationHero.tsx"),
   "./components/mockups/completion-motion/CompletionPreview.tsx": () => import("../components/mockups/completion-motion/CompletionPreview.tsx"),
   "./components/mockups/completion-motion/DestinationEmphasis.tsx": () => import("../components/mockups/completion-motion/DestinationEmphasis.tsx"),
   "./components/mockups/completion-motion/GentlePulse.tsx": () => import("../components/mockups/completion-motion/GentlePulse.tsx"),
