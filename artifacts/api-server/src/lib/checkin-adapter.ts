@@ -30,6 +30,8 @@ type SessionRecord = {
   appointmentId?: string;
   coverage?: CoverageSelection["coverage"];
   onFileInsuranceInformation: CheckInSession["onFileInsuranceInformation"];
+  encounterConsentForms: ConsentForm[];
+  encounterQuestionnaires: Questionnaire[];
   consentSubmissions: Map<string, ConsentInput>;
   questionnaireSubmissions: Map<string, QuestionnaireInput>;
   history?: HistoryInput;
@@ -342,11 +344,11 @@ const questionnaireTemplates: Questionnaire[] = [
   },
 ];
 
-const createConsentForms = (): ConsentForm[] =>
-  consentFormTemplates.map((form) => ({ ...form }));
+const cloneConsentForms = (forms: ConsentForm[]): ConsentForm[] =>
+  forms.map((form) => ({ ...form }));
 
-const createQuestionnaires = (): Questionnaire[] =>
-  questionnaireTemplates.map((questionnaire) => ({
+const cloneQuestionnaires = (questionnaires: Questionnaire[]): Questionnaire[] =>
+  questionnaires.map((questionnaire) => ({
     ...questionnaire,
     questions: questionnaire.questions.map((question) => ({
       ...question,
@@ -356,6 +358,67 @@ const createQuestionnaires = (): Questionnaire[] =>
       ? { ...questionnaire.completedAnswers }
       : undefined,
   }));
+
+const createConsentForms = (
+  status: ConsentForm["status"] = "unsigned",
+): ConsentForm[] =>
+  cloneConsentForms(
+    consentFormTemplates.map((form) => ({ ...form, status })),
+  );
+
+const createQuestionnaires = (
+  statusOverrides?: Partial<Record<Questionnaire["id"], Questionnaire["status"]>>,
+): Questionnaire[] =>
+  cloneQuestionnaires(
+    questionnaireTemplates.map((questionnaire) => ({
+      ...questionnaire,
+      status: statusOverrides?.[questionnaire.id] ?? questionnaire.status,
+    })),
+  );
+
+type EncounterRequirements = {
+  consentForms: ConsentForm[];
+  questionnaires: Questionnaire[];
+};
+
+const getEncounterRequirements = (
+  appointmentId: string,
+): EncounterRequirements => {
+  switch (appointmentId) {
+    case "wellness-1415":
+      return { consentForms: createConsentForms(), questionnaires: [] };
+    case "same-day-0900":
+      return {
+        consentForms: [],
+        questionnaires: createQuestionnaires(),
+      };
+    case "annual-review-1545":
+      return {
+        consentForms: createConsentForms("signed"),
+        questionnaires: createQuestionnaires().filter(
+          (questionnaire) => questionnaire.id === "phq-9",
+        ),
+      };
+    case "immunization-1630":
+      return { consentForms: [], questionnaires: [] };
+    default:
+      return {
+        consentForms: createConsentForms(),
+        questionnaires: createQuestionnaires(),
+      };
+  }
+};
+
+const applyEncounterRequirements = (
+  record: SessionRecord,
+  appointmentId: string,
+) => {
+  const requirements = getEncounterRequirements(appointmentId);
+  record.encounterConsentForms = cloneConsentForms(requirements.consentForms);
+  record.encounterQuestionnaires = cloneQuestionnaires(requirements.questionnaires);
+  record.session.consentForms = cloneConsentForms(record.encounterConsentForms);
+  record.session.questionnaires = cloneQuestionnaires(record.encounterQuestionnaires);
+};
 
 const fallbackSchedulingHandoff: CheckInSession["schedulingHandoff"] = {
   mode: "qr-link",
@@ -401,23 +464,11 @@ const invalidateAfter = (record: SessionRecord, stage: CheckInStage) => {
   }
   if (stageOrder.indexOf(stage) < stageOrder.indexOf("consent")) {
     record.consentSubmissions.clear();
-    record.session.consentForms = record.session.consentForms.map((form) => ({
-      ...form,
-      status: "unsigned",
-    }));
+    record.session.consentForms = cloneConsentForms(record.encounterConsentForms);
   }
   if (stageOrder.indexOf(stage) < stageOrder.indexOf("questionnaire")) {
     record.questionnaireSubmissions.clear();
-    record.session.questionnaires = record.session.questionnaires.map(
-      (questionnaire) =>
-        questionnaire.status === "completed_now"
-          ? {
-              ...questionnaire,
-              status: "not_started",
-              completedAnswers: undefined,
-            }
-          : questionnaire,
-    );
+    record.session.questionnaires = cloneQuestionnaires(record.encounterQuestionnaires);
   }
   if (stageOrder.indexOf(stage) < stageOrder.indexOf("history")) {
     delete record.history;
@@ -425,7 +476,7 @@ const invalidateAfter = (record: SessionRecord, stage: CheckInStage) => {
   record.stage = stage;
 };
 
-class MockCheckInAdapter implements CheckInAdapter {
+export class MockCheckInAdapter implements CheckInAdapter {
   private readonly sessions = new Map<string, SessionRecord>();
 
   async identify(input: CheckInIdentification): Promise<CheckInSession> {
@@ -438,6 +489,10 @@ class MockCheckInAdapter implements CheckInAdapter {
       groupNumber: "IUSHC-2025",
       subscriberName: "Avery Johnson",
     };
+    const hasAppointments = !isNoAppointmentDemo(input);
+    const initialEncounterRequirements = hasAppointments
+      ? getEncounterRequirements("primary-care-1030")
+      : { consentForms: [], questionnaires: [] };
     const session: CheckInSession = {
       sessionId,
       requiresVerification: false,
@@ -454,7 +509,7 @@ class MockCheckInAdapter implements CheckInAdapter {
         state: "IN",
         zip: "47406",
       },
-      appointments: isNoAppointmentDemo(input)
+      appointments: !hasAppointments
         ? []
         : [
         {
@@ -475,12 +530,39 @@ class MockCheckInAdapter implements CheckInAdapter {
           location: "Student Health Center · Second floor",
           addressLine2: providerAccounts.jordanLewis.addressLine2,
         },
+        {
+          id: "same-day-0900",
+          date: "Today, October 14",
+          time: "9:00 AM",
+          provider: providerAccounts.mayaPatel.displayName,
+          type: "Same-day visit",
+          location: "Student Health Center · First floor",
+          addressLine2: providerAccounts.mayaPatel.addressLine2,
+        },
+        {
+          id: "annual-review-1545",
+          date: "Today, October 14",
+          time: "3:45 PM",
+          provider: providerAccounts.jordanLewis.displayName,
+          type: "Annual review",
+          location: "Student Health Center · Second floor",
+          addressLine2: providerAccounts.jordanLewis.addressLine2,
+        },
+        {
+          id: "immunization-1630",
+          date: "Today, October 14",
+          time: "4:30 PM",
+          provider: providerAccounts.mayaPatel.displayName,
+          type: "Immunization visit",
+          location: "Student Health Center · First floor",
+          addressLine2: providerAccounts.mayaPatel.addressLine2,
+        },
           ],
       insuranceInformation: { ...onFileInsuranceInformation },
       onFileInsuranceInformation: { ...onFileInsuranceInformation },
       schedulingHandoff: getSchedulingHandoff(),
-      consentForms: createConsentForms(),
-      questionnaires: createQuestionnaires(),
+      consentForms: cloneConsentForms(initialEncounterRequirements.consentForms),
+      questionnaires: cloneQuestionnaires(initialEncounterRequirements.questionnaires),
     };
 
     this.sessions.set(sessionId, {
@@ -490,6 +572,12 @@ class MockCheckInAdapter implements CheckInAdapter {
       verificationExpiresAt: Date.now() + 10 * 60 * 1000,
       verificationAttempts: 0,
       onFileInsuranceInformation,
+      encounterConsentForms: cloneConsentForms(
+        initialEncounterRequirements.consentForms,
+      ),
+      encounterQuestionnaires: cloneQuestionnaires(
+        initialEncounterRequirements.questionnaires,
+      ),
       consentSubmissions: new Map(),
       questionnaireSubmissions: new Map(),
     });
@@ -532,6 +620,7 @@ class MockCheckInAdapter implements CheckInAdapter {
     }
     record.appointmentId = input.appointmentId;
     invalidateAfter(record, "appointment");
+    applyEncounterRequirements(record, input.appointmentId);
     return record.session;
   }
 
@@ -646,7 +735,11 @@ class MockCheckInAdapter implements CheckInAdapter {
   ): Promise<CheckInSession | null> {
     await wait(180);
     const record = this.sessions.get(sessionId);
-    if (!record || !isAtLeast(record, "consent")) {
+    if (
+      !record ||
+      !isAtLeast(record, "coverage") ||
+      record.session.consentForms.some((form) => form.status === "unsigned")
+    ) {
       return null;
     }
 
@@ -721,7 +814,8 @@ class MockCheckInAdapter implements CheckInAdapter {
       !record.session.consentForms.every((form) => form.status === "signed") ||
       (record.stage !== "questionnaire" &&
         record.stage !== "history" &&
-        record.stage !== "consent")
+        record.stage !== "consent" &&
+        record.stage !== "coverage")
     ) {
       return null;
     }

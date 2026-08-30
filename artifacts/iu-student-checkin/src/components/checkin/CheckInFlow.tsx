@@ -106,6 +106,13 @@ const journeySteps = [
   { id: "questionnaire", label: "Questions" },
 ];
 
+const hasUnsignedConsentForms = (checkInSession: CheckInSession | null) =>
+  checkInSession?.consentForms?.some((form) => form.status === "unsigned") ??
+  false;
+
+const hasEncounterQuestionnaires = (checkInSession: CheckInSession | null) =>
+  (checkInSession?.questionnaires?.length ?? 0) > 0;
+
 const previewScreenOptions: { id: Screen; label: string }[] = [
   { id: "welcome", label: "Welcome" },
   { id: "appointment", label: "Appointment" },
@@ -278,6 +285,7 @@ export function CheckInFlow() {
   const [consentAccepted, setConsentAccepted] = useState(false);
   
   const signaturePadRef = useRef<SignaturePadRef>(null);
+  const finalizationStartedRef = useRef(false);
   const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string | null>(null);
   const [questionnaireAnswers, setQuestionnaireAnswers] = useState<Record<string, string>>({});
 
@@ -345,7 +353,12 @@ export function CheckInFlow() {
     saveQuestionnaireMutation.isPending ||
     completeMutation.isPending;
 
-  const activeStepIndex = journeySteps.findIndex((step) => step.id === screen);
+  const visibleJourneySteps = journeySteps.filter(
+    (step) =>
+      (step.id !== "consent" || hasUnsignedConsentForms(session)) &&
+      (step.id !== "questionnaire" || hasEncounterQuestionnaires(session)),
+  );
+  const activeStepIndex = visibleJourneySteps.findIndex((step) => step.id === screen);
   const isJourney = activeStepIndex >= 0;
   const canContinue =
     mode === "qr"
@@ -355,6 +368,55 @@ export function CheckInFlow() {
         : value.trim().length >= 2 && dob.length === 10;
 
   const clearError = () => setError("");
+
+  const finalizeCheckIn = (
+    currentSession: CheckInSession,
+    fallbackScreen: "coverage" | "consent" | "questionnaire",
+  ) => {
+    if (finalizationStartedRef.current) return;
+    finalizationStartedRef.current = true;
+    clearError();
+
+    if (previewMode) {
+      setCompletion(previewCompletion);
+      setScreen("complete");
+      return;
+    }
+
+    setScreen("checking");
+    completeMutation.mutate(
+      { sessionId: currentSession.sessionId },
+      {
+        onSuccess: (res) => {
+          setCompletion(res);
+          setScreen("complete");
+        },
+        onError: () => {
+          finalizationStartedRef.current = false;
+          setScreen(fallbackScreen);
+          setError("Failed to finalize check-in. Please try again.");
+        },
+      },
+    );
+  };
+
+  const advanceAfterCoverage = (currentSession: CheckInSession) => {
+    if (hasUnsignedConsentForms(currentSession)) {
+      setScreen("consent");
+    } else if (hasEncounterQuestionnaires(currentSession)) {
+      setScreen("questionnaire");
+    } else {
+      finalizeCheckIn(currentSession, "coverage");
+    }
+  };
+
+  const advanceAfterConsent = (currentSession: CheckInSession) => {
+    if (hasEncounterQuestionnaires(currentSession)) {
+      setScreen("questionnaire");
+    } else {
+      finalizeCheckIn(currentSession, "consent");
+    }
+  };
 
   const handleContinue = () => {
     if (!canContinue) {
@@ -368,6 +430,7 @@ export function CheckInFlow() {
     clearError();
 
     if (previewMode) {
+      finalizationStartedRef.current = false;
       setSession(previewSession);
       setSelectedAppointment(previewSession.appointments[0]?.id ?? "");
       setScreen("demographics");
@@ -383,6 +446,7 @@ export function CheckInFlow() {
       }
     }, {
       onSuccess: (data) => {
+        finalizationStartedRef.current = false;
         setSession(data);
         setSelectedAppointment(data.appointments?.[0]?.id ?? "");
         setShowSchedulingHandoff(false);
@@ -414,19 +478,24 @@ export function CheckInFlow() {
       demographics: "welcome",
       coverage: "appointment",
       consent: "coverage",
-      questionnaire: "consent",
-      checking: "questionnaire",
     };
     let next = previous[screen];
-    
-    if (next === "consent" && session && !session.consentForms?.some(f => f.status === "unsigned")) {
-      next = "coverage";
+
+    if (screen === "questionnaire") {
+      next = hasUnsignedConsentForms(session) ? "consent" : "coverage";
+    } else if (screen === "checking") {
+      next = hasEncounterQuestionnaires(session)
+        ? "questionnaire"
+        : hasUnsignedConsentForms(session)
+          ? "consent"
+          : "coverage";
     }
 
     if (next) setScreen(next);
   };
 
   const startOver = () => {
+    finalizationStartedRef.current = false;
     if (previewMode) {
       setScreen("welcome");
       setSession(previewSession);
@@ -489,7 +558,12 @@ export function CheckInFlow() {
       data: { appointmentId: selectedAppointment }
     }, {
       onSuccess: (data) => {
+        finalizationStartedRef.current = false;
         setSession(data);
+        setConsentAccepted(false);
+        signaturePadRef.current?.clear();
+        setActiveQuestionnaireId(null);
+        setQuestionnaireAnswers({});
         setScreen("coverage");
       },
       onError: () => setError("Failed to save appointment. Please try again.")
@@ -555,8 +629,8 @@ export function CheckInFlow() {
       setConsentAccepted(false);
       signaturePadRef.current?.clear();
 
-      if (!nextSession.consentForms?.some(f => f.status === "unsigned")) {
-        setScreen("questionnaire");
+      if (!hasUnsignedConsentForms(nextSession)) {
+        advanceAfterConsent(nextSession);
       }
       return;
     }
@@ -570,18 +644,28 @@ export function CheckInFlow() {
         setConsentAccepted(false);
         signaturePadRef.current?.clear();
         
-        if (!data.consentForms?.some(f => f.status === "unsigned")) {
-          setScreen("questionnaire");
+        if (!hasUnsignedConsentForms(data)) {
+          advanceAfterConsent(data);
         }
       },
       onError: () => setError("Failed to save consent. Please try again.")
     });
   };
 
-  // Skip consent screen if somehow accessed with no unsigned forms
+  // Recover safely if an unavailable encounter stage is reached from stale UI state.
   useEffect(() => {
-    if (screen === "consent" && session && !session.consentForms?.some(f => f.status === "unsigned")) {
-      setScreen("questionnaire");
+    if (!session) return;
+    if (screen === "consent" && !hasUnsignedConsentForms(session)) {
+      advanceAfterConsent(session);
+    } else if (
+      screen === "questionnaire" &&
+      !hasEncounterQuestionnaires(session)
+    ) {
+      if (hasUnsignedConsentForms(session)) {
+        setScreen("consent");
+      } else {
+        finalizeCheckIn(session, "coverage");
+      }
     }
   }, [screen, session]);
 
@@ -591,27 +675,7 @@ export function CheckInFlow() {
       return;
     }
     if (!session?.sessionId) return;
-    clearError();
-
-    if (previewMode) {
-      setCompletion(previewCompletion);
-      setScreen("complete");
-      return;
-    }
-
-    setScreen("checking");
-    completeMutation.mutate({
-      sessionId: session.sessionId
-    }, {
-      onSuccess: (res) => {
-        setCompletion(res);
-        setScreen("complete");
-      },
-      onError: () => {
-        setScreen("questionnaire");
-        setError("Failed to finalize check-in. Please try again.");
-      }
-    });
+    finalizeCheckIn(session, "questionnaire");
   };
 
   const continueCoverage = () => {
@@ -626,11 +690,7 @@ export function CheckInFlow() {
     clearError();
 
     if (previewMode) {
-      if (!session?.consentForms?.some(f => f.status === "unsigned")) {
-        setScreen("questionnaire");
-      } else {
-        setScreen("consent");
-      }
+      advanceAfterCoverage(session);
       return;
     }
 
@@ -646,11 +706,7 @@ export function CheckInFlow() {
     }, {
       onSuccess: (data) => {
         setSession(data);
-        if (!data.consentForms?.some(f => f.status === "unsigned")) {
-          setScreen("questionnaire");
-        } else {
-          setScreen("consent");
-        }
+        advanceAfterCoverage(data);
       },
       onError: () => setError("Failed to save coverage. Please try again.")
     });
@@ -917,7 +973,7 @@ export function CheckInFlow() {
             aria-label="Check-in progress"
             className="kiosk-reveal mb-8 flex items-center justify-between gap-2 overflow-x-auto rounded-2xl border border-[#eadccb] bg-[#fffaf1]/70 px-4 py-3.5 lg:mb-10 lg:px-6"
           >
-            {journeySteps.map((step, index) => {
+            {visibleJourneySteps.map((step, index) => {
               const isCurrent = index === activeStepIndex;
               const isDone = index < activeStepIndex;
               return (
@@ -942,7 +998,7 @@ export function CheckInFlow() {
                       {step.label}
                     </span>
                   </div>
-                  {index < journeySteps.length - 1 && (
+                  {index < visibleJourneySteps.length - 1 && (
                     <span className={`mx-1 h-px flex-1 ${isDone ? "bg-[#b8d0bd]" : "bg-[#e6d7c4]"}`} />
                   )}
                 </div>
@@ -1092,7 +1148,7 @@ export function CheckInFlow() {
                   {screen === "appointment" ? <CalendarDays size={23} /> : screen === "demographics" ? <UserRound size={23} /> : screen === "coverage" ? <CreditCard size={23} /> : screen === "consent" ? <FileCheck2 size={23} /> : screen === "questionnaire" ? <ClipboardList size={23} /> : <ShieldCheck size={23} />}
                 </div>
                 <p className="text-xs font-bold uppercase tracking-[.18em] text-[#9a8074]">
-                  Step {activeStepIndex + 1} of {journeySteps.length}
+                  Step {activeStepIndex + 1} of {visibleJourneySteps.length}
                 </p>
                 <h1
                   className="mt-3 max-w-[520px] text-[clamp(2.75rem,4.6vw,4.7rem)] font-semibold leading-[.97] tracking-[-.065em] text-[#990000] font-serif"
