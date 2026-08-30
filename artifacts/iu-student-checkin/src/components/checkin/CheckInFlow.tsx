@@ -167,6 +167,7 @@ const previewScreenOptions: { id: Screen; label: string }[] = [
 ];
 
 const previewScreenIds = new Set<Screen>(previewScreenOptions.map((option) => option.id));
+const COMPLETION_AUTO_RESET_MS = 60_000;
 
 const previewSession: CheckInSession = {
   sessionId: "preview-session",
@@ -590,6 +591,13 @@ export function CheckInFlow() {
     setLanguageOpen(false);
     setCompletion(null);
   };
+
+  useEffect(() => {
+    if (screen !== "complete" || previewMode) return;
+
+    const resetTimer = window.setTimeout(startOver, COMPLETION_AUTO_RESET_MS);
+    return () => window.clearTimeout(resetTimer);
+  }, [screen, previewMode]);
 
   const continueAppointment = () => {
     if (!selectedAppointment || !session?.sessionId) {
@@ -2100,7 +2108,7 @@ export function CheckInFlow() {
                       <div className="mt-8 shrink-0">
                         {!isReview ? (
                           primaryButton(
-                            "Save Answers",
+                            content.questions.continueButton,
                             handleSaveQuestionnaire,
                             false,
                             <Check size={18} />,

@@ -171,7 +171,7 @@ const defaultContent: EditableContent = {
   questions: {
     heading: "Pre-visit questions",
     description: "Your answers help us prepare for a more useful conversation.",
-    continueButton: "Save answers",
+    continueButton: "Check-in",
   },
   checking: { heading: "Finishing up...", description: "Securely saving your responses." },
   complete: {
