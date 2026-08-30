@@ -140,6 +140,10 @@
   .kiosk-contact-panel .kiosk-contact-actions button {
     min-height: 2.75rem;
   }
+  .kiosk-contact-hero-heading {
+    font-size: clamp(2.35rem, 3.6vw, 3.7rem);
+    line-height: .94;
+  }
 }
 @keyframes kiosk-reveal { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
 @keyframes kiosk-card { from { opacity: 0; transform: translateY(16px) scale(.987) } to { opacity: 1; transform: translateY(0) scale(1) } }

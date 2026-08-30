@@ -1204,10 +1204,12 @@ export function CheckInFlow() {
                   Step {activeStepIndex + 1} of {visibleJourneySteps.length}
                 </p>
                 <h1
-                  className="mt-3 max-w-[520px] text-[clamp(2.75rem,4.6vw,4.7rem)] font-semibold leading-[.97] tracking-[-.065em] text-[#990000] font-serif"
+                  className={`mt-3 max-w-[520px] text-[clamp(2.75rem,4.6vw,4.7rem)] font-semibold leading-[.97] tracking-[-.065em] text-[#990000] font-serif ${
+                    screen === "demographics" ? "kiosk-contact-hero-heading" : ""
+                  }`}
                 >
                   {screen === "appointment" && (session?.appointments?.length ? content.appointment.scheduledHeading : content.appointment.noAppointmentHeading)}
-                  {screen === "demographics" && "Let's make sure we have it right."}
+                  {screen === "demographics" && "Let's make sure we have the correct contact information."}
                   {screen === "coverage" && "How will today's visit be covered?"}
                 </h1>
                 <p className="mt-6 max-w-[430px] text-[16px] leading-7 text-[#806960]">
@@ -1511,10 +1513,6 @@ export function CheckInFlow() {
             {screen === "demographics" && (
               <div className="kiosk-fade relative">
                 {renderBack()}
-                <h2 className="kiosk-contact-heading mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
-                  {content.details.heading}
-                </h2>
-
                 <div
                   className="kiosk-contact-identity mb-7 rounded-2xl border border-[#e7d9c7] bg-[#f8efe3] p-5"
                   data-testid="identity-summary"
