@@ -79,11 +79,11 @@ const stageOrder: CheckInStage[] = [
 const providerAccounts = {
   mayaPatel: {
     displayName: "Maya Patel, MD",
-    addressLine2: "First floor · Care team",
+    addressLine2: "First floor · Waiting Area",
   },
   jordanLewis: {
     displayName: "Jordan Lewis, NP",
-    addressLine2: "Second floor · Waiting area",
+    addressLine2: "Second floor · Waiting Area",
   },
 } as const;
 
@@ -369,9 +369,12 @@ class MockCheckInAdapter implements CheckInAdapter {
     if (!floorLabel || !waitingArea) return null;
     const isCurrentFloor = floorLabel.toLowerCase() === kioskFloor.toLowerCase();
     this.sessions.delete(sessionId);
-    const waitingAreaLabel = waitingArea.toLowerCase() === "waiting area"
+    const normalizedWaitingArea = waitingArea.toLowerCase() === "waiting area"
+      ? "Waiting Area"
+      : waitingArea;
+    const waitingAreaLabel = normalizedWaitingArea.toLowerCase() === "waiting area"
       ? "waiting area"
-      : `${waitingArea} waiting area`;
+      : `${normalizedWaitingArea} waiting area`;
     const directions = isCurrentFloor
       ? `You’re on the right floor. Please have a seat in the ${waitingAreaLabel}.`
       : `Proceed to the ${floorLabel.toLowerCase()} waiting area.`;
@@ -386,7 +389,7 @@ class MockCheckInAdapter implements CheckInAdapter {
       appointmentTime: appointment.time,
       addressLine2: appointment.addressLine2,
       floorLabel,
-      waitingArea,
+      waitingArea: normalizedWaitingArea,
       kioskFloor,
       isCurrentFloor,
     };

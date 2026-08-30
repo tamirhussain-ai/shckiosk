@@ -69,9 +69,9 @@
   "complete": {
     "badge": "Check-in complete",
     "kioskFloorPrefix": "This kiosk is on the",
-    "directionsSuffix": "Your Care team is expecting you.",
+    "directionsSuffix": "Your visit is ready for you.",
     "destinationFallback": "Destination",
-    "waitingAreaFallback": "Waiting area",
+    "waitingAreaFallback": "Waiting Area",
     "visitConfirmed": "Visit confirmed",
     "providerLabel": "Provider",
     "visitLabel": "Visit",

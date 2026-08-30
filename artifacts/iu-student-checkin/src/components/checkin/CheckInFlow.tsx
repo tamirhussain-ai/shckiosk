@@ -166,13 +166,13 @@ const previewSession: CheckInSession = {
 const previewCompletion: CompletionResult = {
   completed: true,
   nextStep: "waiting",
-  directions: "Head to the Care team on the first floor.",
+  directions: "Head to the Waiting Area on the first floor.",
   provider: "Dr. Alvarez",
   visitType: "Follow-up visit",
   appointmentTime: "10:30 AM",
   addressLine2: "600 N Eagleson Avenue",
   floorLabel: "First floor",
-  waitingArea: "Care team",
+  waitingArea: "Waiting Area",
   kioskFloor: "Second floor",
   isCurrentFloor: false,
 };
