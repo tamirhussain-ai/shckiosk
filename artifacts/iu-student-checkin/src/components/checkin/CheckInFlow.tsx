@@ -914,7 +914,9 @@ export function CheckInFlow() {
 
       <div
         className={`pointer-events-none absolute z-0 -translate-x-1/2 -translate-y-1/2 ${
-          screen === "complete" ? "left-1/2 top-[54%]" : "left-[25%] top-[55%]"
+          screen === "complete" || screen === "checking"
+            ? "left-1/2 top-[54%]"
+            : "left-[25%] top-[55%]"
         }`}
         aria-hidden="true"
       >
@@ -922,7 +924,7 @@ export function CheckInFlow() {
           src="/iu-trident-crimson-cropped.png"
           alt=""
           className={`w-auto max-w-[82vw] object-contain opacity-[0.05] ${
-            screen === "complete"
+            screen === "complete" || screen === "checking"
               ? "h-[min(72vh,730px)]"
               : "h-[min(62vh,580px)] sm:h-[min(72vh,700px)]"
           }`}
@@ -1059,7 +1061,7 @@ export function CheckInFlow() {
 
         <div
           className={
-            screen === "complete"
+            screen === "complete" || screen === "checking"
               ? "grid min-h-0 flex-1 grid-cols-1 overflow-y-auto"
               : `grid min-h-0 flex-1 grid-cols-1 gap-8 overflow-hidden ${
                   isLongFormStage ? "" : "lg:grid-cols-[minmax(0,.82fr)_minmax(540px,1.18fr)] lg:gap-16"
@@ -1071,7 +1073,9 @@ export function CheckInFlow() {
           {!isLongFormStage && (
             <section
               className={`kiosk-reveal kiosk-completion-copy relative z-10 flex min-w-0 flex-col justify-center ${
-                screen === "complete" ? "kiosk-completion-panel mx-auto w-full items-center" : "lg:min-h-[590px]"
+                screen === "complete" || screen === "checking"
+                  ? "kiosk-completion-panel mx-auto w-full items-center"
+                  : "lg:min-h-[590px]"
               }`}
             >
             {screen === "welcome" ? (
@@ -1187,14 +1191,23 @@ export function CheckInFlow() {
                   {content.complete.demoNotice}
                 </p>
               </div>
-            ) : screen === "checking" ? (
-               <div className="max-w-[560px]">
-                <h1
-                  className="max-w-[570px] text-[clamp(3rem,5.1vw,5.2rem)] font-semibold leading-[.96] tracking-[-.07em] text-[#990000] font-serif"
-                >
-                  {content.checking.heading}
-                </h1>
-              </div>
+             ) : screen === "checking" ? (
+               <div
+                 className="kiosk-fade flex w-full max-w-[760px] flex-col items-center text-center"
+                 role="status"
+                 aria-live="polite"
+                 aria-label={`${content.checking.heading} ${content.checking.description}`}
+               >
+                 <span className="kiosk-pulse mb-7 flex items-center gap-2" aria-hidden="true">
+                   <span className="h-3 w-3 rounded-full bg-[#990000]" />
+                   <span className="h-3 w-3 rounded-full bg-[#990000]" />
+                   <span className="h-3 w-3 rounded-full bg-[#990000]" />
+                 </span>
+                 <h1 className="text-[clamp(3rem,5.1vw,5.2rem)] font-semibold leading-[.96] tracking-[-.07em] text-[#990000] font-serif">
+                   {content.checking.heading}
+                 </h1>
+                 <p className="mt-4 text-lg text-[#806960]">{content.checking.description}</p>
+               </div>
             ) : (
               <div className="max-w-[520px]">
                 <div className="mb-7 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f3e1dc] text-[#990000]">
@@ -1229,7 +1242,7 @@ export function CheckInFlow() {
             </section>
           )}
 
-          {screen !== "complete" && (
+           {screen !== "complete" && screen !== "checking" && (
             <section
               className={`kiosk-card ${screen === "demographics" ? "kiosk-contact-panel" : ""} relative isolate min-h-0 rounded-[30px] border border-[#e7d9c7] bg-[#fffaf1] p-6 shadow-[0_25px_65px_rgba(108,35,35,.12)] sm:p-9 lg:p-11 ${
                 isLongFormStage
@@ -2106,18 +2119,6 @@ export function CheckInFlow() {
                     </>
                   );
                 })()}
-              </div>
-            )}
-
-            {screen === "checking" && (
-              <div className="kiosk-fade flex min-h-[400px] flex-col items-center justify-center text-center">
-                <span className="kiosk-pulse flex items-center gap-2 mb-6" aria-hidden="true">
-                  <span className="h-3 w-3 rounded-full bg-[#990000]" />
-                  <span className="h-3 w-3 rounded-full bg-[#990000]" />
-                  <span className="h-3 w-3 rounded-full bg-[#990000]" />
-                </span>
-                  <p className="text-lg font-bold text-[#632f2f]">{content.checking.heading}</p>
-                  <p className="mt-2 text-sm text-[#806960]">{content.checking.description}</p>
               </div>
             )}
 
