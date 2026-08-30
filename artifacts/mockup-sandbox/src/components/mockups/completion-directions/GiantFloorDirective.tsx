@@ -9,6 +9,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import "./_group.css";
+import "./GiantFloorDirective.css";
 
 export function GiantFloorDirective() {
   const [isReset, setIsReset] = useState(false);
@@ -91,13 +92,13 @@ export function GiantFloorDirective() {
             </p>
             <h1
               id="destination-heading"
-              className="completion-serif mt-2 max-w-[720px] text-[clamp(4.5rem,12vw,9.5rem)] font-semibold leading-[.82] tracking-[-.095em] text-[var(--iu-crimson)]"
+              className="completion-serif completion-floor-heading mt-2 max-w-[720px] text-[clamp(4.5rem,12vw,9.5rem)] font-semibold leading-[.82] tracking-[-.095em] text-[var(--iu-crimson)]"
             >
               FIRST
               <span className="block text-[#bd5b48]">FLOOR</span>
             </h1>
-            <div className="mt-7 flex items-center gap-4 border-l-[5px] border-[var(--iu-crimson)] pl-5 sm:pl-6">
-              <MapPin className="h-8 w-8 shrink-0 text-[var(--iu-crimson)]" strokeWidth={2.2} />
+            <div className="completion-destination-row mt-7 flex items-center gap-4 border-l-[5px] border-[var(--iu-crimson)] pl-5 sm:pl-6">
+              <MapPin className="completion-destination-pin h-8 w-8 shrink-0 text-[var(--iu-crimson)]" strokeWidth={2.2} />
               <p className="text-[clamp(1.8rem,3.3vw,3rem)] font-bold leading-none tracking-[-.055em] text-[var(--iu-ink)]">
                 Waiting area
               </p>
