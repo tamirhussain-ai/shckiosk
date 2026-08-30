@@ -4,5 +4,9 @@ export const modules: ModuleMap = {
   "./components/mockups/completion-directions/GiantFloorDirective.tsx": () => import("../components/mockups/completion-directions/GiantFloorDirective.tsx"),
   "./components/mockups/completion-directions/VisitTicketDestination.tsx": () => import("../components/mockups/completion-directions/VisitTicketDestination.tsx"),
   "./components/mockups/completion-directions/WayfindingRoute.tsx": () => import("../components/mockups/completion-directions/WayfindingRoute.tsx"),
+  "./components/mockups/completion-motion/CompletionPreview.tsx": () => import("../components/mockups/completion-motion/CompletionPreview.tsx"),
+  "./components/mockups/completion-motion/DestinationEmphasis.tsx": () => import("../components/mockups/completion-motion/DestinationEmphasis.tsx"),
+  "./components/mockups/completion-motion/GentlePulse.tsx": () => import("../components/mockups/completion-motion/GentlePulse.tsx"),
+  "./components/mockups/completion-motion/SoftGlow.tsx": () => import("../components/mockups/completion-motion/SoftGlow.tsx"),
   "./components/mockups/kiosk-checkin/KioskCheckIn.tsx": () => import("../components/mockups/kiosk-checkin/KioskCheckIn.tsx")
 };

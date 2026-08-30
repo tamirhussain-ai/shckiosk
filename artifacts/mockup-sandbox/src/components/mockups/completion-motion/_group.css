@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;600;700&family=Fraunces:opsz,wght@9..144,400;500;600;700&display=swap');
+
+.completion-motion-root {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 5% -5%, rgba(245, 216, 215, .9), transparent 30%),
+    radial-gradient(circle at 100% 100%, rgba(237, 222, 193, .62), transparent 32%),
+    #fbf5e8;
+  color: #3d2626;
+  font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+.completion-motion-root .font-serif {
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+.completion-motion-root::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .2;
+  background-image: radial-gradient(rgba(153, 0, 0, .13) .7px, transparent .7px);
+  background-size: 18px 18px;
+  mask-image: linear-gradient(145deg, black, transparent 68%);
+}
+
+.completion-motion-watermark {
+  position: absolute;
+  left: 25%;
+  top: 55%;
+  z-index: 0;
+  width: min(430px, 42vw);
+  transform: translate(-50%, -50%);
+  opacity: .05;
+}
+
+.completion-motion-watermark img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.completion-motion-glow {
+  animation: completion-soft-glow 3.2s ease-out 1 both;
+}
+
+.completion-motion-pulse {
+  animation: completion-gentle-pulse 2.4s ease-in-out 1 both;
+  transform-origin: left center;
+}
+
+.completion-motion-destination .completion-motion-waiting {
+  animation: completion-destination-emphasis 2.8s ease-out 1 both;
+}
+
+.completion-motion-destination .completion-motion-pin {
+  animation: completion-pin-emphasis 2.8s ease-out 1 both;
+}
+
+@keyframes completion-soft-glow {
+  0% {
+    text-shadow: 0 0 0 rgba(153, 0, 0, 0);
+  }
+  35% {
+    text-shadow:
+      0 0 8px rgba(153, 0, 0, .22),
+      0 0 28px rgba(189, 91, 72, .24);
+  }
+  100% {
+    text-shadow: 0 0 0 rgba(153, 0, 0, 0);
+  }
+}
+
+@keyframes completion-gentle-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.018);
+  }
+}
+
+@keyframes completion-destination-emphasis {
+  0%, 100% {
+    color: #3d2626;
+    text-shadow: 0 0 0 rgba(153, 0, 0, 0);
+  }
+  38% {
+    color: #990000;
+    text-shadow: 0 0 18px rgba(153, 0, 0, .2);
+  }
+}
+
+@keyframes completion-pin-emphasis {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  38% {
+    transform: translateY(-2px) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .completion-motion-glow,
+  .completion-motion-pulse,
+  .completion-motion-destination .completion-motion-waiting,
+  .completion-motion-destination .completion-motion-pin {
+    animation: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .completion-motion-watermark {
+    width: min(360px, 65vw);
+  }
+}
