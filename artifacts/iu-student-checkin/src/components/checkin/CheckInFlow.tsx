@@ -787,7 +787,7 @@ export function CheckInFlow() {
               <img
                 src="/iu-trident-crimson-cropped.png"
                 alt=""
-                className="absolute left-1/2 top-1/2 h-[128%] w-auto -translate-x-1/2 -translate-y-1/2 object-contain opacity-[0.05]"
+                className="absolute right-0 top-0 h-[128%] w-auto translate-x-[33%] -translate-y-[33%] object-contain opacity-[0.05]"
               />
             </div>
 
