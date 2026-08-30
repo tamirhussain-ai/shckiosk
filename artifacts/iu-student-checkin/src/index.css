@@ -67,10 +67,63 @@
 .kiosk-card { animation: kiosk-card .65s cubic-bezier(.22,.8,.32,1) .05s both; }
 .kiosk-fade { animation: kiosk-fade .32s ease both; }
 .kiosk-pulse { animation: kiosk-pulse 1.15s ease-in-out infinite; }
+.kiosk-completion-floor-pulse {
+  animation: kiosk-completion-floor-pulse 10s cubic-bezier(.22, 1, .36, 1) 1 both;
+  transform-origin: left center;
+  will-change: transform, color, text-shadow;
+}
+.kiosk-completion-floor-accent {
+  animation: kiosk-completion-floor-accent 10s cubic-bezier(.22, 1, .36, 1) 1 both;
+}
 @keyframes kiosk-reveal { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
 @keyframes kiosk-card { from { opacity: 0; transform: translateY(16px) scale(.987) } to { opacity: 1; transform: translateY(0) scale(1) } }
 @keyframes kiosk-fade { from { opacity: 0; transform: translateX(9px) } to { opacity: 1; transform: translateX(0) } }
 @keyframes kiosk-pulse { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
+@keyframes kiosk-completion-floor-pulse {
+  0%, 100% {
+    color: #990000;
+    text-shadow: 0 0 0 rgba(153, 0, 0, 0);
+    transform: scale(1);
+  }
+  13% {
+    color: #c64535;
+    text-shadow:
+      0 0 12px rgba(198, 69, 53, .25),
+      0 0 34px rgba(189, 91, 72, .18);
+    transform: scale(1.055);
+  }
+  28% {
+    color: #990000;
+    text-shadow: 0 0 0 rgba(153, 0, 0, 0);
+    transform: scale(1);
+  }
+  48% {
+    color: #7d0000;
+    text-shadow:
+      0 0 14px rgba(125, 0, 0, .24),
+      0 0 40px rgba(189, 91, 72, .2);
+    transform: scale(1.075);
+  }
+  68% {
+    color: #a91f17;
+    text-shadow: 0 0 9px rgba(169, 31, 23, .16);
+    transform: scale(1.018);
+  }
+}
+@keyframes kiosk-completion-floor-accent {
+  0%, 100% { color: #bd5b48; }
+  13% { color: #e18469; }
+  28% { color: #bd5b48; }
+  48% { color: #990000; }
+  68% { color: #c64535; }
+}
 @media (prefers-reduced-motion: reduce) {
-  .kiosk-reveal, .kiosk-card, .kiosk-fade, .kiosk-pulse { animation: none; }
+  .kiosk-reveal,
+  .kiosk-card,
+  .kiosk-fade,
+  .kiosk-pulse,
+  .kiosk-completion-floor-pulse,
+  .kiosk-completion-floor-accent {
+    animation: none;
+  }
 }

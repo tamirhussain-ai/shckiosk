@@ -273,6 +273,16 @@ export function CheckInFlow() {
     query: { queryKey: ["/api/kiosk/content"], staleTime: 0 },
   });
   const content = savedKioskContent ?? kioskContentDefaults;
+  const completionFloorLabel = completion?.floorLabel || content.complete.destinationFallback;
+  const completionFloorWords = completionFloorLabel.trim().split(/\s+/);
+  const completionFloorPrimary =
+    completionFloorWords.length > 1
+      ? completionFloorWords.slice(0, -1).join(" ")
+      : completionFloorLabel;
+  const completionFloorAccent =
+    completionFloorWords.length > 1
+      ? completionFloorWords[completionFloorWords.length - 1]
+      : "";
   const identifyMutation = useIdentifyCheckIn();
   const saveAppointmentMutation = useSaveCheckInAppointment();
   const saveDemographicsMutation = useSaveCheckInDemographics();
@@ -885,10 +895,17 @@ export function CheckInFlow() {
                   {completion?.directions} {content.complete.directionsSuffix}
                 </p>
                 <h1
-                  className="max-w-[650px] text-[clamp(4.6rem,10vw,8.8rem)] font-semibold uppercase leading-[.82] tracking-[-.09em] text-[#990000] font-serif"
+                  className="kiosk-completion-floor-pulse max-w-[650px] text-[clamp(4.6rem,10vw,8.8rem)] font-semibold uppercase leading-[.82] tracking-[-.09em] text-[#990000] font-serif"
                   data-testid="text-floor"
+                  aria-label={completionFloorLabel}
                 >
-                  {completion?.floorLabel || content.complete.destinationFallback}
+                  <span className="block">{completionFloorPrimary}</span>
+                  {completionFloorAccent ? (
+                    <>
+                      {" "}
+                      <span className="kiosk-completion-floor-accent block">{completionFloorAccent}</span>
+                    </>
+                  ) : null}
                 </h1>
                 <div className="mt-7 flex items-center gap-4 border-l-[5px] border-[#990000] pl-5">
                   <MapPin size={32} className="shrink-0 text-[#990000]" />
