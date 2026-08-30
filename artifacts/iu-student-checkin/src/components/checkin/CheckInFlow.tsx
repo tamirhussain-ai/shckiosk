@@ -37,7 +37,12 @@ import {
   useHealthCheck,
   useGetKioskContent,
 } from "@workspace/api-client-react";
-import type { CheckInSession, CompletionResult, CheckInIdentificationMethod } from "@workspace/api-client-react";
+import type {
+  CheckInSession,
+  CompletionResult,
+  CheckInIdentificationMethod,
+  Questionnaire,
+} from "@workspace/api-client-react";
 import { kioskContentDefaults } from "@/lib/kiosk-content-defaults";
 import { SignaturePad, type SignaturePadRef } from "./SignaturePad";
 
@@ -67,6 +72,20 @@ const getApiErrorMessage = (error: unknown, fallback: string) => {
   const data = (error as { data?: { error?: unknown } }).data;
   return typeof data?.error === "string" ? data.error : fallback;
 };
+
+type QuestionnaireValidationTarget = {
+  questionnaireId: string;
+  questionId: string;
+};
+
+const getFirstUnansweredMandatoryQuestion = (
+  questionnaire: Questionnaire,
+  answers: Record<string, string> = {},
+) =>
+  questionnaire.questions.find(
+    (question) =>
+      question.mandatory && !answers[question.id]?.trim(),
+  );
 
 const questions = [
   {
@@ -337,7 +356,58 @@ export function CheckInFlow() {
   const signaturePadRef = useRef<SignaturePadRef>(null);
   const finalizationStartedRef = useRef(false);
   const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string | null>(null);
-  const [questionnaireAnswers, setQuestionnaireAnswers] = useState<Record<string, string>>({});
+  const [questionnaireDrafts, setQuestionnaireDrafts] = useState<
+    Record<string, Record<string, string>>
+  >({});
+  const [questionnaireValidationTarget, setQuestionnaireValidationTarget] =
+    useState<QuestionnaireValidationTarget | null>(null);
+  const questionnaireScrollRef = useRef<HTMLDivElement>(null);
+  const questionnaireQuestionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const questionnaireFocusRefs = useRef<Record<string, HTMLElement | null>>({});
+
+  const questionnaireTargetKey = (
+    questionnaireId: string,
+    questionId: string,
+  ) => `${questionnaireId}:${questionId}`;
+
+  useEffect(() => {
+    if (
+      screen !== "questionnaire" ||
+      !activeQuestionnaireId ||
+      !questionnaireValidationTarget ||
+      questionnaireValidationTarget.questionnaireId !== activeQuestionnaireId
+    ) {
+      return;
+    }
+
+    const key = questionnaireTargetKey(
+      questionnaireValidationTarget.questionnaireId,
+      questionnaireValidationTarget.questionId,
+    );
+    const questionElement = questionnaireQuestionRefs.current[key];
+    const focusElement = questionnaireFocusRefs.current[key];
+    const scrollElement = questionnaireScrollRef.current;
+    if (!questionElement || !scrollElement) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      const scrollRect = scrollElement.getBoundingClientRect();
+      const questionRect = questionElement.getBoundingClientRect();
+      const desiredScrollTop =
+        scrollElement.scrollTop +
+        questionRect.top -
+        scrollRect.top -
+        24;
+      const maxScrollTop = scrollElement.scrollHeight - scrollElement.clientHeight;
+
+      scrollElement.scrollTo({
+        top: Math.min(Math.max(desiredScrollTop, 0), maxScrollTop),
+        behavior: "smooth",
+      });
+      focusElement?.focus({ preventScroll: true });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [screen, activeQuestionnaireId, questionnaireValidationTarget]);
 
   const selectPreviewScreen = (nextScreen: Screen) => {
     if (!previewMode) return;
@@ -522,6 +592,7 @@ export function CheckInFlow() {
     }
     if (screen === "questionnaire" && activeQuestionnaireId) {
       setActiveQuestionnaireId(null);
+      setQuestionnaireValidationTarget(null);
       return;
     }
     const previous: Partial<Record<Screen, Screen>> = {
@@ -558,7 +629,8 @@ export function CheckInFlow() {
       setConsentAccepted(false);
       signaturePadRef.current?.clear();
       setActiveQuestionnaireId(null);
-      setQuestionnaireAnswers({});
+      setQuestionnaireDrafts({});
+      setQuestionnaireValidationTarget(null);
       return;
     }
 
@@ -585,7 +657,8 @@ export function CheckInFlow() {
     setConsentAccepted(false);
     signaturePadRef.current?.clear();
     setActiveQuestionnaireId(null);
-    setQuestionnaireAnswers({});
+    setQuestionnaireDrafts({});
+    setQuestionnaireValidationTarget(null);
     clearError();
     setShowHelp(false);
     setLanguageOpen(false);
@@ -621,7 +694,8 @@ export function CheckInFlow() {
         setConsentAccepted(false);
         signaturePadRef.current?.clear();
         setActiveQuestionnaireId(null);
-        setQuestionnaireAnswers({});
+        setQuestionnaireDrafts({});
+        setQuestionnaireValidationTarget(null);
         setScreen("coverage");
       },
       onError: () => setError("Failed to save appointment. Please try again.")
@@ -728,8 +802,24 @@ export function CheckInFlow() {
   }, [screen, session]);
 
   const continueQuestions = () => {
-    if (session?.questionnaires?.some(q => q.status === "not_started")) {
+    const incompleteQuestionnaire = session?.questionnaires?.find(
+      (questionnaire) => questionnaire.status === "not_started",
+    );
+    if (incompleteQuestionnaire) {
+      const firstMissingQuestion = getFirstUnansweredMandatoryQuestion(
+        incompleteQuestionnaire,
+        questionnaireDrafts[incompleteQuestionnaire.id],
+      );
       setError("Please complete all required questionnaires.");
+      setActiveQuestionnaireId(incompleteQuestionnaire.id);
+      setQuestionnaireValidationTarget(
+        firstMissingQuestion
+          ? {
+              questionnaireId: incompleteQuestionnaire.id,
+              questionId: firstMissingQuestion.id,
+            }
+          : null,
+      );
       return;
     }
     if (!session?.sessionId) return;
@@ -1913,7 +2003,7 @@ export function CheckInFlow() {
                             onClick={() => {
                               if (isNotStarted || isPortal) {
                                 setActiveQuestionnaireId(q.id);
-                                setQuestionnaireAnswers({});
+                                setQuestionnaireValidationTarget(null);
                                 clearError();
                               }
                             }}
@@ -1965,7 +2055,7 @@ export function CheckInFlow() {
                   {primaryButton(
                     content.questions.continueButton, 
                     continueQuestions, 
-                    session?.questionnaires?.some(q => q.status === "not_started"),
+                    false,
                     undefined,
                     "button-save-questionnaires"
                   )}
@@ -1980,18 +2070,24 @@ export function CheckInFlow() {
                   if (!q) return null;
                   
                   const isReview = q.status === "completed_portal";
+                  const questionnaireAnswers = questionnaireDrafts[q.id] ?? {};
                   
                   const handleSaveQuestionnaire = () => {
-                     const missing = q.questions.filter(
+                    const missing = q.questions.filter(
                        question =>
                          question.mandatory &&
                          !questionnaireAnswers[question.id]?.trim(),
                      );
                     if (missing.length > 0) {
                       setError("Please answer all required questions.");
+                      setQuestionnaireValidationTarget({
+                        questionnaireId: q.id,
+                        questionId: missing[0].id,
+                      });
                       return;
                     }
                     clearError();
+                    setQuestionnaireValidationTarget(null);
 
                     if (previewMode) {
                       const updatedQs = session?.questionnaires?.map(x => 
@@ -2020,11 +2116,18 @@ export function CheckInFlow() {
 
                   return (
                     <>
-                      <div className="flex-1 overflow-y-auto pr-1">
+                      <div
+                        ref={questionnaireScrollRef}
+                        className="kiosk-questionnaire-scroll flex-1 overflow-y-auto pr-1"
+                      >
                         <button
                           type="button"
                           data-testid="button-back-questionnaire"
-                          onClick={() => { setActiveQuestionnaireId(null); clearError(); }}
+                          onClick={() => {
+                            setActiveQuestionnaireId(null);
+                            setQuestionnaireValidationTarget(null);
+                            clearError();
+                          }}
                           className="mb-6 flex min-h-10 items-center gap-2 text-sm font-bold text-[#806259] transition hover:text-[#990000] focus:outline-none focus:ring-2 focus:ring-[#990000]/25"
                         >
                           <ArrowLeft size={17} /> Back
@@ -2044,13 +2147,41 @@ export function CheckInFlow() {
                         <div className="space-y-8">
                           {q.questions.map(question => {
                             const value = isReview ? (q.completedAnswers?.[question.id] || "") : (questionnaireAnswers[question.id] || "");
+                            const targetKey = questionnaireTargetKey(q.id, question.id);
+                            const isValidationTarget =
+                              !isReview &&
+                              questionnaireValidationTarget?.questionnaireId === q.id &&
+                              questionnaireValidationTarget.questionId === question.id;
+                            const validationMessageId = `${targetKey}-required-message`;
                             
                             return (
-                              <div key={question.id} className="flex flex-col gap-3">
-                                <label className="text-[15px] font-bold text-[#632f2f]">
+                              <div
+                                key={question.id}
+                                ref={(element) => {
+                                  questionnaireQuestionRefs.current[targetKey] = element;
+                                }}
+                                className={`flex flex-col gap-3 rounded-2xl ${
+                                  isValidationTarget
+                                    ? "border border-[#e8b9ad] bg-[#fff0ec] p-4"
+                                    : ""
+                                }`}
+                                data-testid={`questionnaire-question-${q.id}-${question.id}`}
+                              >
+                                <label
+                                  htmlFor={question.type === "free_text" ? `${targetKey}-input` : undefined}
+                                  className="text-[15px] font-bold text-[#632f2f]"
+                                >
                                   {question.text}
                                   {question.mandatory && !isReview && <span className="ml-1 text-[#990000]">*</span>}
                                 </label>
+                                {isValidationTarget && (
+                                  <p
+                                    id={validationMessageId}
+                                    className="text-sm font-bold text-[#9a2929]"
+                                  >
+                                    Required — please answer this question.
+                                  </p>
+                                )}
                                 
                                 {question.type === "single_select" && question.options && (
                                   <div className="flex flex-wrap gap-2">
@@ -2061,9 +2192,33 @@ export function CheckInFlow() {
                                           key={opt.id}
                                           type="button"
                                           disabled={isReview}
+                                          ref={
+                                            opt.id === question.options?.[0]?.id
+                                              ? (element) => {
+                                                  questionnaireFocusRefs.current[targetKey] = element;
+                                                }
+                                              : undefined
+                                          }
+                                          aria-invalid={
+                                            opt.id === question.options?.[0]?.id && isValidationTarget
+                                              ? true
+                                              : undefined
+                                          }
+                                          aria-describedby={
+                                            opt.id === question.options?.[0]?.id && isValidationTarget
+                                              ? validationMessageId
+                                              : undefined
+                                          }
                                           onClick={() => {
                                             if (!isReview) {
-                                              setQuestionnaireAnswers(prev => ({ ...prev, [question.id]: opt.id }));
+                                              setQuestionnaireDrafts((previousDrafts) => ({
+                                                ...previousDrafts,
+                                                [q.id]: {
+                                                  ...previousDrafts[q.id],
+                                                  [question.id]: opt.id,
+                                                },
+                                              }));
+                                              setQuestionnaireValidationTarget(null);
                                               clearError();
                                             }
                                           }}
@@ -2087,10 +2242,23 @@ export function CheckInFlow() {
                                     </div>
                                   ) : (
                                     <textarea
+                                      id={`${targetKey}-input`}
                                       rows={4}
                                       value={value}
+                                      ref={(element) => {
+                                        questionnaireFocusRefs.current[targetKey] = element;
+                                      }}
+                                      aria-invalid={isValidationTarget || undefined}
+                                      aria-describedby={isValidationTarget ? validationMessageId : undefined}
                                       onChange={(e) => {
-                                        setQuestionnaireAnswers(prev => ({ ...prev, [question.id]: e.target.value }));
+                                        setQuestionnaireDrafts((previousDrafts) => ({
+                                          ...previousDrafts,
+                                          [q.id]: {
+                                            ...previousDrafts[q.id],
+                                            [question.id]: e.target.value,
+                                          },
+                                        }));
+                                        setQuestionnaireValidationTarget(null);
                                         clearError();
                                       }}
                                       className="w-full rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] p-4 text-[15px] font-medium text-[#632f2f] placeholder:text-[#b7a49a] focus:border-[#990000] focus:bg-[#fff6e8] focus:outline-none focus:ring-4 focus:ring-[#990000]/10"
@@ -2117,7 +2285,10 @@ export function CheckInFlow() {
                         ) : (
                           <button
                             type="button"
-                            onClick={() => setActiveQuestionnaireId(null)}
+                            onClick={() => {
+                              setActiveQuestionnaireId(null);
+                              setQuestionnaireValidationTarget(null);
+                            }}
                             className="flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl border border-[#c1aba0] bg-[#fffaf1] px-5 text-[15px] font-bold text-[#632f2f] transition hover:bg-[#f4e6d5] focus:outline-none focus:ring-4 focus:ring-[#990000]/20"
                           >
                             Return to list

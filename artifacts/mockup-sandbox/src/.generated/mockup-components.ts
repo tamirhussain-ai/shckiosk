@@ -2,6 +2,7 @@
 type ModuleMap = Record<string, () => Promise<Record<string, unknown>>>;
 export const modules: ModuleMap = {
   "./components/mockups/completion-confirmation-ticket/ConfirmationTicket.tsx": () => import("../components/mockups/completion-confirmation-ticket/ConfirmationTicket.tsx"),
+  "./components/mockups/completion-destination-hero/DestinationHero.tsx": () => import("../components/mockups/completion-destination-hero/DestinationHero.tsx"),
   "./components/mockups/completion-directions/GiantFloorDirective.tsx": () => import("../components/mockups/completion-directions/GiantFloorDirective.tsx"),
   "./components/mockups/completion-directions/VisitTicketDestination.tsx": () => import("../components/mockups/completion-directions/VisitTicketDestination.tsx"),
   "./components/mockups/completion-directions/WayfindingRoute.tsx": () => import("../components/mockups/completion-directions/WayfindingRoute.tsx"),
@@ -9,7 +10,6 @@ export const modules: ModuleMap = {
   "./components/mockups/completion-motion/DestinationEmphasis.tsx": () => import("../components/mockups/completion-motion/DestinationEmphasis.tsx"),
   "./components/mockups/completion-motion/GentlePulse.tsx": () => import("../components/mockups/completion-motion/GentlePulse.tsx"),
   "./components/mockups/completion-motion/SoftGlow.tsx": () => import("../components/mockups/completion-motion/SoftGlow.tsx"),
-  "./components/mockups/completion-destination-hero/DestinationHero.tsx": () => import("../components/mockups/completion-destination-hero/DestinationHero.tsx"),
-  "./components/mockups/kiosk-checkin/KioskCheckIn.tsx": () => import("../components/mockups/kiosk-checkin/KioskCheckIn.tsx"),
-  "./components/mockups/completion-stacked-kiosk/StackedKiosk.tsx": () => import("../components/mockups/completion-stacked-kiosk/StackedKiosk.tsx")
+  "./components/mockups/completion-stacked-kiosk/StackedKiosk.tsx": () => import("../components/mockups/completion-stacked-kiosk/StackedKiosk.tsx"),
+  "./components/mockups/kiosk-checkin/KioskCheckIn.tsx": () => import("../components/mockups/kiosk-checkin/KioskCheckIn.tsx")
 };
