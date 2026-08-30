@@ -786,11 +786,11 @@ export function CheckInFlow() {
           </section>
 
           <section className="kiosk-card relative isolate min-h-[580px] rounded-[30px] border border-[#e7d9c7] bg-[#fffaf1] p-6 shadow-[0_25px_65px_rgba(108,35,35,.12)] sm:p-9 lg:min-h-[610px] lg:p-11">
-            <div className="pointer-events-none absolute right-0 top-0 z-0 h-48 w-48 overflow-hidden rounded-tr-[30px]" aria-hidden="true">
+            <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[30px]" aria-hidden="true">
               <img
                 src="/iu-trident-crimson-cropped.png"
                 alt=""
-                className="absolute -right-2 -top-3 h-44 w-40 object-contain opacity-[0.065]"
+                className="absolute -bottom-3 -right-8 h-[90%] w-auto object-contain opacity-[0.05]"
               />
             </div>
 
