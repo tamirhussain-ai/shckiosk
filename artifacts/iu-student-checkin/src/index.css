@@ -130,6 +130,9 @@
   }
   .kiosk-contact-panel .kiosk-contact-fields input {
     min-height: 2.75rem;
+    padding-right: .65rem;
+    padding-left: .65rem;
+    font-size: .875rem;
   }
   .kiosk-contact-panel .kiosk-contact-actions {
     margin-top: .75rem;

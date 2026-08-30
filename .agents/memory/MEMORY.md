@@ -3,3 +3,4 @@
 - [Canvas motion replay](canvas-motion-replay.md) — Canvas selection does not reload one-time animations; motion comparisons need visible replay controls.
 - [Completion motion direction](completion-motion-direction.md) — production uses the approved 10-second two-peak color pulse on the floor directive, with reduced-motion support.
 - [Form workflow semantics](form-workflow-semantics.md) — consent is sequential per form with drawn signatures; portal-completed questionnaires are review-only.
+- [Kiosk form grids](kiosk-form-grids.md) — use flat responsive grids for dense landscape forms; nested display-contents grids can collapse columns in the kiosk preview.
