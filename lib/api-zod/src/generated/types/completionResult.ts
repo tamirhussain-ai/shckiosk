@@ -10,4 +10,10 @@ export interface CompletionResult {
   completed: boolean;
   nextStep: string;
   directions: string;
+  provider: string;
+  visitType: string;
+  appointmentTime: string;
+  addressLine2: string;
+  floorLabel: string;
+  waitingArea: string;
 }

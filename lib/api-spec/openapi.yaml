@@ -54,7 +54,7 @@ paths:
     post:
       operationId: verifyCheckIn
       tags: [check-in]
-      summary: Verify the secure code sent to the student
+      summary: Verify a secure code for clients that use step-up verification
       parameters:
         - $ref: "#/components/parameters/SessionId"
       requestBody:
@@ -303,7 +303,9 @@ components:
           type: string
         location:
           type: string
-      required: [id, date, time, provider, type, location]
+        addressLine2:
+          type: string
+      required: [id, date, time, provider, type, location, addressLine2]
     StudentProfile:
       type: object
       properties:
@@ -402,5 +404,17 @@ components:
           type: string
         directions:
           type: string
-      required: [completed, nextStep, directions]
+        provider:
+          type: string
+        visitType:
+          type: string
+        appointmentTime:
+          type: string
+        addressLine2:
+          type: string
+        floorLabel:
+          type: string
+        waitingArea:
+          type: string
+      required: [completed, nextStep, directions, provider, visitType, appointmentTime, addressLine2, floorLabel, waitingArea]
 

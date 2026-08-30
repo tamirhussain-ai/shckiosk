@@ -12,7 +12,6 @@ import {
 
 type CheckInStage =
   | "identified"
-  | "verified"
   | "appointment"
   | "demographics"
   | "coverage"
@@ -68,7 +67,6 @@ const wait = (milliseconds: number) =>
 
 const stageOrder: CheckInStage[] = [
   "identified",
-  "verified",
   "appointment",
   "demographics",
   "coverage",
@@ -76,6 +74,17 @@ const stageOrder: CheckInStage[] = [
   "questionnaire",
   "history",
 ];
+
+const providerAccounts = {
+  mayaPatel: {
+    displayName: "Maya Patel, MD",
+    addressLine2: "First floor · Primary Care waiting area",
+  },
+  jordanLewis: {
+    displayName: "Jordan Lewis, NP",
+    addressLine2: "Second floor · Wellness waiting area",
+  },
+} as const;
 
 const isAtLeast = (record: SessionRecord, stage: CheckInStage) =>
   stageOrder.indexOf(record.stage) >= stageOrder.indexOf(stage);
@@ -105,7 +114,7 @@ class MockCheckInAdapter implements CheckInAdapter {
     const sessionId = crypto.randomUUID();
     const session: CheckInSession = {
       sessionId,
-      requiresVerification: input.method !== "qr",
+      requiresVerification: false,
       student: {
         firstName: "Avery",
         lastName: "Johnson",
@@ -117,24 +126,26 @@ class MockCheckInAdapter implements CheckInAdapter {
           id: "primary-care-1030",
           date: "Today, October 14",
           time: "10:30 AM",
-          provider: "Maya Patel, MD",
+          provider: providerAccounts.mayaPatel.displayName,
           type: "Primary care visit",
           location: "Student Health Center · First floor",
+          addressLine2: providerAccounts.mayaPatel.addressLine2,
         },
         {
           id: "wellness-1415",
           date: "Today, October 14",
           time: "2:15 PM",
-          provider: "Jordan Lewis, NP",
+          provider: providerAccounts.jordanLewis.displayName,
           type: "Wellness visit",
-          location: "Student Health Center · First floor",
+          location: "Student Health Center · Second floor",
+          addressLine2: providerAccounts.jordanLewis.addressLine2,
         },
       ],
     };
 
     this.sessions.set(sessionId, {
       session,
-      verified: !session.requiresVerification,
+      verified: true,
       stage: "identified",
       verificationExpiresAt: Date.now() + 10 * 60 * 1000,
       verificationAttempts: 0,
@@ -156,7 +167,7 @@ class MockCheckInAdapter implements CheckInAdapter {
     record.verificationAttempts += 1;
     if (code !== "123456") return false;
     record.verified = true;
-    invalidateAfter(record, "verified");
+    invalidateAfter(record, "identified");
     return true;
   }
 
@@ -166,11 +177,7 @@ class MockCheckInAdapter implements CheckInAdapter {
   ): Promise<CheckInSession | null> {
     await wait(180);
     const record = this.sessions.get(sessionId);
-    if (
-      !record ||
-      !record.verified ||
-      !isAtLeast(record, "identified")
-    ) {
+    if (!record || !record.verified || !isAtLeast(record, "identified")) {
       return null;
     }
     if (
@@ -268,11 +275,25 @@ class MockCheckInAdapter implements CheckInAdapter {
     await wait(500);
     const record = this.sessions.get(sessionId);
     if (!record?.history || record.stage !== "history") return null;
+    const appointment = record.session.appointments.find(
+      (item) => item.id === record.appointmentId,
+    );
+    if (!appointment) return null;
+    const [floorLabel, waitingArea] = appointment.addressLine2
+      .split("·")
+      .map((part) => part.trim());
+    if (!floorLabel || !waitingArea) return null;
     this.sessions.delete(sessionId);
     return {
       completed: true,
-      nextStep: "Have a seat in the main waiting area",
-      directions: "Your care team will call your first name when they are ready.",
+      nextStep: `Go to the ${waitingArea}`,
+      directions: `Take the elevator or stairs to the ${floorLabel.toLowerCase()}, then follow signs for the ${waitingArea}.`,
+      provider: appointment.provider,
+      visitType: appointment.type,
+      appointmentTime: appointment.time,
+      addressLine2: appointment.addressLine2,
+      floorLabel,
+      waitingArea,
     };
   }
 }

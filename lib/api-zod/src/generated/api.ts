@@ -42,13 +42,14 @@ export const IdentifyCheckInResponse = zod.object({
   "time": zod.string(),
   "provider": zod.string(),
   "type": zod.string(),
-  "location": zod.string()
+  "location": zod.string(),
+  "addressLine2": zod.string()
 }))
 })
 
 
 /**
- * @summary Verify the secure code sent to the student
+ * @summary Verify a secure code for clients that use step-up verification
  */
 
 
@@ -100,7 +101,8 @@ export const SaveCheckInAppointmentResponse = zod.object({
   "time": zod.string(),
   "provider": zod.string(),
   "type": zod.string(),
-  "location": zod.string()
+  "location": zod.string(),
+  "addressLine2": zod.string()
 }))
 })
 
@@ -137,7 +139,8 @@ export const SaveCheckInDemographicsResponse = zod.object({
   "time": zod.string(),
   "provider": zod.string(),
   "type": zod.string(),
-  "location": zod.string()
+  "location": zod.string(),
+  "addressLine2": zod.string()
 }))
 })
 
@@ -171,7 +174,8 @@ export const SaveCheckInCoverageResponse = zod.object({
   "time": zod.string(),
   "provider": zod.string(),
   "type": zod.string(),
-  "location": zod.string()
+  "location": zod.string(),
+  "addressLine2": zod.string()
 }))
 })
 
@@ -206,7 +210,8 @@ export const SaveCheckInConsentResponse = zod.object({
   "time": zod.string(),
   "provider": zod.string(),
   "type": zod.string(),
-  "location": zod.string()
+  "location": zod.string(),
+  "addressLine2": zod.string()
 }))
 })
 
@@ -240,7 +245,8 @@ export const SaveCheckInQuestionnaireResponse = zod.object({
   "time": zod.string(),
   "provider": zod.string(),
   "type": zod.string(),
-  "location": zod.string()
+  "location": zod.string(),
+  "addressLine2": zod.string()
 }))
 })
 
@@ -274,7 +280,8 @@ export const SaveCheckInHistoryResponse = zod.object({
   "time": zod.string(),
   "provider": zod.string(),
   "type": zod.string(),
-  "location": zod.string()
+  "location": zod.string(),
+  "addressLine2": zod.string()
 }))
 })
 
@@ -292,7 +299,13 @@ export const CompleteCheckInParams = zod.object({
 export const CompleteCheckInResponse = zod.object({
   "completed": zod.boolean(),
   "nextStep": zod.string(),
-  "directions": zod.string()
+  "directions": zod.string(),
+  "provider": zod.string(),
+  "visitType": zod.string(),
+  "appointmentTime": zod.string(),
+  "addressLine2": zod.string(),
+  "floorLabel": zod.string(),
+  "waitingArea": zod.string()
 })
 
 

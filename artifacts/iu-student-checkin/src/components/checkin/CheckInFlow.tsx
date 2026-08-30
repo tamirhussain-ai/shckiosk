@@ -1,4 +1,4 @@
-import { useState, useRef, type KeyboardEvent, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   AlertCircle,
   ArrowLeft,
@@ -17,7 +17,6 @@ import {
   HeartPulse,
   HelpCircle,
   Info,
-  KeyRound,
   LockKeyhole,
   MapPin,
   MessageCircleMore,
@@ -32,7 +31,6 @@ import {
 } from "lucide-react";
 import { 
   useIdentifyCheckIn,
-  useVerifyCheckIn,
   useSaveCheckInAppointment,
   useSaveCheckInDemographics,
   useSaveCheckInCoverage,
@@ -49,7 +47,6 @@ type Coverage = "iu" | "other" | "self";
 type Answer = "yes" | "no" | "unsure";
 type Screen =
   | "welcome"
-  | "code"
   | "appointment"
   | "demographics"
   | "coverage"
@@ -112,6 +109,13 @@ const journeySteps = [
   { id: "history", label: "History" },
 ];
 
+function formatDateOfBirth(input: string) {
+  const digits = input.replace(/\D/g, "").slice(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
+
 export function CheckInFlow() {
   const [mode, setMode] = useState<CheckInMode>("universityId");
   const [screen, setScreen] = useState<Screen>("welcome");
@@ -123,7 +127,6 @@ export function CheckInFlow() {
   // Form State
   const [value, setValue] = useState("");
   const [dob, setDob] = useState("");
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [language, setLanguage] = useState(languages[0]);
   const [languageOpen, setLanguageOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -141,8 +144,6 @@ export function CheckInFlow() {
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
   const [historyChoice, setHistoryChoice] = useState<"same" | "update" | "">("");
   
-  const otpRefs = useRef<Array<HTMLInputElement | null>>([]);
-
   // Sync demographics from session when fetched
   useEffect(() => {
     if (session?.student) {
@@ -156,7 +157,6 @@ export function CheckInFlow() {
   // API Hooks
   const { data: healthStatus } = useHealthCheck();
   const identifyMutation = useIdentifyCheckIn();
-  const verifyMutation = useVerifyCheckIn();
   const saveAppointmentMutation = useSaveCheckInAppointment();
   const saveDemographicsMutation = useSaveCheckInDemographics();
   const saveCoverageMutation = useSaveCheckInCoverage();
@@ -167,7 +167,6 @@ export function CheckInFlow() {
 
   const isMutating = 
     identifyMutation.isPending || 
-    verifyMutation.isPending || 
     saveAppointmentMutation.isPending ||
     saveDemographicsMutation.isPending ||
     saveCoverageMutation.isPending ||
@@ -182,9 +181,8 @@ export function CheckInFlow() {
     mode === "qr"
       ? true
       : mode === "universityId"
-        ? value.trim().length >= 3 && dob.trim().length >= 4
-        : value.trim().length >= 2 && dob.trim().length >= 4;
-  const canVerify = otp.every((digit) => digit.length === 1);
+        ? value.trim().length >= 3 && dob.length === 10
+        : value.trim().length >= 2 && dob.length === 10;
 
   const clearError = () => setError("");
 
@@ -209,11 +207,8 @@ export function CheckInFlow() {
     }, {
       onSuccess: (data) => {
         setSession(data);
-        if (data.requiresVerification) {
-          setScreen("code");
-        } else {
-          setScreen("appointment");
-        }
+        setSelectedAppointment(data.appointments?.[0]?.id ?? "");
+        setScreen("appointment");
       },
       onError: (err: unknown) => {
         setError(getApiErrorMessage(err, "We couldn't find a matching demo visit. Use the sample details shown on this screen."));
@@ -221,50 +216,10 @@ export function CheckInFlow() {
     });
   };
 
-  const handleOtpChange = (index: number, nextValue: string) => {
-    const digit = nextValue.replace(/\D/g, "").slice(-1);
-    const next = [...otp];
-    next[index] = digit;
-    setOtp(next);
-    clearError();
-    if (digit && index < otp.length - 1) otpRefs.current[index + 1]?.focus();
-  };
-
-  const handleOtpKeyDown = (index: number, event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Backspace" && !otp[index] && index > 0) {
-      otpRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const verifyCode = () => {
-    if (!canVerify || !session?.sessionId) {
-      setError("Enter the 6-digit code to continue.");
-      return;
-    }
-    clearError();
-    
-    verifyMutation.mutate({
-      sessionId: session.sessionId,
-      data: { code: otp.join("") }
-    }, {
-      onSuccess: (res) => {
-        if (res.verified) {
-          setScreen("appointment");
-        } else {
-          setError("The code you entered is incorrect. Please try again.");
-        }
-      },
-      onError: (err: unknown) => {
-        setError(getApiErrorMessage(err, "Failed to verify code. Please try again."));
-      }
-    });
-  };
-
   const goBack = () => {
     clearError();
     const previous: Partial<Record<Screen, Screen>> = {
-      code: "welcome",
-      appointment: session?.requiresVerification ? "code" : "welcome",
+      appointment: "welcome",
       demographics: "appointment",
       coverage: "demographics",
       consent: "coverage",
@@ -282,7 +237,6 @@ export function CheckInFlow() {
     setMode("universityId");
     setValue("");
     setDob("");
-    setOtp(["", "", "", "", "", ""]);
     setSelectedAppointment("");
     setCoverage("iu");
     setConsentAccepted(false);
@@ -708,22 +662,20 @@ export function CheckInFlow() {
                   Check-in complete
                 </div>
                 <h1
-                  className="max-w-[570px] text-[clamp(3rem,5.1vw,5.2rem)] font-semibold leading-[.96] tracking-[-.07em] text-[#990000] font-serif"
+                  className="max-w-[650px] text-[clamp(4.6rem,10vw,8.8rem)] font-semibold uppercase leading-[.82] tracking-[-.09em] text-[#990000] font-serif"
+                  data-testid="text-floor"
                 >
-                  You're in good hands.
+                  {completion?.floorLabel || "Destination"}
                 </h1>
-                <p className="mt-7 max-w-[450px] text-[17px] leading-7 text-[#806960]" data-testid="text-directions">
-                  {completion?.directions || "Your care team has your check-in. Find a seat in the waiting area and we'll call your name shortly."}
-                </p>
-                {completion?.nextStep && (
-                  <p className="mt-4 max-w-[450px] text-[17px] font-bold text-[#990000]">
-                    Next step: {completion.nextStep}
+                <div className="mt-7 flex items-center gap-4 border-l-[5px] border-[#990000] pl-5">
+                  <MapPin size={32} className="shrink-0 text-[#990000]" />
+                  <p className="text-[clamp(1.8rem,3.3vw,3rem)] font-bold leading-none tracking-[-.05em] text-[#3d2626]" data-testid="text-waiting-area">
+                    {completion?.waitingArea || "Waiting area"}
                   </p>
-                )}
-                <div className="mt-9 flex items-center gap-2 text-xs font-semibold text-[#8d756b]">
-                  <LockKeyhole size={14} />
-                  Your information is no longer visible on this screen.
                 </div>
+                <p className="mt-7 max-w-[560px] text-[17px] leading-7 text-[#806960]" data-testid="text-directions">
+                  {completion?.directions}
+                </p>
               </div>
             ) : screen === "checking" ? (
                <div className="max-w-[560px]">
@@ -750,7 +702,6 @@ export function CheckInFlow() {
                   {screen === "consent" && "A quick review before we begin."}
                   {screen === "questionnaire" && "A few things for your care team."}
                   {screen === "history" && "Anything changed since your last visit?"}
-                  {screen === "code" && "Verify your identity."}
                 </h1>
                 <p className="mt-6 max-w-[430px] text-[16px] leading-7 text-[#806960]">
                   {screen === "appointment" && "Choose the appointment you're here for today."}
@@ -759,7 +710,6 @@ export function CheckInFlow() {
                   {screen === "consent" && "Please read the short notice, then sign to acknowledge."}
                   {screen === "questionnaire" && "Your answers help us prepare for a more useful conversation."}
                   {screen === "history" && "A quick confirmation helps us keep your record current."}
-                  {screen === "code" && "Please enter the 6-digit verification code sent to your device."}
                 </p>
               </div>
             )}
@@ -861,10 +811,11 @@ export function CheckInFlow() {
                             data-testid="input-dob"
                             value={dob}
                             onChange={(event) => {
-                              setDob(event.target.value);
+                              setDob(formatDateOfBirth(event.target.value));
                               clearError();
                             }}
-                            placeholder="MM / DD / YYYY"
+                            maxLength={10}
+                            placeholder="MM/DD/YYYY"
                             className="min-h-14 w-full rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] pl-12 pr-4 text-[16px] font-semibold tracking-[.01em] text-[#632f2f] outline-none transition placeholder:text-[#b7a49a] focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
                           />
                         </div>
@@ -884,53 +835,6 @@ export function CheckInFlow() {
                     )}
                   </div>
                 </div>
-              </div>
-            )}
-
-            {screen === "code" && (
-              <div className="kiosk-fade relative">
-                {renderBack()}
-                <div className="mb-7">
-                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#e6f0e5] text-[#316148]">
-                    <CheckCircle2 size={24} />
-                  </div>
-                  <h2 className="text-[clamp(2.1rem,3.5vw,2.9rem)] font-semibold leading-[1.03] tracking-[-.055em] text-[#990000] font-serif">
-                    We found your visit.
-                  </h2>
-                  <p className="mt-3 text-[15px] leading-6 text-[#806960]">
-                    To protect your health records, please enter the 6-digit code we just sent to your phone ending in <strong className="text-[#632f2f]">**48</strong>.
-                  </p>
-                </div>
-
-                <div className="flex gap-2 sm:gap-3">
-                  {otp.map((digit, index) => (
-                    <input
-                      key={index}
-                      type="text"
-                      inputMode="numeric"
-                      autoComplete="off"
-                      maxLength={1}
-                      data-testid={`input-otp-${index}`}
-                      value={digit}
-                      ref={(el) => {
-                        otpRefs.current[index] = el;
-                      }}
-                      onChange={(e) => handleOtpChange(index, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                      className="min-h-16 w-full rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] text-center text-[22px] font-bold text-[#632f2f] outline-none transition focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
-                    />
-                  ))}
-                </div>
-
-                {renderError()}
-
-                <div className="mt-8">
-                  {primaryButton("Verify and continue", verifyCode, !canVerify, undefined, "button-verify")}
-                </div>
-                
-                <p data-testid="text-demo-code" className="mt-5 text-center text-sm font-semibold text-[#806960]">
-                  Demo verification code: <strong className="text-[#990000]">123456</strong>
-                </p>
               </div>
             )}
 
@@ -1285,22 +1189,37 @@ export function CheckInFlow() {
             )}
 
             {screen === "complete" && (
-              <div className="kiosk-fade flex min-h-[400px] flex-col items-center justify-center text-center">
-                <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#e6f0e5] text-[#316148] shadow-[0_8px_20px_rgba(49,97,72,.16)]">
-                  <CheckCircle2 size={40} strokeWidth={2.5} />
+              <div className="kiosk-fade flex min-h-[510px] flex-col">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-[#806960]">
+                  <Check size={16} className="text-[#316148]" />
+                  Visit confirmed
                 </div>
-                <h2 className="text-2xl font-bold text-[#632f2f] font-serif">All set</h2>
-                <p className="mt-3 max-w-[320px] text-[15px] leading-relaxed text-[#806960]">
-                  Demo complete. No real student health information was stored.
-                </p>
+                <dl className="mt-6 divide-y divide-[#e7d9c7]">
+                  <div className="py-4 first:pt-0">
+                    <dt className="text-xs font-semibold uppercase tracking-[.12em] text-[#806960]">Provider</dt>
+                    <dd className="mt-1 text-lg font-bold text-[#3d2626]" data-testid="text-provider">{completion?.provider}</dd>
+                  </div>
+                  <div className="py-4">
+                    <dt className="text-xs font-semibold uppercase tracking-[.12em] text-[#806960]">Visit</dt>
+                    <dd className="mt-1 text-lg font-bold text-[#3d2626]" data-testid="text-visit-type">{completion?.visitType}</dd>
+                  </div>
+                  <div className="py-4">
+                    <dt className="text-xs font-semibold uppercase tracking-[.12em] text-[#806960]">Time</dt>
+                    <dd className="mt-1 text-lg font-bold text-[#3d2626]" data-testid="text-appointment-time">{completion?.appointmentTime}</dd>
+                  </div>
+                </dl>
                 <button
                   type="button"
                   data-testid="button-finish"
                   onClick={startOver}
-                  className="mt-8 min-h-12 rounded-xl border-2 border-[#990000] px-6 text-[15px] font-bold text-[#990000] transition hover:bg-[#990000] hover:text-[#fff9ed] focus:outline-none focus:ring-4 focus:ring-[#990000]/20"
+                  className="mt-auto flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#990000] px-6 text-[16px] font-bold text-[#fff9ed] shadow-[0_10px_22px_rgba(122,0,0,.18)] transition hover:-translate-y-0.5 hover:bg-[#7d0000] focus:outline-none focus:ring-4 focus:ring-[#990000]/20"
                 >
                   Done
+                  <ArrowRight size={18} />
                 </button>
+                <p className="mt-4 text-center text-[11px] leading-5 text-[#806960]">
+                  Demo / sample data only. No patient information is displayed.
+                </p>
               </div>
             )}
           </section>

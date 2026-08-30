@@ -1,0 +1,23 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;600;700&family=Fraunces:opsz,wght@9..144,500;600;700&display=swap");
+
+:root {
+  --iu-crimson: #990000;
+  --iu-crimson-dark: #7d0000;
+  --iu-cream: #fbf5e8;
+  --iu-paper: #fffaf1;
+  --iu-ink: #3d2626;
+  --iu-muted: #806960;
+  --iu-border: #e7d9c7;
+  --iu-success: #316148;
+}
+
+body {
+  margin: 0;
+  background: var(--iu-cream);
+  color: var(--iu-ink);
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+.completion-serif {
+  font-family: "Fraunces", Georgia, serif;
+}

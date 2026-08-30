@@ -1,0 +1,1 @@
+- [Check-in verification boundary](checkin-verification-boundary.md) — no OTP screen in the demo, but keep server authorization state and the legacy verification API compatible.

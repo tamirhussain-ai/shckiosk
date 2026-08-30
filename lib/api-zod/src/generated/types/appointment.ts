@@ -13,4 +13,5 @@ export interface Appointment {
   provider: string;
   type: string;
   location: string;
+  addressLine2: string;
 }

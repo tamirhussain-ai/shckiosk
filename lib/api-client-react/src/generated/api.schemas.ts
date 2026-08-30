@@ -36,6 +36,7 @@ export interface Appointment {
   provider: string;
   type: string;
   location: string;
+  addressLine2: string;
 }
 
 export interface StudentProfile {
@@ -115,5 +116,11 @@ export interface CompletionResult {
   completed: boolean;
   nextStep: string;
   directions: string;
+  provider: string;
+  visitType: string;
+  appointmentTime: string;
+  addressLine2: string;
+  floorLabel: string;
+  waitingArea: string;
 }
 

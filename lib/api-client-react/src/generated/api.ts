@@ -220,7 +220,7 @@ export const getVerifyCheckInUrl = (sessionId: string,) => {
 }
 
 /**
- * @summary Verify the secure code sent to the student
+ * @summary Verify a secure code for clients that use step-up verification
  */
 export const verifyCheckIn = async (sessionId: string,
     verificationCode: VerificationCode, options?: Parameters<typeof customFetch>[1]): Promise<VerificationResult> => {
@@ -270,7 +270,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type VerifyCheckInMutationError = ErrorType<ErrorResponse>
 
     /**
- * @summary Verify the secure code sent to the student
+ * @summary Verify a secure code for clients that use step-up verification
  */
 export const useVerifyCheckIn = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof verifyCheckIn>>, TError,{sessionId: string;data: BodyType<VerificationCode>}, TContext>, request?: SecondParameter<typeof customFetch>}
