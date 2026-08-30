@@ -74,7 +74,7 @@ export const kioskContentDefaults: KioskContent = {
   complete: {
     badge: "Check-in complete",
     kioskFloorPrefix: "This kiosk is on the",
-    directionsSuffix: "Your visit is ready for you.",
+    directionsSuffix: "Your care team is expecting you.",
     destinationFallback: "Destination",
     waitingAreaFallback: "Waiting Area",
     visitConfirmed: "Visit confirmed",
