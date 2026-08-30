@@ -98,6 +98,48 @@ const questions = [
   },
 ];
 
+const generalConsentDescription = `IU STUDENT HEALTH CENTER GENERAL CONSENT FORM, GUARANTEE OF PAYMENT AND ACKNOWLEGEMENT OF NOTICE
+
+Treatment Authorization
+I authorize IU Bloomington Student Health Center (IUSHC), its agents and employees to furnish medical care and services, including but not limited to, diagnostic tests, examinations, digital photos for treatment and documentation, and other medical and/or surgical procedures, which are deemed necessary during my care. I agree that IUSHC cannot make any explicit guarantee or promises regarding results or cures.
+
+Teaching Environment
+I understand that IUSHC is part of a teaching environment and at times I may be asked to allow students, residents, and fellows to be involved in my care and that my medical records, including digital photos, may be used for purposes of research and education, so long as all personal identifiers are removed.
+
+Infectious Disease Testing
+I agree to allow IUSHC to test for infectious diseases including hepatitis and human immunodeficiency virus (HIV) if one of my caregivers is exposed to my blood or body fluid. In reciprocity, if I am exposed to any blood or body fluid during my treatment, I can request the source person be tested for such infectious diseases in accordance with Universal Protocol; at no cost to parties being tested. All parties invoiced will have access to the results.
+
+Financial Agreement
+In consideration for providing medical care and services, I understand that I am financially responsible for all fees and charges for services provided by IUSHC. IUSHC will provide information regarding fees for services upon request.
+
+Payment Responsibility and Insurance Benefit Authorization
+I am responsible for paying for all the care I receive, and if insurance does not cover all the cost, I must pay the remaining balance. I agree IUSHC may release my medical records as necessary to determine my insurance benefits and receive all payments that I am entitled to under insurance policies. I authorize payment of insurance benefits be made on my behalf to IUSHC for services provided to me. I understand that I am responsible for knowing what insurance coverage I have, providing IUSHC with my current insurance information, and for following all insurance policy rules.
+
+Bursar Account (if active)
+I authorize IUSHC to place my health service charges onto my Bursar account. By signing this form, I understand that I am entering into and agreeing to a legally binding contract to pay all fees assessed to my bursar account. I understand that if I allow my bursar account to become delinquent, University services, such as future registration, transcripts, diploma, and other certification will be encumbered until such time as the account is paid in full. In addition, I understand that IU may refer my past due account for collection, report my delinquency to the credit bureau system and may authorize legal action against me for the collection of this debt. I agree to be liable for all reasonable collection costs, including attorney fees, collection agency fees and court costs necessary for the collection of any past due amount. I understand and agree that if I leave any IU campus with an unpaid balance, that I authorize the University and/or its agents, including attorneys and collection agencies to contact me via cellular telephone and/or all forms of electronic technology (including text messaging/email) to collect such outstanding debt, unless I notify the agent in writing to cease electronic/cellular communication.
+
+Referrals
+I understand that IUSHC or my provider may refer me to an out of network provider for health care items or services. An out of network provider is not bound by payment provisions that apply to health care items or services rendered by a network provider under my health plan. I may contact my health plan before receiving health care items or services rendered by an out of network provider to obtain a list of network providers that may render the health care items or services and for additional assistance.
+
+HIPAA Notice of Privacy Practices
+I acknowledge that IUSHC is required to provide me with a copy of their Notice of Privacy Practices, which states how IUSHC may use and/or disclose my health information. I acknowledge that I have received or have been offered a copy of IUSHC's Notice of Privacy Practices (available electronically at https://healthcenter.indiana.edu/about/policies/privacy-notice.html) and that I may request a paper copy of this notice should I so choose.
+
+Communication Authorization
+I understand that IUSHC can contact me by telephone but needs my written permission to use other types of communication, including text message and email. I understand that IUSHC has enabled a portal for my use to securely perform the following: view lab results, vaccination information, make appointments, and communicate via email. An email is sent to me upon activation of the portal. Email sent through the University’s email system is secure, but the portal has additional security measures.
+
+IUSHC requests my permission to contact me by text message and through my University email address with information regarding my health care. I understand that the security of email sent from outside the University system or by text messages are not secure and there is a risk that the messages could be intercepted and read by someone other than myself.
+
+I authorize IUSHC to contact me by:
+
+Text message
+Email
+
+Duration of Consent
+This consent form will be valid for one (1) year from the date of signature below. I may revoke my consent at any time, except to the extent that action has been taken in reliance on the consent. Any revocation of my consent must be done in writing delivered to IUSHC.
+
+Acknowledgement
+I have read the above and have had the opportunity to ask questions. I understand my rights and obligations as described in this consent form.`;
+
 const journeySteps = [
   { id: "demographics", label: "Contact" },
   { id: "appointment", label: "Visit" },
@@ -174,8 +216,8 @@ const previewSession: CheckInSession = {
   consentForms: [
     {
       id: "c1",
-      title: "HIPAA Notice of Privacy Practices",
-      description: "I acknowledge that I have received the Notice of Privacy Practices detailing how my medical information may be used and disclosed.",
+      title: "General Consent Form",
+      description: generalConsentDescription,
       requiresSignature: true,
       status: "unsigned"
     },
@@ -358,6 +400,7 @@ export function CheckInFlow() {
       (step.id !== "consent" || hasUnsignedConsentForms(session)) &&
       (step.id !== "questionnaire" || hasEncounterQuestionnaires(session)),
   );
+  const isLongFormStage = screen === "consent" || screen === "questionnaire";
   const activeStepIndex = visibleJourneySteps.findIndex((step) => step.id === screen);
   const isJourney = activeStepIndex >= 0;
   const canContinue =
@@ -770,13 +813,13 @@ export function CheckInFlow() {
 
   return (
     <main
-      className="kiosk-shell relative min-h-[100dvh] overflow-hidden text-[#3d2626]"
+      className="kiosk-shell relative flex h-[100dvh] flex-col overflow-hidden text-[#3d2626]"
       style={{
         background:
           "radial-gradient(circle at 5% -5%, rgba(245,216,215,.9), transparent 30%), radial-gradient(circle at 100% 100%, rgba(237,222,193,.62), transparent 32%), #fbf5e8",
       }}
     >
-      <header className="relative z-20 flex items-center justify-between px-6 py-5 sm:px-10 lg:px-14">
+      <header className="relative z-20 flex shrink-0 items-center justify-between px-6 py-5 sm:px-10 lg:px-14">
         <div className="flex items-center gap-3.5">
           <div className="flex h-11 w-11 items-center justify-center rounded-[15px] bg-[#990000] text-[#fff9ed] shadow-[0_8px_20px_rgba(153,0,0,.16)]">
               <img
@@ -880,7 +923,7 @@ export function CheckInFlow() {
       </div>
 
       {previewMode && (
-        <div className="relative z-40 mx-auto w-full max-w-[1370px] px-6 sm:px-10 lg:px-14">
+        <div className="relative z-40 mx-auto w-full shrink-0 max-w-[1370px] px-6 sm:px-10 lg:px-14">
           <div className="rounded-2xl border border-[#e2d2bf] bg-[#fffaf1]/95 p-2.5 shadow-[0_12px_30px_rgba(108,35,35,.08)] backdrop-blur-sm">
             <div className="flex items-center gap-3 overflow-x-auto">
               <div className="shrink-0 px-2 text-[10px] font-bold uppercase tracking-[.14em] text-[#9a8074]">
@@ -967,11 +1010,11 @@ export function CheckInFlow() {
         </div>
       )}
 
-      <div className="relative z-10 mx-auto w-full max-w-[1370px] px-6 pb-9 sm:px-10 lg:px-14 lg:pb-14">
+      <div className="relative z-10 mx-auto flex min-h-0 w-full max-w-[1370px] flex-1 flex-col overflow-hidden px-6 pb-9 sm:px-10 lg:px-14 lg:pb-14">
         {isJourney && (
           <nav
             aria-label="Check-in progress"
-            className="kiosk-reveal mb-8 flex items-center justify-between gap-2 overflow-x-auto rounded-2xl border border-[#eadccb] bg-[#fffaf1]/70 px-4 py-3.5 lg:mb-10 lg:px-6"
+            className="kiosk-reveal mb-8 flex shrink-0 items-center justify-between gap-2 overflow-x-auto rounded-2xl border border-[#eadccb] bg-[#fffaf1]/70 px-4 py-3.5 lg:mb-10 lg:px-6"
           >
             {visibleJourneySteps.map((step, index) => {
               const isCurrent = index === activeStepIndex;
@@ -1010,17 +1053,20 @@ export function CheckInFlow() {
         <div
           className={
             screen === "complete"
-              ? "grid grid-cols-1"
-              : `grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,.82fr)_minmax(540px,1.18fr)] lg:gap-16 ${
+              ? "grid min-h-0 flex-1 grid-cols-1 overflow-y-auto"
+              : `grid min-h-0 flex-1 grid-cols-1 gap-8 overflow-hidden ${
+                  isLongFormStage ? "" : "lg:grid-cols-[minmax(0,.82fr)_minmax(540px,1.18fr)] lg:gap-16"
+                } ${
                   isJourney ? "lg:items-start" : "lg:items-center"
                 }`
           }
         >
-          <section
-            className={`kiosk-reveal kiosk-completion-copy relative z-10 flex min-w-0 flex-col justify-center ${
-              screen === "complete" ? "kiosk-completion-panel mx-auto w-full items-center" : "lg:min-h-[590px]"
-            }`}
-          >
+          {!isLongFormStage && (
+            <section
+              className={`kiosk-reveal kiosk-completion-copy relative z-10 flex min-w-0 flex-col justify-center ${
+                screen === "complete" ? "kiosk-completion-panel mx-auto w-full items-center" : "lg:min-h-[590px]"
+              }`}
+            >
             {screen === "welcome" ? (
               <div className="max-w-[610px]">
                 <h1
@@ -1156,15 +1202,11 @@ export function CheckInFlow() {
                   {screen === "appointment" && (session?.appointments?.length ? content.appointment.scheduledHeading : content.appointment.noAppointmentHeading)}
                   {screen === "demographics" && "Let's make sure we have it right."}
                   {screen === "coverage" && "How will today's visit be covered?"}
-                  {screen === "consent" && "A quick review before we begin."}
-                  {screen === "questionnaire" && content.questions.heading}
                 </h1>
                 <p className="mt-6 max-w-[430px] text-[16px] leading-7 text-[#806960]">
                   {screen === "appointment" && (session?.appointments?.length ? content.appointment.scheduledDescription : content.appointment.noAppointmentDescription)}
                   {screen === "demographics" && "Review your details so we can keep your visit moving smoothly."}
                   {screen === "coverage" && "Choose the option that best describes your plan today."}
-                  {screen === "consent" && "Please read the short notice, then sign to acknowledge."}
-                  {screen === "questionnaire" && content.questions.description}
                 </p>
               </div>
             )}
@@ -1175,10 +1217,17 @@ export function CheckInFlow() {
                 <span>{content.welcome.privacyNote}</span>
               </div>
             )}
-          </section>
+            </section>
+          )}
 
           {screen !== "complete" && (
-            <section className="kiosk-card relative isolate min-h-[580px] rounded-[30px] border border-[#e7d9c7] bg-[#fffaf1] p-6 shadow-[0_25px_65px_rgba(108,35,35,.12)] sm:p-9 lg:min-h-[610px] lg:p-11">
+            <section
+              className={`kiosk-card relative isolate min-h-0 rounded-[30px] border border-[#e7d9c7] bg-[#fffaf1] p-6 shadow-[0_25px_65px_rgba(108,35,35,.12)] sm:p-9 lg:p-11 ${
+                isLongFormStage
+                  ? "kiosk-long-form-panel flex h-full flex-col overflow-hidden"
+                  : "kiosk-card-scroll h-full overflow-y-auto overscroll-contain"
+              }`}
+            >
             {screen === "welcome" && (
               <div className="kiosk-fade relative">
                 <div className="mb-7">
@@ -1727,134 +1776,168 @@ export function CheckInFlow() {
             )}
 
             {screen === "consent" && currentConsent && (
-              <div className="kiosk-fade flex h-full flex-col relative">
-                <div className="flex-1">
-                  {renderBack()}
-                  <div className="mb-6 flex items-center justify-between">
-                    <h2 className="text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
-                      {currentConsent.title}
-                    </h2>
-                    {totalConsents > 1 && (
-                      <span className="text-sm font-bold uppercase tracking-wider text-[#a5918a]">
-                        Form {currentConsentIndex} of {totalConsents}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="mb-6 max-h-48 overflow-y-auto rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] p-4 text-sm font-medium leading-relaxed text-[#806960] whitespace-pre-wrap">
-                    {currentConsent.description}
-                  </div>
-
-                  <label className="flex cursor-pointer items-start gap-3">
-                    <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded border-2 border-[#c1aba0] bg-[#fffaf1] transition-colors focus-within:ring-2 focus-within:ring-[#990000]/50" style={{ borderColor: consentAccepted ? "#990000" : undefined, backgroundColor: consentAccepted ? "#990000" : undefined }}>
-                      {consentAccepted && <Check size={16} className="text-[#fff9ed]" strokeWidth={3} />}
-                      <input
-                        type="checkbox"
-                        data-testid="input-consent"
-                        checked={consentAccepted}
-                        onChange={(e) => {
-                          setConsentAccepted(e.target.checked);
-                          clearError();
-                        }}
-                        className="sr-only"
-                      />
-                    </div>
-                    <span className="text-[15px] font-bold text-[#632f2f]">
-                      {content.consent.agreementLabel}
+              <div className="kiosk-fade relative flex min-h-0 flex-1 flex-col">
+                {renderBack()}
+                <div className="mb-5 flex shrink-0 items-center justify-between gap-4">
+                  <h2 className="text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
+                    {currentConsent.title}
+                  </h2>
+                  {totalConsents > 1 && (
+                    <span className="text-sm font-bold uppercase tracking-wider text-[#a5918a]">
+                      Form {currentConsentIndex} of {totalConsents}
                     </span>
-                  </label>
-
-                  <div className="mt-6">
-                    <label className="mb-2 block text-sm font-bold text-[#632f2f]">{content.consent.signatureLabel}</label>
-                    <SignaturePad 
-                      ref={signaturePadRef} 
-                      onBegin={clearError} 
-                      ariaLabel={`Signature pad for ${currentConsent.title}`} 
-                    />
-                  </div>
-                  {renderError()}
+                  )}
                 </div>
 
-                <div className="mt-8 shrink-0">
-                  {primaryButton(content.consent.continueButton, continueConsent, undefined, undefined, "button-save-consent")}
+                <div className="grid min-h-0 flex-1 grid-rows-[minmax(120px,1fr)_auto] gap-5 lg:grid-cols-[minmax(0,1.45fr)_minmax(320px,.55fr)] lg:grid-rows-1 lg:gap-7">
+                  <div
+                    className="kiosk-consent-document min-h-0 overflow-y-auto overscroll-contain rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] p-5 pr-4 text-[15px] leading-7 text-[#806960] sm:p-7 sm:pr-6"
+                    data-testid="consent-document"
+                    tabIndex={0}
+                    aria-label={`${currentConsent.title} text`}
+                  >
+                    <div className="space-y-6">
+                      {currentConsent.description.split(/\n\s*\n/).filter(Boolean).map((section, index) => {
+                        const lines = section.split("\n");
+                        const heading = lines[0];
+                        const body = lines.slice(1).join("\n");
+                        const isHeading =
+                          index === 0 ||
+                          /^(Treatment Authorization|Teaching Environment|Infectious Disease Testing|Financial Agreement|Payment Responsibility and Insurance Benefit Authorization|Bursar Account \(if active\)|Referrals|HIPAA Notice of Privacy Practices|Communication Authorization|Duration of Consent|Acknowledgement)$/.test(heading);
+
+                        return (
+                          <div key={`${heading}-${index}`}>
+                            {isHeading && (
+                              <h3 className="mb-1.5 text-[13px] font-bold uppercase tracking-[.08em] text-[#632f2f]">
+                                {heading}
+                              </h3>
+                            )}
+                            {isHeading ? (
+                              body && <p className="whitespace-pre-wrap">{body}</p>
+                            ) : (
+                              <p className="whitespace-pre-wrap">{section}</p>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="flex min-h-0 flex-col">
+                    <label className="flex shrink-0 cursor-pointer items-start gap-3">
+                      <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded border-2 border-[#c1aba0] bg-[#fffaf1] transition-colors focus-within:ring-2 focus-within:ring-[#990000]/50" style={{ borderColor: consentAccepted ? "#990000" : undefined, backgroundColor: consentAccepted ? "#990000" : undefined }}>
+                        {consentAccepted && <Check size={16} className="text-[#fff9ed]" strokeWidth={3} />}
+                        <input
+                          type="checkbox"
+                          data-testid="input-consent"
+                          checked={consentAccepted}
+                          onChange={(e) => {
+                            setConsentAccepted(e.target.checked);
+                            clearError();
+                          }}
+                          className="sr-only"
+                        />
+                      </div>
+                      <span className="text-[15px] font-bold text-[#632f2f]">
+                        {content.consent.agreementLabel}
+                      </span>
+                    </label>
+
+                    <div className="mt-5 shrink-0">
+                      <label className="mb-2 block text-sm font-bold text-[#632f2f]">{content.consent.signatureLabel}</label>
+                      <SignaturePad
+                        ref={signaturePadRef}
+                        onBegin={clearError}
+                        ariaLabel={`Signature pad for ${currentConsent.title}`}
+                      />
+                    </div>
+                    {renderError()}
+
+                    <div className="mt-5 shrink-0 lg:mt-auto lg:pt-5">
+                      {primaryButton(content.consent.continueButton, continueConsent, undefined, undefined, "button-save-consent")}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
 
             {screen === "questionnaire" && !activeQuestionnaireId && (
-              <div className="kiosk-fade flex h-full flex-col relative">
-                <div className="flex-1">
+              <div className="kiosk-fade relative flex min-h-0 flex-1 flex-col">
+                <div className="flex min-h-0 flex-1 flex-col">
                   {renderBack()}
-                  <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
+                  <h2 className="mb-4 shrink-0 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
                     {content.questions.heading}
                   </h2>
-                  <p className="mb-6 text-sm font-medium leading-relaxed text-[#806960]">
-                    {content.questions.description}
-                  </p>
 
-                  <div className="space-y-4">
-                    {session?.questionnaires?.map(q => {
-                      const isNotStarted = q.status === "not_started";
-                      const isPortal = q.status === "completed_portal";
-                      const isNow = q.status === "completed_now";
-                      const isCompleted = isPortal || isNow;
+                  <div className="kiosk-questionnaire-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
+                    <p className="mb-6 text-[15px] font-medium leading-7 text-[#806960]">
+                      {content.questions.description}
+                    </p>
+
+                    <div className="space-y-4">
+                      {session?.questionnaires?.map(q => {
+                        const isNotStarted = q.status === "not_started";
+                        const isPortal = q.status === "completed_portal";
+                        const isNow = q.status === "completed_now";
+                        const isCompleted = isPortal || isNow;
                       
-                      return (
-                        <button
-                          key={q.id}
-                          type="button"
-                          data-testid={`questionnaire-card-${q.id}`}
-                          onClick={() => {
-                            if (isNotStarted || isPortal) {
-                              setActiveQuestionnaireId(q.id);
-                              setQuestionnaireAnswers({});
-                              clearError();
-                            }
-                          }}
-                          disabled={isNow || isMutating}
-                          className={`w-full flex items-center justify-between p-4 rounded-2xl border text-left transition-all ${
-                            isCompleted 
-                              ? "bg-[#fffaf1] border-[#d9c6b5] cursor-default opacity-80" 
-                              : "bg-white border-[#c1aba0] shadow-sm hover:border-[#990000] hover:bg-[#fff6e8] cursor-pointer"
-                          }`}
-                        >
-                          <div className="flex flex-col gap-1">
-                            <span className={`text-[15px] font-bold ${isCompleted ? "text-[#806960]" : "text-[#632f2f]"}`}>
-                              {q.name}
-                            </span>
-                            {isPortal && (
-                              <span className="text-xs font-bold uppercase tracking-wider text-[#806960]">
-                                Completed online
+                        return (
+                          <button
+                            key={q.id}
+                            type="button"
+                            data-testid={`questionnaire-card-${q.id}`}
+                            onClick={() => {
+                              if (isNotStarted || isPortal) {
+                                setActiveQuestionnaireId(q.id);
+                                setQuestionnaireAnswers({});
+                                clearError();
+                              }
+                            }}
+                            disabled={isNow || isMutating}
+                            className={`flex w-full items-center justify-between rounded-2xl border p-4 text-left transition-all ${
+                              isCompleted
+                                ? "cursor-default border-[#d9c6b5] bg-[#fffaf1] opacity-80"
+                                : "cursor-pointer border-[#c1aba0] bg-white shadow-sm hover:border-[#990000] hover:bg-[#fff6e8]"
+                            }`}
+                          >
+                            <div className="flex flex-col gap-1">
+                              <span className={`text-[15px] font-bold ${isCompleted ? "text-[#806960]" : "text-[#632f2f]"}`}>
+                                {q.name}
                               </span>
-                            )}
-                            {isNow && (
-                              <span className="text-xs font-bold uppercase tracking-wider text-[#316148]">
-                                Completed
-                              </span>
-                            )}
-                            {isNotStarted && (
-                              <span className="text-xs font-bold uppercase tracking-wider text-[#990000]">
-                                Required
-                              </span>
-                            )}
-                          </div>
-                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                            isCompleted ? "bg-[#f4e6d5]" : "bg-[#fffaf1] border border-[#c1aba0]"
-                          }`}>
-                            {isCompleted ? (
-                              <CheckCircle2 size={18} className={isNow ? "text-[#316148]" : "text-[#806960]"} />
-                            ) : (
-                              <ArrowRight size={16} className="text-[#990000]" />
-                            )}
-                          </div>
-                        </button>
-                      )
-                    })}
+                              {isPortal && (
+                                <span className="text-xs font-bold uppercase tracking-wider text-[#806960]">
+                                  Completed online
+                                </span>
+                              )}
+                              {isNow && (
+                                <span className="text-xs font-bold uppercase tracking-wider text-[#316148]">
+                                  Completed
+                                </span>
+                              )}
+                              {isNotStarted && (
+                                <span className="text-xs font-bold uppercase tracking-wider text-[#990000]">
+                                  Required
+                                </span>
+                              )}
+                            </div>
+                            <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                              isCompleted ? "bg-[#f4e6d5]" : "border border-[#c1aba0] bg-[#fffaf1]"
+                            }`}>
+                              {isCompleted ? (
+                                <CheckCircle2 size={18} className={isNow ? "text-[#316148]" : "text-[#806960]"} />
+                              ) : (
+                                <ArrowRight size={16} className="text-[#990000]" />
+                              )}
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
+                    {renderError()}
                   </div>
-                  {renderError()}
                 </div>
                 
-                <div className="mt-8 shrink-0">
+                <div className="mt-6 shrink-0">
                   {primaryButton(
                     content.questions.continueButton, 
                     continueQuestions, 
@@ -1867,7 +1950,7 @@ export function CheckInFlow() {
             )}
 
             {screen === "questionnaire" && activeQuestionnaireId && (
-              <div className="kiosk-fade flex h-full flex-col relative">
+              <div className="kiosk-fade relative flex min-h-0 flex-1 flex-col">
                 {(() => {
                   const q = session?.questionnaires?.find(x => x.id === activeQuestionnaireId);
                   if (!q) return null;
