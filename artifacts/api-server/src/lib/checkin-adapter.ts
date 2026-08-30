@@ -83,7 +83,7 @@ const providerAccounts = {
   },
   jordanLewis: {
     displayName: "Jordan Lewis, NP",
-    addressLine2: "Second floor · Wellness waiting area",
+    addressLine2: "Second floor · Waiting area",
   },
 } as const;
 
@@ -369,8 +369,11 @@ class MockCheckInAdapter implements CheckInAdapter {
     if (!floorLabel || !waitingArea) return null;
     const isCurrentFloor = floorLabel.toLowerCase() === kioskFloor.toLowerCase();
     this.sessions.delete(sessionId);
+    const waitingAreaLabel = waitingArea.toLowerCase() === "waiting area"
+      ? "waiting area"
+      : `${waitingArea} waiting area`;
     const directions = isCurrentFloor
-      ? `You’re on the right floor. Please have a seat in the ${waitingArea} waiting area.`
+      ? `You’re on the right floor. Please have a seat in the ${waitingAreaLabel}.`
       : `Proceed to the ${floorLabel.toLowerCase()} waiting area.`;
     return {
       completed: true,
