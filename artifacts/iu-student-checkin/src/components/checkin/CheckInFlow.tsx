@@ -24,7 +24,6 @@ import {
   QrCode,
   ScanLine,
   ShieldCheck,
-  Sparkles,
   Stethoscope,
   UserRound,
   X,
@@ -621,10 +620,6 @@ export function CheckInFlow() {
           <section className="kiosk-reveal flex flex-col justify-center lg:min-h-[590px]">
             {screen === "welcome" ? (
               <div className="max-w-[610px]">
-                <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#e0c6ba] bg-[#f4e6d5] px-3.5 py-2 text-[11px] font-bold uppercase tracking-[.16em] text-[#7f4d4d]">
-                  <Sparkles size={14} className="text-[#bd5b48]" />
-                  A calmer arrival starts here
-                </div>
                 <h1
                   className="max-w-[590px] text-[clamp(3.15rem,5.4vw,5.55rem)] font-semibold leading-[.95] tracking-[-.07em] text-[#990000] font-serif"
                 >
