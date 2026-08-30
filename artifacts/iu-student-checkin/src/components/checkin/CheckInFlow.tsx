@@ -1062,7 +1062,7 @@ export function CheckInFlow() {
         <div
           className={
             screen === "complete" || screen === "checking"
-              ? "grid min-h-0 flex-1 grid-cols-1 overflow-y-auto"
+              ? "kiosk-completion-scroll grid min-h-0 flex-1 grid-cols-1 overflow-y-auto"
               : `grid min-h-0 flex-1 grid-cols-1 gap-8 overflow-hidden ${
                   isLongFormStage ? "" : "lg:grid-cols-[minmax(0,.82fr)_minmax(540px,1.18fr)] lg:gap-16"
                 } ${
@@ -1103,12 +1103,12 @@ export function CheckInFlow() {
               </div>
             ) : screen === "complete" ? (
               <div className="kiosk-fade mx-auto flex w-full max-w-[980px] flex-col items-center text-center">
-                <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#c9ddcd] bg-[#e6f0e5] px-3.5 py-2 text-[11px] font-bold uppercase tracking-[.16em] text-[#316148]">
+                <div className="kiosk-completion-badge mb-5 inline-flex items-center gap-2 rounded-full border border-[#c9ddcd] bg-[#e6f0e5] px-3.5 py-2 text-[11px] font-bold uppercase tracking-[.16em] text-[#316148]">
                   <CheckCircle2 size={14} />
                   {content.complete.badge}
                 </div>
                 <p
-                  className="mb-4 text-[12px] font-bold uppercase tracking-[.14em] text-[#806960]"
+                  className="kiosk-completion-floor-label mb-4 text-[12px] font-bold uppercase tracking-[.14em] text-[#806960]"
                   data-testid="text-kiosk-floor"
                 >
                   {content.complete.kioskFloorPrefix} {completion?.kioskFloor || content.complete.destinationFallback}.
@@ -1187,7 +1187,7 @@ export function CheckInFlow() {
                 >
                   {content.complete.doneButton}
                 </button>
-                <p className="mt-4 text-[11px] leading-5 text-[#9a8074]">
+                <p className="kiosk-completion-demo-notice mt-4 text-[11px] leading-5 text-[#9a8074]">
                   {content.complete.demoNotice}
                 </p>
               </div>

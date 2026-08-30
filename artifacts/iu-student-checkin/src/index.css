@@ -82,6 +82,9 @@
 .kiosk-consent-document {
   box-shadow: inset 0 0 0 1px rgba(255, 250, 241, .5);
 }
+.kiosk-completion-scroll {
+  padding-bottom: max(4rem, env(safe-area-inset-bottom));
+}
 .kiosk-completion-copy { container-type: inline-size; }
 .kiosk-completion-panel {
   min-height: 0;
@@ -196,7 +199,7 @@
     padding: 2rem 2.5rem;
   }
   .kiosk-completion-panel {
-    min-height: 540px;
+    min-height: 0;
     justify-content: flex-start;
     padding-top: .75rem;
     padding-bottom: 1.5rem;
@@ -216,6 +219,50 @@
   }
 }
 @media (max-height: 700px) and (min-width: 700px) {
+  .kiosk-completion-scroll {
+    padding-bottom: 4.5rem;
+  }
+  .kiosk-completion-panel {
+    padding-top: 0;
+    padding-bottom: .75rem;
+  }
+  .kiosk-completion-badge {
+    margin-bottom: .35rem;
+    padding: .3rem .7rem;
+  }
+  .kiosk-completion-floor-label {
+    margin-bottom: .25rem;
+  }
+  .kiosk-completion-floor-heading {
+    font-size: clamp(2.7rem, min(6.4vw, 12.8cqi), 5rem);
+  }
+  .kiosk-completion-waiting {
+    margin-top: .05rem;
+    font-size: clamp(1.85rem, 3.6vw, 3.1rem);
+  }
+  .kiosk-completion-directions {
+    margin-top: .35rem;
+    font-size: 14px;
+    line-height: 1.2;
+  }
+  .kiosk-completion-summary {
+    margin-top: .6rem;
+  }
+  .kiosk-completion-summary > div {
+    padding: .5rem .9rem;
+  }
+  .kiosk-completion-summary dd {
+    margin-top: .25rem;
+    font-size: 12px;
+  }
+  .kiosk-completion-button {
+    margin-top: .5rem;
+    min-height: 48px;
+  }
+  .kiosk-completion-demo-notice {
+    margin-top: .35rem;
+    line-height: 1.15;
+  }
   .kiosk-long-form-panel {
     padding: 1.5rem 2rem;
   }
