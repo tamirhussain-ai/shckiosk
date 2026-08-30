@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: check-in
     description: Student health center check-in operations
+  - name: kiosk-content
+    description: Staff-managed kiosk wording
 paths:
   /healthz:
     get:
@@ -26,6 +28,59 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /kiosk/content:
+    get:
+      operationId: getKioskContent
+      tags: [kiosk-content]
+      summary: Get the saved kiosk content
+      responses:
+        "200":
+          description: Saved kiosk content, or the stable defaults when no valid content has been saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KioskContent"
+    put:
+      operationId: updateKioskContent
+      tags: [kiosk-content]
+      summary: Save kiosk content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KioskContentUpdate"
+      responses:
+        "200":
+          description: Updated kiosk content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KioskContent"
+        "400":
+          description: Invalid kiosk content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /kiosk/content/reset:
+    post:
+      operationId: resetKioskContent
+      tags: [kiosk-content]
+      summary: Reset one screen or all kiosk content to defaults
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KioskContentReset"
+      responses:
+        "200":
+          description: Reset kiosk content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KioskContent"
   /checkin/sessions:
     post:
       operationId: identifyCheckIn
@@ -275,6 +330,127 @@ components:
         error:
           type: string
       required: [error]
+    KioskContentScreenId:
+      type: string
+      enum: [welcome, appointment, details, coverage, consent, questions, checking, complete]
+    KioskContentWelcome:
+      type: object
+      properties:
+        eyebrow: { type: string, minLength: 1, maxLength: 120 }
+        title: { type: string, minLength: 1, maxLength: 240 }
+        titleAccent: { type: string, minLength: 1, maxLength: 240 }
+        description: { type: string, minLength: 1, maxLength: 500 }
+        duration: { type: string, minLength: 1, maxLength: 80 }
+        durationNote: { type: string, minLength: 1, maxLength: 160 }
+        startEyebrow: { type: string, minLength: 1, maxLength: 120 }
+        startTitle: { type: string, minLength: 1, maxLength: 180 }
+        privacyNote: { type: string, minLength: 1, maxLength: 240 }
+        demoInstructions: { type: string, minLength: 1, maxLength: 500 }
+        qrPrompt: { type: string, minLength: 1, maxLength: 180 }
+        qrDescription: { type: string, minLength: 1, maxLength: 400 }
+        findVisitButton: { type: string, minLength: 1, maxLength: 100 }
+        qrButton: { type: string, minLength: 1, maxLength: 100 }
+      required: [eyebrow, title, titleAccent, description, duration, durationNote, startEyebrow, startTitle, privacyNote, demoInstructions, qrPrompt, qrDescription, findVisitButton, qrButton]
+    KioskContentAppointment:
+      type: object
+      properties:
+        scheduledHeading: { type: string, minLength: 1, maxLength: 180 }
+        scheduledDescription: { type: string, minLength: 1, maxLength: 300 }
+        confirmButton: { type: string, minLength: 1, maxLength: 100 }
+        noAppointmentHeading: { type: string, minLength: 1, maxLength: 180 }
+        noAppointmentDescription: { type: string, minLength: 1, maxLength: 300 }
+        frontDeskLabel: { type: string, minLength: 1, maxLength: 120 }
+        frontDeskDescription: { type: string, minLength: 1, maxLength: 300 }
+        scheduleLabel: { type: string, minLength: 1, maxLength: 120 }
+        scheduleDescription: { type: string, minLength: 1, maxLength: 300 }
+        frontDeskConfirmation: { type: string, minLength: 1, maxLength: 300 }
+        schedulingHeading: { type: string, minLength: 1, maxLength: 180 }
+        schedulingUnavailable: { type: string, minLength: 1, maxLength: 300 }
+        backToOptionsButton: { type: string, minLength: 1, maxLength: 140 }
+      required: [scheduledHeading, scheduledDescription, confirmButton, noAppointmentHeading, noAppointmentDescription, frontDeskLabel, frontDeskDescription, scheduleLabel, scheduleDescription, frontDeskConfirmation, schedulingHeading, schedulingUnavailable, backToOptionsButton]
+    KioskContentDetails:
+      type: object
+      properties:
+        heading: { type: string, minLength: 1, maxLength: 180 }
+        continueButton: { type: string, minLength: 1, maxLength: 100 }
+      required: [heading, continueButton]
+    KioskContentCoverage:
+      type: object
+      properties:
+        heading: { type: string, minLength: 1, maxLength: 180 }
+        description: { type: string, minLength: 1, maxLength: 300 }
+        selfPayTitle: { type: string, minLength: 1, maxLength: 120 }
+        selfPayDescription: { type: string, minLength: 1, maxLength: 240 }
+        iuOptionTitle: { type: string, minLength: 1, maxLength: 140 }
+        iuOptionDescription: { type: string, minLength: 1, maxLength: 240 }
+        otherOptionTitle: { type: string, minLength: 1, maxLength: 160 }
+        otherOptionDescription: { type: string, minLength: 1, maxLength: 240 }
+        insuranceHeading: { type: string, minLength: 1, maxLength: 180 }
+        updateInsuranceButton: { type: string, minLength: 1, maxLength: 180 }
+        viewInsuranceButton: { type: string, minLength: 1, maxLength: 180 }
+        confirmButton: { type: string, minLength: 1, maxLength: 100 }
+      required: [heading, description, selfPayTitle, selfPayDescription, iuOptionTitle, iuOptionDescription, otherOptionTitle, otherOptionDescription, insuranceHeading, updateInsuranceButton, viewInsuranceButton, confirmButton]
+    KioskContentConsent:
+      type: object
+      properties:
+        heading: { type: string, minLength: 1, maxLength: 180 }
+        noticeFirstParagraph: { type: string, minLength: 1, maxLength: 1000 }
+        noticeSecondParagraph: { type: string, minLength: 1, maxLength: 700 }
+        agreementLabel: { type: string, minLength: 1, maxLength: 240 }
+        signatureLabel: { type: string, minLength: 1, maxLength: 140 }
+        signaturePlaceholder: { type: string, minLength: 1, maxLength: 100 }
+        continueButton: { type: string, minLength: 1, maxLength: 100 }
+      required: [heading, noticeFirstParagraph, noticeSecondParagraph, agreementLabel, signatureLabel, signaturePlaceholder, continueButton]
+    KioskContentQuestions:
+      type: object
+      properties:
+        heading: { type: string, minLength: 1, maxLength: 180 }
+        description: { type: string, minLength: 1, maxLength: 300 }
+        continueButton: { type: string, minLength: 1, maxLength: 100 }
+      required: [heading, description, continueButton]
+    KioskContentChecking:
+      type: object
+      properties:
+        heading: { type: string, minLength: 1, maxLength: 180 }
+        description: { type: string, minLength: 1, maxLength: 240 }
+      required: [heading, description]
+    KioskContentComplete:
+      type: object
+      properties:
+        badge: { type: string, minLength: 1, maxLength: 120 }
+        kioskFloorPrefix: { type: string, minLength: 1, maxLength: 120 }
+        directionsSuffix: { type: string, minLength: 1, maxLength: 240 }
+        destinationFallback: { type: string, minLength: 1, maxLength: 120 }
+        waitingAreaFallback: { type: string, minLength: 1, maxLength: 120 }
+        visitConfirmed: { type: string, minLength: 1, maxLength: 120 }
+        providerLabel: { type: string, minLength: 1, maxLength: 100 }
+        visitLabel: { type: string, minLength: 1, maxLength: 100 }
+        timeLabel: { type: string, minLength: 1, maxLength: 100 }
+        doneButton: { type: string, minLength: 1, maxLength: 100 }
+        demoNotice: { type: string, minLength: 1, maxLength: 240 }
+      required: [badge, kioskFloorPrefix, directionsSuffix, destinationFallback, waitingAreaFallback, visitConfirmed, providerLabel, visitLabel, timeLabel, doneButton, demoNotice]
+    KioskContent:
+      type: object
+      properties:
+        welcome: { $ref: "#/components/schemas/KioskContentWelcome" }
+        appointment: { $ref: "#/components/schemas/KioskContentAppointment" }
+        details: { $ref: "#/components/schemas/KioskContentDetails" }
+        coverage: { $ref: "#/components/schemas/KioskContentCoverage" }
+        consent: { $ref: "#/components/schemas/KioskContentConsent" }
+        questions: { $ref: "#/components/schemas/KioskContentQuestions" }
+        checking: { $ref: "#/components/schemas/KioskContentChecking" }
+        complete: { $ref: "#/components/schemas/KioskContentComplete" }
+      required: [welcome, appointment, details, coverage, consent, questions, checking, complete]
+    KioskContentUpdate:
+      type: object
+      properties:
+        content: { $ref: "#/components/schemas/KioskContent" }
+      required: [content]
+    KioskContentReset:
+      type: object
+      properties:
+        screen:
+          $ref: "#/components/schemas/KioskContentScreenId"
     CheckInIdentification:
       type: object
       properties:

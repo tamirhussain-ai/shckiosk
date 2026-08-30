@@ -13,6 +13,383 @@ export interface ErrorResponse {
   error: string;
 }
 
+export type KioskContentScreenId = typeof KioskContentScreenId[keyof typeof KioskContentScreenId];
+
+
+export const KioskContentScreenId = {
+  welcome: 'welcome',
+  appointment: 'appointment',
+  details: 'details',
+  coverage: 'coverage',
+  consent: 'consent',
+  questions: 'questions',
+  checking: 'checking',
+  complete: 'complete',
+} as const;
+
+export interface KioskContentWelcome {
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  eyebrow: string;
+  /**
+     * @minLength 1
+     * @maxLength 240
+     */
+  title: string;
+  /**
+     * @minLength 1
+     * @maxLength 240
+     */
+  titleAccent: string;
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  description: string;
+  /**
+     * @minLength 1
+     * @maxLength 80
+     */
+  duration: string;
+  /**
+     * @minLength 1
+     * @maxLength 160
+     */
+  durationNote: string;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  startEyebrow: string;
+  /**
+     * @minLength 1
+     * @maxLength 180
+     */
+  startTitle: string;
+  /**
+     * @minLength 1
+     * @maxLength 240
+     */
+  privacyNote: string;
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  demoInstructions: string;
+  /**
+     * @minLength 1
+     * @maxLength 180
+     */
+  qrPrompt: string;
+  /**
+     * @minLength 1
+     * @maxLength 400
+     */
+  qrDescription: string;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  findVisitButton: string;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  qrButton: string;
+}
+
+export interface KioskContentAppointment {
+  /**
+     * @minLength 1
+     * @maxLength 180
+     */
+  scheduledHeading: string;
+  /**
+     * @minLength 1
+     * @maxLength 300
+     */
+  scheduledDescription: string;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  confirmButton: string;
+  /**
+     * @minLength 1
+     * @maxLength 180
+     */
+  noAppointmentHeading: string;
+  /**
+     * @minLength 1
+     * @maxLength 300
+     */
+  noAppointmentDescription: string;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  frontDeskLabel: string;
+  /**
+     * @minLength 1
+     * @maxLength 300
+     */
+  frontDeskDescription: string;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  scheduleLabel: string;
+  /**
+     * @minLength 1
+     * @maxLength 300
+     */
+  scheduleDescription: string;
+  /**
+     * @minLength 1
+     * @maxLength 300
+     */
+  frontDeskConfirmation: string;
+  /**
+     * @minLength 1
+     * @maxLength 180
+     */
+  schedulingHeading: string;
+  /**
+     * @minLength 1
+     * @maxLength 300
+     */
+  schedulingUnavailable: string;
+  /**
+     * @minLength 1
+     * @maxLength 140
+     */
+  backToOptionsButton: string;
+}
+
+export interface KioskContentDetails {
+  /**
+     * @minLength 1
+     * @maxLength 180
+     */
+  heading: string;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  continueButton: string;
+}
+
+export interface KioskContentCoverage {
+  /**
+     * @minLength 1
+     * @maxLength 180
+     */
+  heading: string;
+  /**
+     * @minLength 1
+     * @maxLength 300
+     */
+  description: string;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  selfPayTitle: string;
+  /**
+     * @minLength 1
+     * @maxLength 240
+     */
+  selfPayDescription: string;
+  /**
+     * @minLength 1
+     * @maxLength 140
+     */
+  iuOptionTitle: string;
+  /**
+     * @minLength 1
+     * @maxLength 240
+     */
+  iuOptionDescription: string;
+  /**
+     * @minLength 1
+     * @maxLength 160
+     */
+  otherOptionTitle: string;
+  /**
+     * @minLength 1
+     * @maxLength 240
+     */
+  otherOptionDescription: string;
+  /**
+     * @minLength 1
+     * @maxLength 180
+     */
+  insuranceHeading: string;
+  /**
+     * @minLength 1
+     * @maxLength 180
+     */
+  updateInsuranceButton: string;
+  /**
+     * @minLength 1
+     * @maxLength 180
+     */
+  viewInsuranceButton: string;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  confirmButton: string;
+}
+
+export interface KioskContentConsent {
+  /**
+     * @minLength 1
+     * @maxLength 180
+     */
+  heading: string;
+  /**
+     * @minLength 1
+     * @maxLength 1000
+     */
+  noticeFirstParagraph: string;
+  /**
+     * @minLength 1
+     * @maxLength 700
+     */
+  noticeSecondParagraph: string;
+  /**
+     * @minLength 1
+     * @maxLength 240
+     */
+  agreementLabel: string;
+  /**
+     * @minLength 1
+     * @maxLength 140
+     */
+  signatureLabel: string;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  signaturePlaceholder: string;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  continueButton: string;
+}
+
+export interface KioskContentQuestions {
+  /**
+     * @minLength 1
+     * @maxLength 180
+     */
+  heading: string;
+  /**
+     * @minLength 1
+     * @maxLength 300
+     */
+  description: string;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  continueButton: string;
+}
+
+export interface KioskContentChecking {
+  /**
+     * @minLength 1
+     * @maxLength 180
+     */
+  heading: string;
+  /**
+     * @minLength 1
+     * @maxLength 240
+     */
+  description: string;
+}
+
+export interface KioskContentComplete {
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  badge: string;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  kioskFloorPrefix: string;
+  /**
+     * @minLength 1
+     * @maxLength 240
+     */
+  directionsSuffix: string;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  destinationFallback: string;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  waitingAreaFallback: string;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  visitConfirmed: string;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  providerLabel: string;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  visitLabel: string;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  timeLabel: string;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  doneButton: string;
+  /**
+     * @minLength 1
+     * @maxLength 240
+     */
+  demoNotice: string;
+}
+
+export interface KioskContent {
+  welcome: KioskContentWelcome;
+  appointment: KioskContentAppointment;
+  details: KioskContentDetails;
+  coverage: KioskContentCoverage;
+  consent: KioskContentConsent;
+  questions: KioskContentQuestions;
+  checking: KioskContentChecking;
+  complete: KioskContentComplete;
+}
+
+export interface KioskContentUpdate {
+  content: KioskContent;
+}
+
+export interface KioskContentReset {
+  screen?: KioskContentScreenId;
+}
+
 export type CheckInIdentificationMethod = typeof CheckInIdentificationMethod[keyof typeof CheckInIdentificationMethod];
 
 

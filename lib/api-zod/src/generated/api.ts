@@ -18,6 +18,876 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
+ * @summary Get the saved kiosk content
+ */
+export const getKioskContentResponseWelcomeEyebrowMax = 120;
+
+export const getKioskContentResponseWelcomeTitleMax = 240;
+
+export const getKioskContentResponseWelcomeTitleAccentMax = 240;
+
+export const getKioskContentResponseWelcomeDescriptionMax = 500;
+
+export const getKioskContentResponseWelcomeDurationMax = 80;
+
+export const getKioskContentResponseWelcomeDurationNoteMax = 160;
+
+export const getKioskContentResponseWelcomeStartEyebrowMax = 120;
+
+export const getKioskContentResponseWelcomeStartTitleMax = 180;
+
+export const getKioskContentResponseWelcomePrivacyNoteMax = 240;
+
+export const getKioskContentResponseWelcomeDemoInstructionsMax = 500;
+
+export const getKioskContentResponseWelcomeQrPromptMax = 180;
+
+export const getKioskContentResponseWelcomeQrDescriptionMax = 400;
+
+export const getKioskContentResponseWelcomeFindVisitButtonMax = 100;
+
+export const getKioskContentResponseWelcomeQrButtonMax = 100;
+
+export const getKioskContentResponseAppointmentScheduledHeadingMax = 180;
+
+export const getKioskContentResponseAppointmentScheduledDescriptionMax = 300;
+
+export const getKioskContentResponseAppointmentConfirmButtonMax = 100;
+
+export const getKioskContentResponseAppointmentNoAppointmentHeadingMax = 180;
+
+export const getKioskContentResponseAppointmentNoAppointmentDescriptionMax = 300;
+
+export const getKioskContentResponseAppointmentFrontDeskLabelMax = 120;
+
+export const getKioskContentResponseAppointmentFrontDeskDescriptionMax = 300;
+
+export const getKioskContentResponseAppointmentScheduleLabelMax = 120;
+
+export const getKioskContentResponseAppointmentScheduleDescriptionMax = 300;
+
+export const getKioskContentResponseAppointmentFrontDeskConfirmationMax = 300;
+
+export const getKioskContentResponseAppointmentSchedulingHeadingMax = 180;
+
+export const getKioskContentResponseAppointmentSchedulingUnavailableMax = 300;
+
+export const getKioskContentResponseAppointmentBackToOptionsButtonMax = 140;
+
+export const getKioskContentResponseDetailsHeadingMax = 180;
+
+export const getKioskContentResponseDetailsContinueButtonMax = 100;
+
+export const getKioskContentResponseCoverageHeadingMax = 180;
+
+export const getKioskContentResponseCoverageDescriptionMax = 300;
+
+export const getKioskContentResponseCoverageSelfPayTitleMax = 120;
+
+export const getKioskContentResponseCoverageSelfPayDescriptionMax = 240;
+
+export const getKioskContentResponseCoverageIuOptionTitleMax = 140;
+
+export const getKioskContentResponseCoverageIuOptionDescriptionMax = 240;
+
+export const getKioskContentResponseCoverageOtherOptionTitleMax = 160;
+
+export const getKioskContentResponseCoverageOtherOptionDescriptionMax = 240;
+
+export const getKioskContentResponseCoverageInsuranceHeadingMax = 180;
+
+export const getKioskContentResponseCoverageUpdateInsuranceButtonMax = 180;
+
+export const getKioskContentResponseCoverageViewInsuranceButtonMax = 180;
+
+export const getKioskContentResponseCoverageConfirmButtonMax = 100;
+
+export const getKioskContentResponseConsentHeadingMax = 180;
+
+export const getKioskContentResponseConsentNoticeFirstParagraphMax = 1000;
+
+export const getKioskContentResponseConsentNoticeSecondParagraphMax = 700;
+
+export const getKioskContentResponseConsentAgreementLabelMax = 240;
+
+export const getKioskContentResponseConsentSignatureLabelMax = 140;
+
+export const getKioskContentResponseConsentSignaturePlaceholderMax = 100;
+
+export const getKioskContentResponseConsentContinueButtonMax = 100;
+
+export const getKioskContentResponseQuestionsHeadingMax = 180;
+
+export const getKioskContentResponseQuestionsDescriptionMax = 300;
+
+export const getKioskContentResponseQuestionsContinueButtonMax = 100;
+
+export const getKioskContentResponseCheckingHeadingMax = 180;
+
+export const getKioskContentResponseCheckingDescriptionMax = 240;
+
+export const getKioskContentResponseCompleteBadgeMax = 120;
+
+export const getKioskContentResponseCompleteKioskFloorPrefixMax = 120;
+
+export const getKioskContentResponseCompleteDirectionsSuffixMax = 240;
+
+export const getKioskContentResponseCompleteDestinationFallbackMax = 120;
+
+export const getKioskContentResponseCompleteWaitingAreaFallbackMax = 120;
+
+export const getKioskContentResponseCompleteVisitConfirmedMax = 120;
+
+export const getKioskContentResponseCompleteProviderLabelMax = 100;
+
+export const getKioskContentResponseCompleteVisitLabelMax = 100;
+
+export const getKioskContentResponseCompleteTimeLabelMax = 100;
+
+export const getKioskContentResponseCompleteDoneButtonMax = 100;
+
+export const getKioskContentResponseCompleteDemoNoticeMax = 240;
+
+
+
+export const GetKioskContentResponse = zod.object({
+  "welcome": zod.object({
+  "eyebrow": zod.string().min(1).max(getKioskContentResponseWelcomeEyebrowMax),
+  "title": zod.string().min(1).max(getKioskContentResponseWelcomeTitleMax),
+  "titleAccent": zod.string().min(1).max(getKioskContentResponseWelcomeTitleAccentMax),
+  "description": zod.string().min(1).max(getKioskContentResponseWelcomeDescriptionMax),
+  "duration": zod.string().min(1).max(getKioskContentResponseWelcomeDurationMax),
+  "durationNote": zod.string().min(1).max(getKioskContentResponseWelcomeDurationNoteMax),
+  "startEyebrow": zod.string().min(1).max(getKioskContentResponseWelcomeStartEyebrowMax),
+  "startTitle": zod.string().min(1).max(getKioskContentResponseWelcomeStartTitleMax),
+  "privacyNote": zod.string().min(1).max(getKioskContentResponseWelcomePrivacyNoteMax),
+  "demoInstructions": zod.string().min(1).max(getKioskContentResponseWelcomeDemoInstructionsMax),
+  "qrPrompt": zod.string().min(1).max(getKioskContentResponseWelcomeQrPromptMax),
+  "qrDescription": zod.string().min(1).max(getKioskContentResponseWelcomeQrDescriptionMax),
+  "findVisitButton": zod.string().min(1).max(getKioskContentResponseWelcomeFindVisitButtonMax),
+  "qrButton": zod.string().min(1).max(getKioskContentResponseWelcomeQrButtonMax)
+}),
+  "appointment": zod.object({
+  "scheduledHeading": zod.string().min(1).max(getKioskContentResponseAppointmentScheduledHeadingMax),
+  "scheduledDescription": zod.string().min(1).max(getKioskContentResponseAppointmentScheduledDescriptionMax),
+  "confirmButton": zod.string().min(1).max(getKioskContentResponseAppointmentConfirmButtonMax),
+  "noAppointmentHeading": zod.string().min(1).max(getKioskContentResponseAppointmentNoAppointmentHeadingMax),
+  "noAppointmentDescription": zod.string().min(1).max(getKioskContentResponseAppointmentNoAppointmentDescriptionMax),
+  "frontDeskLabel": zod.string().min(1).max(getKioskContentResponseAppointmentFrontDeskLabelMax),
+  "frontDeskDescription": zod.string().min(1).max(getKioskContentResponseAppointmentFrontDeskDescriptionMax),
+  "scheduleLabel": zod.string().min(1).max(getKioskContentResponseAppointmentScheduleLabelMax),
+  "scheduleDescription": zod.string().min(1).max(getKioskContentResponseAppointmentScheduleDescriptionMax),
+  "frontDeskConfirmation": zod.string().min(1).max(getKioskContentResponseAppointmentFrontDeskConfirmationMax),
+  "schedulingHeading": zod.string().min(1).max(getKioskContentResponseAppointmentSchedulingHeadingMax),
+  "schedulingUnavailable": zod.string().min(1).max(getKioskContentResponseAppointmentSchedulingUnavailableMax),
+  "backToOptionsButton": zod.string().min(1).max(getKioskContentResponseAppointmentBackToOptionsButtonMax)
+}),
+  "details": zod.object({
+  "heading": zod.string().min(1).max(getKioskContentResponseDetailsHeadingMax),
+  "continueButton": zod.string().min(1).max(getKioskContentResponseDetailsContinueButtonMax)
+}),
+  "coverage": zod.object({
+  "heading": zod.string().min(1).max(getKioskContentResponseCoverageHeadingMax),
+  "description": zod.string().min(1).max(getKioskContentResponseCoverageDescriptionMax),
+  "selfPayTitle": zod.string().min(1).max(getKioskContentResponseCoverageSelfPayTitleMax),
+  "selfPayDescription": zod.string().min(1).max(getKioskContentResponseCoverageSelfPayDescriptionMax),
+  "iuOptionTitle": zod.string().min(1).max(getKioskContentResponseCoverageIuOptionTitleMax),
+  "iuOptionDescription": zod.string().min(1).max(getKioskContentResponseCoverageIuOptionDescriptionMax),
+  "otherOptionTitle": zod.string().min(1).max(getKioskContentResponseCoverageOtherOptionTitleMax),
+  "otherOptionDescription": zod.string().min(1).max(getKioskContentResponseCoverageOtherOptionDescriptionMax),
+  "insuranceHeading": zod.string().min(1).max(getKioskContentResponseCoverageInsuranceHeadingMax),
+  "updateInsuranceButton": zod.string().min(1).max(getKioskContentResponseCoverageUpdateInsuranceButtonMax),
+  "viewInsuranceButton": zod.string().min(1).max(getKioskContentResponseCoverageViewInsuranceButtonMax),
+  "confirmButton": zod.string().min(1).max(getKioskContentResponseCoverageConfirmButtonMax)
+}),
+  "consent": zod.object({
+  "heading": zod.string().min(1).max(getKioskContentResponseConsentHeadingMax),
+  "noticeFirstParagraph": zod.string().min(1).max(getKioskContentResponseConsentNoticeFirstParagraphMax),
+  "noticeSecondParagraph": zod.string().min(1).max(getKioskContentResponseConsentNoticeSecondParagraphMax),
+  "agreementLabel": zod.string().min(1).max(getKioskContentResponseConsentAgreementLabelMax),
+  "signatureLabel": zod.string().min(1).max(getKioskContentResponseConsentSignatureLabelMax),
+  "signaturePlaceholder": zod.string().min(1).max(getKioskContentResponseConsentSignaturePlaceholderMax),
+  "continueButton": zod.string().min(1).max(getKioskContentResponseConsentContinueButtonMax)
+}),
+  "questions": zod.object({
+  "heading": zod.string().min(1).max(getKioskContentResponseQuestionsHeadingMax),
+  "description": zod.string().min(1).max(getKioskContentResponseQuestionsDescriptionMax),
+  "continueButton": zod.string().min(1).max(getKioskContentResponseQuestionsContinueButtonMax)
+}),
+  "checking": zod.object({
+  "heading": zod.string().min(1).max(getKioskContentResponseCheckingHeadingMax),
+  "description": zod.string().min(1).max(getKioskContentResponseCheckingDescriptionMax)
+}),
+  "complete": zod.object({
+  "badge": zod.string().min(1).max(getKioskContentResponseCompleteBadgeMax),
+  "kioskFloorPrefix": zod.string().min(1).max(getKioskContentResponseCompleteKioskFloorPrefixMax),
+  "directionsSuffix": zod.string().min(1).max(getKioskContentResponseCompleteDirectionsSuffixMax),
+  "destinationFallback": zod.string().min(1).max(getKioskContentResponseCompleteDestinationFallbackMax),
+  "waitingAreaFallback": zod.string().min(1).max(getKioskContentResponseCompleteWaitingAreaFallbackMax),
+  "visitConfirmed": zod.string().min(1).max(getKioskContentResponseCompleteVisitConfirmedMax),
+  "providerLabel": zod.string().min(1).max(getKioskContentResponseCompleteProviderLabelMax),
+  "visitLabel": zod.string().min(1).max(getKioskContentResponseCompleteVisitLabelMax),
+  "timeLabel": zod.string().min(1).max(getKioskContentResponseCompleteTimeLabelMax),
+  "doneButton": zod.string().min(1).max(getKioskContentResponseCompleteDoneButtonMax),
+  "demoNotice": zod.string().min(1).max(getKioskContentResponseCompleteDemoNoticeMax)
+})
+})
+
+
+/**
+ * @summary Save kiosk content
+ */
+export const updateKioskContentBodyContentWelcomeEyebrowMax = 120;
+
+export const updateKioskContentBodyContentWelcomeTitleMax = 240;
+
+export const updateKioskContentBodyContentWelcomeTitleAccentMax = 240;
+
+export const updateKioskContentBodyContentWelcomeDescriptionMax = 500;
+
+export const updateKioskContentBodyContentWelcomeDurationMax = 80;
+
+export const updateKioskContentBodyContentWelcomeDurationNoteMax = 160;
+
+export const updateKioskContentBodyContentWelcomeStartEyebrowMax = 120;
+
+export const updateKioskContentBodyContentWelcomeStartTitleMax = 180;
+
+export const updateKioskContentBodyContentWelcomePrivacyNoteMax = 240;
+
+export const updateKioskContentBodyContentWelcomeDemoInstructionsMax = 500;
+
+export const updateKioskContentBodyContentWelcomeQrPromptMax = 180;
+
+export const updateKioskContentBodyContentWelcomeQrDescriptionMax = 400;
+
+export const updateKioskContentBodyContentWelcomeFindVisitButtonMax = 100;
+
+export const updateKioskContentBodyContentWelcomeQrButtonMax = 100;
+
+export const updateKioskContentBodyContentAppointmentScheduledHeadingMax = 180;
+
+export const updateKioskContentBodyContentAppointmentScheduledDescriptionMax = 300;
+
+export const updateKioskContentBodyContentAppointmentConfirmButtonMax = 100;
+
+export const updateKioskContentBodyContentAppointmentNoAppointmentHeadingMax = 180;
+
+export const updateKioskContentBodyContentAppointmentNoAppointmentDescriptionMax = 300;
+
+export const updateKioskContentBodyContentAppointmentFrontDeskLabelMax = 120;
+
+export const updateKioskContentBodyContentAppointmentFrontDeskDescriptionMax = 300;
+
+export const updateKioskContentBodyContentAppointmentScheduleLabelMax = 120;
+
+export const updateKioskContentBodyContentAppointmentScheduleDescriptionMax = 300;
+
+export const updateKioskContentBodyContentAppointmentFrontDeskConfirmationMax = 300;
+
+export const updateKioskContentBodyContentAppointmentSchedulingHeadingMax = 180;
+
+export const updateKioskContentBodyContentAppointmentSchedulingUnavailableMax = 300;
+
+export const updateKioskContentBodyContentAppointmentBackToOptionsButtonMax = 140;
+
+export const updateKioskContentBodyContentDetailsHeadingMax = 180;
+
+export const updateKioskContentBodyContentDetailsContinueButtonMax = 100;
+
+export const updateKioskContentBodyContentCoverageHeadingMax = 180;
+
+export const updateKioskContentBodyContentCoverageDescriptionMax = 300;
+
+export const updateKioskContentBodyContentCoverageSelfPayTitleMax = 120;
+
+export const updateKioskContentBodyContentCoverageSelfPayDescriptionMax = 240;
+
+export const updateKioskContentBodyContentCoverageIuOptionTitleMax = 140;
+
+export const updateKioskContentBodyContentCoverageIuOptionDescriptionMax = 240;
+
+export const updateKioskContentBodyContentCoverageOtherOptionTitleMax = 160;
+
+export const updateKioskContentBodyContentCoverageOtherOptionDescriptionMax = 240;
+
+export const updateKioskContentBodyContentCoverageInsuranceHeadingMax = 180;
+
+export const updateKioskContentBodyContentCoverageUpdateInsuranceButtonMax = 180;
+
+export const updateKioskContentBodyContentCoverageViewInsuranceButtonMax = 180;
+
+export const updateKioskContentBodyContentCoverageConfirmButtonMax = 100;
+
+export const updateKioskContentBodyContentConsentHeadingMax = 180;
+
+export const updateKioskContentBodyContentConsentNoticeFirstParagraphMax = 1000;
+
+export const updateKioskContentBodyContentConsentNoticeSecondParagraphMax = 700;
+
+export const updateKioskContentBodyContentConsentAgreementLabelMax = 240;
+
+export const updateKioskContentBodyContentConsentSignatureLabelMax = 140;
+
+export const updateKioskContentBodyContentConsentSignaturePlaceholderMax = 100;
+
+export const updateKioskContentBodyContentConsentContinueButtonMax = 100;
+
+export const updateKioskContentBodyContentQuestionsHeadingMax = 180;
+
+export const updateKioskContentBodyContentQuestionsDescriptionMax = 300;
+
+export const updateKioskContentBodyContentQuestionsContinueButtonMax = 100;
+
+export const updateKioskContentBodyContentCheckingHeadingMax = 180;
+
+export const updateKioskContentBodyContentCheckingDescriptionMax = 240;
+
+export const updateKioskContentBodyContentCompleteBadgeMax = 120;
+
+export const updateKioskContentBodyContentCompleteKioskFloorPrefixMax = 120;
+
+export const updateKioskContentBodyContentCompleteDirectionsSuffixMax = 240;
+
+export const updateKioskContentBodyContentCompleteDestinationFallbackMax = 120;
+
+export const updateKioskContentBodyContentCompleteWaitingAreaFallbackMax = 120;
+
+export const updateKioskContentBodyContentCompleteVisitConfirmedMax = 120;
+
+export const updateKioskContentBodyContentCompleteProviderLabelMax = 100;
+
+export const updateKioskContentBodyContentCompleteVisitLabelMax = 100;
+
+export const updateKioskContentBodyContentCompleteTimeLabelMax = 100;
+
+export const updateKioskContentBodyContentCompleteDoneButtonMax = 100;
+
+export const updateKioskContentBodyContentCompleteDemoNoticeMax = 240;
+
+
+
+export const UpdateKioskContentBody = zod.object({
+  "content": zod.object({
+  "welcome": zod.object({
+  "eyebrow": zod.string().min(1).max(updateKioskContentBodyContentWelcomeEyebrowMax),
+  "title": zod.string().min(1).max(updateKioskContentBodyContentWelcomeTitleMax),
+  "titleAccent": zod.string().min(1).max(updateKioskContentBodyContentWelcomeTitleAccentMax),
+  "description": zod.string().min(1).max(updateKioskContentBodyContentWelcomeDescriptionMax),
+  "duration": zod.string().min(1).max(updateKioskContentBodyContentWelcomeDurationMax),
+  "durationNote": zod.string().min(1).max(updateKioskContentBodyContentWelcomeDurationNoteMax),
+  "startEyebrow": zod.string().min(1).max(updateKioskContentBodyContentWelcomeStartEyebrowMax),
+  "startTitle": zod.string().min(1).max(updateKioskContentBodyContentWelcomeStartTitleMax),
+  "privacyNote": zod.string().min(1).max(updateKioskContentBodyContentWelcomePrivacyNoteMax),
+  "demoInstructions": zod.string().min(1).max(updateKioskContentBodyContentWelcomeDemoInstructionsMax),
+  "qrPrompt": zod.string().min(1).max(updateKioskContentBodyContentWelcomeQrPromptMax),
+  "qrDescription": zod.string().min(1).max(updateKioskContentBodyContentWelcomeQrDescriptionMax),
+  "findVisitButton": zod.string().min(1).max(updateKioskContentBodyContentWelcomeFindVisitButtonMax),
+  "qrButton": zod.string().min(1).max(updateKioskContentBodyContentWelcomeQrButtonMax)
+}),
+  "appointment": zod.object({
+  "scheduledHeading": zod.string().min(1).max(updateKioskContentBodyContentAppointmentScheduledHeadingMax),
+  "scheduledDescription": zod.string().min(1).max(updateKioskContentBodyContentAppointmentScheduledDescriptionMax),
+  "confirmButton": zod.string().min(1).max(updateKioskContentBodyContentAppointmentConfirmButtonMax),
+  "noAppointmentHeading": zod.string().min(1).max(updateKioskContentBodyContentAppointmentNoAppointmentHeadingMax),
+  "noAppointmentDescription": zod.string().min(1).max(updateKioskContentBodyContentAppointmentNoAppointmentDescriptionMax),
+  "frontDeskLabel": zod.string().min(1).max(updateKioskContentBodyContentAppointmentFrontDeskLabelMax),
+  "frontDeskDescription": zod.string().min(1).max(updateKioskContentBodyContentAppointmentFrontDeskDescriptionMax),
+  "scheduleLabel": zod.string().min(1).max(updateKioskContentBodyContentAppointmentScheduleLabelMax),
+  "scheduleDescription": zod.string().min(1).max(updateKioskContentBodyContentAppointmentScheduleDescriptionMax),
+  "frontDeskConfirmation": zod.string().min(1).max(updateKioskContentBodyContentAppointmentFrontDeskConfirmationMax),
+  "schedulingHeading": zod.string().min(1).max(updateKioskContentBodyContentAppointmentSchedulingHeadingMax),
+  "schedulingUnavailable": zod.string().min(1).max(updateKioskContentBodyContentAppointmentSchedulingUnavailableMax),
+  "backToOptionsButton": zod.string().min(1).max(updateKioskContentBodyContentAppointmentBackToOptionsButtonMax)
+}),
+  "details": zod.object({
+  "heading": zod.string().min(1).max(updateKioskContentBodyContentDetailsHeadingMax),
+  "continueButton": zod.string().min(1).max(updateKioskContentBodyContentDetailsContinueButtonMax)
+}),
+  "coverage": zod.object({
+  "heading": zod.string().min(1).max(updateKioskContentBodyContentCoverageHeadingMax),
+  "description": zod.string().min(1).max(updateKioskContentBodyContentCoverageDescriptionMax),
+  "selfPayTitle": zod.string().min(1).max(updateKioskContentBodyContentCoverageSelfPayTitleMax),
+  "selfPayDescription": zod.string().min(1).max(updateKioskContentBodyContentCoverageSelfPayDescriptionMax),
+  "iuOptionTitle": zod.string().min(1).max(updateKioskContentBodyContentCoverageIuOptionTitleMax),
+  "iuOptionDescription": zod.string().min(1).max(updateKioskContentBodyContentCoverageIuOptionDescriptionMax),
+  "otherOptionTitle": zod.string().min(1).max(updateKioskContentBodyContentCoverageOtherOptionTitleMax),
+  "otherOptionDescription": zod.string().min(1).max(updateKioskContentBodyContentCoverageOtherOptionDescriptionMax),
+  "insuranceHeading": zod.string().min(1).max(updateKioskContentBodyContentCoverageInsuranceHeadingMax),
+  "updateInsuranceButton": zod.string().min(1).max(updateKioskContentBodyContentCoverageUpdateInsuranceButtonMax),
+  "viewInsuranceButton": zod.string().min(1).max(updateKioskContentBodyContentCoverageViewInsuranceButtonMax),
+  "confirmButton": zod.string().min(1).max(updateKioskContentBodyContentCoverageConfirmButtonMax)
+}),
+  "consent": zod.object({
+  "heading": zod.string().min(1).max(updateKioskContentBodyContentConsentHeadingMax),
+  "noticeFirstParagraph": zod.string().min(1).max(updateKioskContentBodyContentConsentNoticeFirstParagraphMax),
+  "noticeSecondParagraph": zod.string().min(1).max(updateKioskContentBodyContentConsentNoticeSecondParagraphMax),
+  "agreementLabel": zod.string().min(1).max(updateKioskContentBodyContentConsentAgreementLabelMax),
+  "signatureLabel": zod.string().min(1).max(updateKioskContentBodyContentConsentSignatureLabelMax),
+  "signaturePlaceholder": zod.string().min(1).max(updateKioskContentBodyContentConsentSignaturePlaceholderMax),
+  "continueButton": zod.string().min(1).max(updateKioskContentBodyContentConsentContinueButtonMax)
+}),
+  "questions": zod.object({
+  "heading": zod.string().min(1).max(updateKioskContentBodyContentQuestionsHeadingMax),
+  "description": zod.string().min(1).max(updateKioskContentBodyContentQuestionsDescriptionMax),
+  "continueButton": zod.string().min(1).max(updateKioskContentBodyContentQuestionsContinueButtonMax)
+}),
+  "checking": zod.object({
+  "heading": zod.string().min(1).max(updateKioskContentBodyContentCheckingHeadingMax),
+  "description": zod.string().min(1).max(updateKioskContentBodyContentCheckingDescriptionMax)
+}),
+  "complete": zod.object({
+  "badge": zod.string().min(1).max(updateKioskContentBodyContentCompleteBadgeMax),
+  "kioskFloorPrefix": zod.string().min(1).max(updateKioskContentBodyContentCompleteKioskFloorPrefixMax),
+  "directionsSuffix": zod.string().min(1).max(updateKioskContentBodyContentCompleteDirectionsSuffixMax),
+  "destinationFallback": zod.string().min(1).max(updateKioskContentBodyContentCompleteDestinationFallbackMax),
+  "waitingAreaFallback": zod.string().min(1).max(updateKioskContentBodyContentCompleteWaitingAreaFallbackMax),
+  "visitConfirmed": zod.string().min(1).max(updateKioskContentBodyContentCompleteVisitConfirmedMax),
+  "providerLabel": zod.string().min(1).max(updateKioskContentBodyContentCompleteProviderLabelMax),
+  "visitLabel": zod.string().min(1).max(updateKioskContentBodyContentCompleteVisitLabelMax),
+  "timeLabel": zod.string().min(1).max(updateKioskContentBodyContentCompleteTimeLabelMax),
+  "doneButton": zod.string().min(1).max(updateKioskContentBodyContentCompleteDoneButtonMax),
+  "demoNotice": zod.string().min(1).max(updateKioskContentBodyContentCompleteDemoNoticeMax)
+})
+})
+})
+
+export const updateKioskContentResponseWelcomeEyebrowMax = 120;
+
+export const updateKioskContentResponseWelcomeTitleMax = 240;
+
+export const updateKioskContentResponseWelcomeTitleAccentMax = 240;
+
+export const updateKioskContentResponseWelcomeDescriptionMax = 500;
+
+export const updateKioskContentResponseWelcomeDurationMax = 80;
+
+export const updateKioskContentResponseWelcomeDurationNoteMax = 160;
+
+export const updateKioskContentResponseWelcomeStartEyebrowMax = 120;
+
+export const updateKioskContentResponseWelcomeStartTitleMax = 180;
+
+export const updateKioskContentResponseWelcomePrivacyNoteMax = 240;
+
+export const updateKioskContentResponseWelcomeDemoInstructionsMax = 500;
+
+export const updateKioskContentResponseWelcomeQrPromptMax = 180;
+
+export const updateKioskContentResponseWelcomeQrDescriptionMax = 400;
+
+export const updateKioskContentResponseWelcomeFindVisitButtonMax = 100;
+
+export const updateKioskContentResponseWelcomeQrButtonMax = 100;
+
+export const updateKioskContentResponseAppointmentScheduledHeadingMax = 180;
+
+export const updateKioskContentResponseAppointmentScheduledDescriptionMax = 300;
+
+export const updateKioskContentResponseAppointmentConfirmButtonMax = 100;
+
+export const updateKioskContentResponseAppointmentNoAppointmentHeadingMax = 180;
+
+export const updateKioskContentResponseAppointmentNoAppointmentDescriptionMax = 300;
+
+export const updateKioskContentResponseAppointmentFrontDeskLabelMax = 120;
+
+export const updateKioskContentResponseAppointmentFrontDeskDescriptionMax = 300;
+
+export const updateKioskContentResponseAppointmentScheduleLabelMax = 120;
+
+export const updateKioskContentResponseAppointmentScheduleDescriptionMax = 300;
+
+export const updateKioskContentResponseAppointmentFrontDeskConfirmationMax = 300;
+
+export const updateKioskContentResponseAppointmentSchedulingHeadingMax = 180;
+
+export const updateKioskContentResponseAppointmentSchedulingUnavailableMax = 300;
+
+export const updateKioskContentResponseAppointmentBackToOptionsButtonMax = 140;
+
+export const updateKioskContentResponseDetailsHeadingMax = 180;
+
+export const updateKioskContentResponseDetailsContinueButtonMax = 100;
+
+export const updateKioskContentResponseCoverageHeadingMax = 180;
+
+export const updateKioskContentResponseCoverageDescriptionMax = 300;
+
+export const updateKioskContentResponseCoverageSelfPayTitleMax = 120;
+
+export const updateKioskContentResponseCoverageSelfPayDescriptionMax = 240;
+
+export const updateKioskContentResponseCoverageIuOptionTitleMax = 140;
+
+export const updateKioskContentResponseCoverageIuOptionDescriptionMax = 240;
+
+export const updateKioskContentResponseCoverageOtherOptionTitleMax = 160;
+
+export const updateKioskContentResponseCoverageOtherOptionDescriptionMax = 240;
+
+export const updateKioskContentResponseCoverageInsuranceHeadingMax = 180;
+
+export const updateKioskContentResponseCoverageUpdateInsuranceButtonMax = 180;
+
+export const updateKioskContentResponseCoverageViewInsuranceButtonMax = 180;
+
+export const updateKioskContentResponseCoverageConfirmButtonMax = 100;
+
+export const updateKioskContentResponseConsentHeadingMax = 180;
+
+export const updateKioskContentResponseConsentNoticeFirstParagraphMax = 1000;
+
+export const updateKioskContentResponseConsentNoticeSecondParagraphMax = 700;
+
+export const updateKioskContentResponseConsentAgreementLabelMax = 240;
+
+export const updateKioskContentResponseConsentSignatureLabelMax = 140;
+
+export const updateKioskContentResponseConsentSignaturePlaceholderMax = 100;
+
+export const updateKioskContentResponseConsentContinueButtonMax = 100;
+
+export const updateKioskContentResponseQuestionsHeadingMax = 180;
+
+export const updateKioskContentResponseQuestionsDescriptionMax = 300;
+
+export const updateKioskContentResponseQuestionsContinueButtonMax = 100;
+
+export const updateKioskContentResponseCheckingHeadingMax = 180;
+
+export const updateKioskContentResponseCheckingDescriptionMax = 240;
+
+export const updateKioskContentResponseCompleteBadgeMax = 120;
+
+export const updateKioskContentResponseCompleteKioskFloorPrefixMax = 120;
+
+export const updateKioskContentResponseCompleteDirectionsSuffixMax = 240;
+
+export const updateKioskContentResponseCompleteDestinationFallbackMax = 120;
+
+export const updateKioskContentResponseCompleteWaitingAreaFallbackMax = 120;
+
+export const updateKioskContentResponseCompleteVisitConfirmedMax = 120;
+
+export const updateKioskContentResponseCompleteProviderLabelMax = 100;
+
+export const updateKioskContentResponseCompleteVisitLabelMax = 100;
+
+export const updateKioskContentResponseCompleteTimeLabelMax = 100;
+
+export const updateKioskContentResponseCompleteDoneButtonMax = 100;
+
+export const updateKioskContentResponseCompleteDemoNoticeMax = 240;
+
+
+
+export const UpdateKioskContentResponse = zod.object({
+  "welcome": zod.object({
+  "eyebrow": zod.string().min(1).max(updateKioskContentResponseWelcomeEyebrowMax),
+  "title": zod.string().min(1).max(updateKioskContentResponseWelcomeTitleMax),
+  "titleAccent": zod.string().min(1).max(updateKioskContentResponseWelcomeTitleAccentMax),
+  "description": zod.string().min(1).max(updateKioskContentResponseWelcomeDescriptionMax),
+  "duration": zod.string().min(1).max(updateKioskContentResponseWelcomeDurationMax),
+  "durationNote": zod.string().min(1).max(updateKioskContentResponseWelcomeDurationNoteMax),
+  "startEyebrow": zod.string().min(1).max(updateKioskContentResponseWelcomeStartEyebrowMax),
+  "startTitle": zod.string().min(1).max(updateKioskContentResponseWelcomeStartTitleMax),
+  "privacyNote": zod.string().min(1).max(updateKioskContentResponseWelcomePrivacyNoteMax),
+  "demoInstructions": zod.string().min(1).max(updateKioskContentResponseWelcomeDemoInstructionsMax),
+  "qrPrompt": zod.string().min(1).max(updateKioskContentResponseWelcomeQrPromptMax),
+  "qrDescription": zod.string().min(1).max(updateKioskContentResponseWelcomeQrDescriptionMax),
+  "findVisitButton": zod.string().min(1).max(updateKioskContentResponseWelcomeFindVisitButtonMax),
+  "qrButton": zod.string().min(1).max(updateKioskContentResponseWelcomeQrButtonMax)
+}),
+  "appointment": zod.object({
+  "scheduledHeading": zod.string().min(1).max(updateKioskContentResponseAppointmentScheduledHeadingMax),
+  "scheduledDescription": zod.string().min(1).max(updateKioskContentResponseAppointmentScheduledDescriptionMax),
+  "confirmButton": zod.string().min(1).max(updateKioskContentResponseAppointmentConfirmButtonMax),
+  "noAppointmentHeading": zod.string().min(1).max(updateKioskContentResponseAppointmentNoAppointmentHeadingMax),
+  "noAppointmentDescription": zod.string().min(1).max(updateKioskContentResponseAppointmentNoAppointmentDescriptionMax),
+  "frontDeskLabel": zod.string().min(1).max(updateKioskContentResponseAppointmentFrontDeskLabelMax),
+  "frontDeskDescription": zod.string().min(1).max(updateKioskContentResponseAppointmentFrontDeskDescriptionMax),
+  "scheduleLabel": zod.string().min(1).max(updateKioskContentResponseAppointmentScheduleLabelMax),
+  "scheduleDescription": zod.string().min(1).max(updateKioskContentResponseAppointmentScheduleDescriptionMax),
+  "frontDeskConfirmation": zod.string().min(1).max(updateKioskContentResponseAppointmentFrontDeskConfirmationMax),
+  "schedulingHeading": zod.string().min(1).max(updateKioskContentResponseAppointmentSchedulingHeadingMax),
+  "schedulingUnavailable": zod.string().min(1).max(updateKioskContentResponseAppointmentSchedulingUnavailableMax),
+  "backToOptionsButton": zod.string().min(1).max(updateKioskContentResponseAppointmentBackToOptionsButtonMax)
+}),
+  "details": zod.object({
+  "heading": zod.string().min(1).max(updateKioskContentResponseDetailsHeadingMax),
+  "continueButton": zod.string().min(1).max(updateKioskContentResponseDetailsContinueButtonMax)
+}),
+  "coverage": zod.object({
+  "heading": zod.string().min(1).max(updateKioskContentResponseCoverageHeadingMax),
+  "description": zod.string().min(1).max(updateKioskContentResponseCoverageDescriptionMax),
+  "selfPayTitle": zod.string().min(1).max(updateKioskContentResponseCoverageSelfPayTitleMax),
+  "selfPayDescription": zod.string().min(1).max(updateKioskContentResponseCoverageSelfPayDescriptionMax),
+  "iuOptionTitle": zod.string().min(1).max(updateKioskContentResponseCoverageIuOptionTitleMax),
+  "iuOptionDescription": zod.string().min(1).max(updateKioskContentResponseCoverageIuOptionDescriptionMax),
+  "otherOptionTitle": zod.string().min(1).max(updateKioskContentResponseCoverageOtherOptionTitleMax),
+  "otherOptionDescription": zod.string().min(1).max(updateKioskContentResponseCoverageOtherOptionDescriptionMax),
+  "insuranceHeading": zod.string().min(1).max(updateKioskContentResponseCoverageInsuranceHeadingMax),
+  "updateInsuranceButton": zod.string().min(1).max(updateKioskContentResponseCoverageUpdateInsuranceButtonMax),
+  "viewInsuranceButton": zod.string().min(1).max(updateKioskContentResponseCoverageViewInsuranceButtonMax),
+  "confirmButton": zod.string().min(1).max(updateKioskContentResponseCoverageConfirmButtonMax)
+}),
+  "consent": zod.object({
+  "heading": zod.string().min(1).max(updateKioskContentResponseConsentHeadingMax),
+  "noticeFirstParagraph": zod.string().min(1).max(updateKioskContentResponseConsentNoticeFirstParagraphMax),
+  "noticeSecondParagraph": zod.string().min(1).max(updateKioskContentResponseConsentNoticeSecondParagraphMax),
+  "agreementLabel": zod.string().min(1).max(updateKioskContentResponseConsentAgreementLabelMax),
+  "signatureLabel": zod.string().min(1).max(updateKioskContentResponseConsentSignatureLabelMax),
+  "signaturePlaceholder": zod.string().min(1).max(updateKioskContentResponseConsentSignaturePlaceholderMax),
+  "continueButton": zod.string().min(1).max(updateKioskContentResponseConsentContinueButtonMax)
+}),
+  "questions": zod.object({
+  "heading": zod.string().min(1).max(updateKioskContentResponseQuestionsHeadingMax),
+  "description": zod.string().min(1).max(updateKioskContentResponseQuestionsDescriptionMax),
+  "continueButton": zod.string().min(1).max(updateKioskContentResponseQuestionsContinueButtonMax)
+}),
+  "checking": zod.object({
+  "heading": zod.string().min(1).max(updateKioskContentResponseCheckingHeadingMax),
+  "description": zod.string().min(1).max(updateKioskContentResponseCheckingDescriptionMax)
+}),
+  "complete": zod.object({
+  "badge": zod.string().min(1).max(updateKioskContentResponseCompleteBadgeMax),
+  "kioskFloorPrefix": zod.string().min(1).max(updateKioskContentResponseCompleteKioskFloorPrefixMax),
+  "directionsSuffix": zod.string().min(1).max(updateKioskContentResponseCompleteDirectionsSuffixMax),
+  "destinationFallback": zod.string().min(1).max(updateKioskContentResponseCompleteDestinationFallbackMax),
+  "waitingAreaFallback": zod.string().min(1).max(updateKioskContentResponseCompleteWaitingAreaFallbackMax),
+  "visitConfirmed": zod.string().min(1).max(updateKioskContentResponseCompleteVisitConfirmedMax),
+  "providerLabel": zod.string().min(1).max(updateKioskContentResponseCompleteProviderLabelMax),
+  "visitLabel": zod.string().min(1).max(updateKioskContentResponseCompleteVisitLabelMax),
+  "timeLabel": zod.string().min(1).max(updateKioskContentResponseCompleteTimeLabelMax),
+  "doneButton": zod.string().min(1).max(updateKioskContentResponseCompleteDoneButtonMax),
+  "demoNotice": zod.string().min(1).max(updateKioskContentResponseCompleteDemoNoticeMax)
+})
+})
+
+
+/**
+ * @summary Reset one screen or all kiosk content to defaults
+ */
+export const ResetKioskContentBody = zod.object({
+  "screen": zod.enum(['welcome', 'appointment', 'details', 'coverage', 'consent', 'questions', 'checking', 'complete']).optional()
+})
+
+export const resetKioskContentResponseWelcomeEyebrowMax = 120;
+
+export const resetKioskContentResponseWelcomeTitleMax = 240;
+
+export const resetKioskContentResponseWelcomeTitleAccentMax = 240;
+
+export const resetKioskContentResponseWelcomeDescriptionMax = 500;
+
+export const resetKioskContentResponseWelcomeDurationMax = 80;
+
+export const resetKioskContentResponseWelcomeDurationNoteMax = 160;
+
+export const resetKioskContentResponseWelcomeStartEyebrowMax = 120;
+
+export const resetKioskContentResponseWelcomeStartTitleMax = 180;
+
+export const resetKioskContentResponseWelcomePrivacyNoteMax = 240;
+
+export const resetKioskContentResponseWelcomeDemoInstructionsMax = 500;
+
+export const resetKioskContentResponseWelcomeQrPromptMax = 180;
+
+export const resetKioskContentResponseWelcomeQrDescriptionMax = 400;
+
+export const resetKioskContentResponseWelcomeFindVisitButtonMax = 100;
+
+export const resetKioskContentResponseWelcomeQrButtonMax = 100;
+
+export const resetKioskContentResponseAppointmentScheduledHeadingMax = 180;
+
+export const resetKioskContentResponseAppointmentScheduledDescriptionMax = 300;
+
+export const resetKioskContentResponseAppointmentConfirmButtonMax = 100;
+
+export const resetKioskContentResponseAppointmentNoAppointmentHeadingMax = 180;
+
+export const resetKioskContentResponseAppointmentNoAppointmentDescriptionMax = 300;
+
+export const resetKioskContentResponseAppointmentFrontDeskLabelMax = 120;
+
+export const resetKioskContentResponseAppointmentFrontDeskDescriptionMax = 300;
+
+export const resetKioskContentResponseAppointmentScheduleLabelMax = 120;
+
+export const resetKioskContentResponseAppointmentScheduleDescriptionMax = 300;
+
+export const resetKioskContentResponseAppointmentFrontDeskConfirmationMax = 300;
+
+export const resetKioskContentResponseAppointmentSchedulingHeadingMax = 180;
+
+export const resetKioskContentResponseAppointmentSchedulingUnavailableMax = 300;
+
+export const resetKioskContentResponseAppointmentBackToOptionsButtonMax = 140;
+
+export const resetKioskContentResponseDetailsHeadingMax = 180;
+
+export const resetKioskContentResponseDetailsContinueButtonMax = 100;
+
+export const resetKioskContentResponseCoverageHeadingMax = 180;
+
+export const resetKioskContentResponseCoverageDescriptionMax = 300;
+
+export const resetKioskContentResponseCoverageSelfPayTitleMax = 120;
+
+export const resetKioskContentResponseCoverageSelfPayDescriptionMax = 240;
+
+export const resetKioskContentResponseCoverageIuOptionTitleMax = 140;
+
+export const resetKioskContentResponseCoverageIuOptionDescriptionMax = 240;
+
+export const resetKioskContentResponseCoverageOtherOptionTitleMax = 160;
+
+export const resetKioskContentResponseCoverageOtherOptionDescriptionMax = 240;
+
+export const resetKioskContentResponseCoverageInsuranceHeadingMax = 180;
+
+export const resetKioskContentResponseCoverageUpdateInsuranceButtonMax = 180;
+
+export const resetKioskContentResponseCoverageViewInsuranceButtonMax = 180;
+
+export const resetKioskContentResponseCoverageConfirmButtonMax = 100;
+
+export const resetKioskContentResponseConsentHeadingMax = 180;
+
+export const resetKioskContentResponseConsentNoticeFirstParagraphMax = 1000;
+
+export const resetKioskContentResponseConsentNoticeSecondParagraphMax = 700;
+
+export const resetKioskContentResponseConsentAgreementLabelMax = 240;
+
+export const resetKioskContentResponseConsentSignatureLabelMax = 140;
+
+export const resetKioskContentResponseConsentSignaturePlaceholderMax = 100;
+
+export const resetKioskContentResponseConsentContinueButtonMax = 100;
+
+export const resetKioskContentResponseQuestionsHeadingMax = 180;
+
+export const resetKioskContentResponseQuestionsDescriptionMax = 300;
+
+export const resetKioskContentResponseQuestionsContinueButtonMax = 100;
+
+export const resetKioskContentResponseCheckingHeadingMax = 180;
+
+export const resetKioskContentResponseCheckingDescriptionMax = 240;
+
+export const resetKioskContentResponseCompleteBadgeMax = 120;
+
+export const resetKioskContentResponseCompleteKioskFloorPrefixMax = 120;
+
+export const resetKioskContentResponseCompleteDirectionsSuffixMax = 240;
+
+export const resetKioskContentResponseCompleteDestinationFallbackMax = 120;
+
+export const resetKioskContentResponseCompleteWaitingAreaFallbackMax = 120;
+
+export const resetKioskContentResponseCompleteVisitConfirmedMax = 120;
+
+export const resetKioskContentResponseCompleteProviderLabelMax = 100;
+
+export const resetKioskContentResponseCompleteVisitLabelMax = 100;
+
+export const resetKioskContentResponseCompleteTimeLabelMax = 100;
+
+export const resetKioskContentResponseCompleteDoneButtonMax = 100;
+
+export const resetKioskContentResponseCompleteDemoNoticeMax = 240;
+
+
+
+export const ResetKioskContentResponse = zod.object({
+  "welcome": zod.object({
+  "eyebrow": zod.string().min(1).max(resetKioskContentResponseWelcomeEyebrowMax),
+  "title": zod.string().min(1).max(resetKioskContentResponseWelcomeTitleMax),
+  "titleAccent": zod.string().min(1).max(resetKioskContentResponseWelcomeTitleAccentMax),
+  "description": zod.string().min(1).max(resetKioskContentResponseWelcomeDescriptionMax),
+  "duration": zod.string().min(1).max(resetKioskContentResponseWelcomeDurationMax),
+  "durationNote": zod.string().min(1).max(resetKioskContentResponseWelcomeDurationNoteMax),
+  "startEyebrow": zod.string().min(1).max(resetKioskContentResponseWelcomeStartEyebrowMax),
+  "startTitle": zod.string().min(1).max(resetKioskContentResponseWelcomeStartTitleMax),
+  "privacyNote": zod.string().min(1).max(resetKioskContentResponseWelcomePrivacyNoteMax),
+  "demoInstructions": zod.string().min(1).max(resetKioskContentResponseWelcomeDemoInstructionsMax),
+  "qrPrompt": zod.string().min(1).max(resetKioskContentResponseWelcomeQrPromptMax),
+  "qrDescription": zod.string().min(1).max(resetKioskContentResponseWelcomeQrDescriptionMax),
+  "findVisitButton": zod.string().min(1).max(resetKioskContentResponseWelcomeFindVisitButtonMax),
+  "qrButton": zod.string().min(1).max(resetKioskContentResponseWelcomeQrButtonMax)
+}),
+  "appointment": zod.object({
+  "scheduledHeading": zod.string().min(1).max(resetKioskContentResponseAppointmentScheduledHeadingMax),
+  "scheduledDescription": zod.string().min(1).max(resetKioskContentResponseAppointmentScheduledDescriptionMax),
+  "confirmButton": zod.string().min(1).max(resetKioskContentResponseAppointmentConfirmButtonMax),
+  "noAppointmentHeading": zod.string().min(1).max(resetKioskContentResponseAppointmentNoAppointmentHeadingMax),
+  "noAppointmentDescription": zod.string().min(1).max(resetKioskContentResponseAppointmentNoAppointmentDescriptionMax),
+  "frontDeskLabel": zod.string().min(1).max(resetKioskContentResponseAppointmentFrontDeskLabelMax),
+  "frontDeskDescription": zod.string().min(1).max(resetKioskContentResponseAppointmentFrontDeskDescriptionMax),
+  "scheduleLabel": zod.string().min(1).max(resetKioskContentResponseAppointmentScheduleLabelMax),
+  "scheduleDescription": zod.string().min(1).max(resetKioskContentResponseAppointmentScheduleDescriptionMax),
+  "frontDeskConfirmation": zod.string().min(1).max(resetKioskContentResponseAppointmentFrontDeskConfirmationMax),
+  "schedulingHeading": zod.string().min(1).max(resetKioskContentResponseAppointmentSchedulingHeadingMax),
+  "schedulingUnavailable": zod.string().min(1).max(resetKioskContentResponseAppointmentSchedulingUnavailableMax),
+  "backToOptionsButton": zod.string().min(1).max(resetKioskContentResponseAppointmentBackToOptionsButtonMax)
+}),
+  "details": zod.object({
+  "heading": zod.string().min(1).max(resetKioskContentResponseDetailsHeadingMax),
+  "continueButton": zod.string().min(1).max(resetKioskContentResponseDetailsContinueButtonMax)
+}),
+  "coverage": zod.object({
+  "heading": zod.string().min(1).max(resetKioskContentResponseCoverageHeadingMax),
+  "description": zod.string().min(1).max(resetKioskContentResponseCoverageDescriptionMax),
+  "selfPayTitle": zod.string().min(1).max(resetKioskContentResponseCoverageSelfPayTitleMax),
+  "selfPayDescription": zod.string().min(1).max(resetKioskContentResponseCoverageSelfPayDescriptionMax),
+  "iuOptionTitle": zod.string().min(1).max(resetKioskContentResponseCoverageIuOptionTitleMax),
+  "iuOptionDescription": zod.string().min(1).max(resetKioskContentResponseCoverageIuOptionDescriptionMax),
+  "otherOptionTitle": zod.string().min(1).max(resetKioskContentResponseCoverageOtherOptionTitleMax),
+  "otherOptionDescription": zod.string().min(1).max(resetKioskContentResponseCoverageOtherOptionDescriptionMax),
+  "insuranceHeading": zod.string().min(1).max(resetKioskContentResponseCoverageInsuranceHeadingMax),
+  "updateInsuranceButton": zod.string().min(1).max(resetKioskContentResponseCoverageUpdateInsuranceButtonMax),
+  "viewInsuranceButton": zod.string().min(1).max(resetKioskContentResponseCoverageViewInsuranceButtonMax),
+  "confirmButton": zod.string().min(1).max(resetKioskContentResponseCoverageConfirmButtonMax)
+}),
+  "consent": zod.object({
+  "heading": zod.string().min(1).max(resetKioskContentResponseConsentHeadingMax),
+  "noticeFirstParagraph": zod.string().min(1).max(resetKioskContentResponseConsentNoticeFirstParagraphMax),
+  "noticeSecondParagraph": zod.string().min(1).max(resetKioskContentResponseConsentNoticeSecondParagraphMax),
+  "agreementLabel": zod.string().min(1).max(resetKioskContentResponseConsentAgreementLabelMax),
+  "signatureLabel": zod.string().min(1).max(resetKioskContentResponseConsentSignatureLabelMax),
+  "signaturePlaceholder": zod.string().min(1).max(resetKioskContentResponseConsentSignaturePlaceholderMax),
+  "continueButton": zod.string().min(1).max(resetKioskContentResponseConsentContinueButtonMax)
+}),
+  "questions": zod.object({
+  "heading": zod.string().min(1).max(resetKioskContentResponseQuestionsHeadingMax),
+  "description": zod.string().min(1).max(resetKioskContentResponseQuestionsDescriptionMax),
+  "continueButton": zod.string().min(1).max(resetKioskContentResponseQuestionsContinueButtonMax)
+}),
+  "checking": zod.object({
+  "heading": zod.string().min(1).max(resetKioskContentResponseCheckingHeadingMax),
+  "description": zod.string().min(1).max(resetKioskContentResponseCheckingDescriptionMax)
+}),
+  "complete": zod.object({
+  "badge": zod.string().min(1).max(resetKioskContentResponseCompleteBadgeMax),
+  "kioskFloorPrefix": zod.string().min(1).max(resetKioskContentResponseCompleteKioskFloorPrefixMax),
+  "directionsSuffix": zod.string().min(1).max(resetKioskContentResponseCompleteDirectionsSuffixMax),
+  "destinationFallback": zod.string().min(1).max(resetKioskContentResponseCompleteDestinationFallbackMax),
+  "waitingAreaFallback": zod.string().min(1).max(resetKioskContentResponseCompleteWaitingAreaFallbackMax),
+  "visitConfirmed": zod.string().min(1).max(resetKioskContentResponseCompleteVisitConfirmedMax),
+  "providerLabel": zod.string().min(1).max(resetKioskContentResponseCompleteProviderLabelMax),
+  "visitLabel": zod.string().min(1).max(resetKioskContentResponseCompleteVisitLabelMax),
+  "timeLabel": zod.string().min(1).max(resetKioskContentResponseCompleteTimeLabelMax),
+  "doneButton": zod.string().min(1).max(resetKioskContentResponseCompleteDoneButtonMax),
+  "demoNotice": zod.string().min(1).max(resetKioskContentResponseCompleteDemoNoticeMax)
+})
+})
+
+
+/**
  * @summary Start a student check-in session
  */
 export const IdentifyCheckInBody = zod.object({

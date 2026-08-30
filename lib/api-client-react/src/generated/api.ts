@@ -30,6 +30,9 @@ import type {
   ErrorResponse,
   HealthStatus,
   HistoryInput,
+  KioskContent,
+  KioskContentReset,
+  KioskContentUpdate,
   QuestionnaireInput,
   VerificationCode,
   VerificationResult
@@ -139,6 +142,225 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
 
 
 
+
+export const getGetKioskContentUrl = () => {
+
+
+
+
+  return `/api/kiosk/content`
+}
+
+/**
+ * @summary Get the saved kiosk content
+ */
+export const getKioskContent = async ( options?: Parameters<typeof customFetch>[1]): Promise<KioskContent> => {
+
+  return customFetch<KioskContent>(getGetKioskContentUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetKioskContentQueryKey = () => {
+    return [
+    `/api/kiosk/content`
+    ] as const;
+    }
+
+
+export const getGetKioskContentQueryOptions = <TData = Awaited<ReturnType<typeof getKioskContent>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getKioskContent>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetKioskContentQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getKioskContent>>> = ({ signal }) => getKioskContent({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getKioskContent>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetKioskContentQueryResult = NonNullable<Awaited<ReturnType<typeof getKioskContent>>>
+export type GetKioskContentQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get the saved kiosk content
+ */
+
+export function useGetKioskContent<TData = Awaited<ReturnType<typeof getKioskContent>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getKioskContent>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetKioskContentQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateKioskContentUrl = () => {
+
+
+
+
+  return `/api/kiosk/content`
+}
+
+/**
+ * @summary Save kiosk content
+ */
+export const updateKioskContent = async (kioskContentUpdate: KioskContentUpdate, options?: Parameters<typeof customFetch>[1]): Promise<KioskContent> => {
+
+  return customFetch<KioskContent>(getUpdateKioskContentUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(kioskContentUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateKioskContentMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKioskContent>>, TError,{data: BodyType<KioskContentUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateKioskContent>>, TError,{data: BodyType<KioskContentUpdate>}, TContext> => {
+
+const mutationKey = ['updateKioskContent'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateKioskContent>>, {data: BodyType<KioskContentUpdate>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateKioskContent(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateKioskContentMutationResult = NonNullable<Awaited<ReturnType<typeof updateKioskContent>>>
+    export type UpdateKioskContentMutationBody = BodyType<KioskContentUpdate>
+    export type UpdateKioskContentMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Save kiosk content
+ */
+export const useUpdateKioskContent = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKioskContent>>, TError,{data: BodyType<KioskContentUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateKioskContent>>,
+        TError,
+        {data: BodyType<KioskContentUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateKioskContentMutationOptions(options));
+    }
+
+export const getResetKioskContentUrl = () => {
+
+
+
+
+  return `/api/kiosk/content/reset`
+}
+
+/**
+ * @summary Reset one screen or all kiosk content to defaults
+ */
+export const resetKioskContent = async (kioskContentReset?: KioskContentReset, options?: Parameters<typeof customFetch>[1]): Promise<KioskContent> => {
+
+  return customFetch<KioskContent>(getResetKioskContentUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(kioskContentReset)
+  }
+);}
+
+
+
+
+
+export const getResetKioskContentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetKioskContent>>, TError,{data?: BodyType<KioskContentReset>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof resetKioskContent>>, TError,{data?: BodyType<KioskContentReset>}, TContext> => {
+
+const mutationKey = ['resetKioskContent'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resetKioskContent>>, {data?: BodyType<KioskContentReset>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  resetKioskContent(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResetKioskContentMutationResult = NonNullable<Awaited<ReturnType<typeof resetKioskContent>>>
+    export type ResetKioskContentMutationBody = BodyType<KioskContentReset> | undefined
+    export type ResetKioskContentMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Reset one screen or all kiosk content to defaults
+ */
+export const useResetKioskContent = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetKioskContent>>, TError,{data?: BodyType<KioskContentReset>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof resetKioskContent>>,
+        TError,
+        {data?: BodyType<KioskContentReset>},
+        TContext
+      > => {
+      return useMutation(getResetKioskContentMutationOptions(options));
+    }
 
 export const getIdentifyCheckInUrl = () => {
 

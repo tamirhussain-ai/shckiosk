@@ -35,8 +35,10 @@ import {
   useSaveCheckInQuestionnaire,
   useCompleteCheckIn,
   useHealthCheck,
+  useGetKioskContent,
 } from "@workspace/api-client-react";
 import type { CheckInSession, CompletionResult, CheckInIdentificationMethod } from "@workspace/api-client-react";
+import { kioskContentDefaults } from "@/lib/kiosk-content-defaults";
 
 type CheckInMode = "universityId" | "lastName" | "qr";
 type Coverage = "iu" | "other" | "self";
@@ -267,6 +269,10 @@ export function CheckInFlow() {
 
   // API Hooks
   const { data: healthStatus } = useHealthCheck();
+  const { data: savedKioskContent } = useGetKioskContent({
+    query: { queryKey: ["/api/kiosk/content"], staleTime: 0 },
+  });
+  const content = savedKioskContent ?? kioskContentDefaults;
   const identifyMutation = useIdentifyCheckIn();
   const saveAppointmentMutation = useSaveCheckInAppointment();
   const saveDemographicsMutation = useSaveCheckInDemographics();
@@ -845,11 +851,11 @@ export function CheckInFlow() {
                 <h1
                   className="max-w-[590px] text-[clamp(3.15rem,5.4vw,5.55rem)] font-semibold leading-[.95] tracking-[-.07em] text-[#990000] font-serif"
                 >
-                  Welcome, Hoosier.
-                  <span className="mt-3 block max-w-[540px] text-[clamp(2.6rem,4.4vw,4.5rem)] leading-[.98] tracking-[-.07em] text-[#bd5b48]">Thank you for trusting us with your care.</span>
+                  {content.welcome.title}
+                  <span className="mt-3 block max-w-[540px] text-[clamp(2.6rem,4.4vw,4.5rem)] leading-[.98] tracking-[-.07em] text-[#bd5b48]">{content.welcome.titleAccent}</span>
                 </h1>
                 <p className="mt-7 max-w-[480px] text-[17px] leading-7 text-[#806960]">
-                  Check in for your visit in a few simple steps. Take your time — your health information stays private throughout.
+                  {content.welcome.description}
                 </p>
                 <div className="mt-10 max-w-[270px]">
                   <div className="flex items-start gap-3 rounded-2xl border border-[#e7d9c7] bg-[#fffaf1]/80 p-4">
@@ -857,8 +863,8 @@ export function CheckInFlow() {
                       <Clock3 size={17} />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-[#632f2f]">About 2 minutes</p>
-                      <p className="mt-1 text-xs leading-5 text-[#9a8074]">No paperwork to carry.</p>
+                      <p className="text-sm font-bold text-[#632f2f]">{content.welcome.duration}</p>
+                      <p className="mt-1 text-xs leading-5 text-[#9a8074]">{content.welcome.durationNote}</p>
                     </div>
                   </div>
                 </div>
@@ -867,27 +873,27 @@ export function CheckInFlow() {
               <div className="max-w-[560px]">
                 <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#c9ddcd] bg-[#e6f0e5] px-3.5 py-2 text-[11px] font-bold uppercase tracking-[.16em] text-[#316148]">
                   <CheckCircle2 size={14} />
-                  Check-in complete
+                  {content.complete.badge}
                 </div>
                 <p
                   className="mb-5 text-sm font-bold uppercase tracking-[.16em] text-[#806960]"
                   data-testid="text-kiosk-floor"
                 >
-                  This kiosk is on the {completion?.kioskFloor || "Second floor"}.
+                  {content.complete.kioskFloorPrefix} {completion?.kioskFloor || content.complete.destinationFallback}.
                 </p>
                 <p className="mb-7 max-w-[560px] text-[17px] font-bold leading-7 text-[#632f2f]" data-testid="text-directions">
-                  {completion?.directions} Your Care team is expecting you.
+                  {completion?.directions} {content.complete.directionsSuffix}
                 </p>
                 <h1
                   className="max-w-[650px] text-[clamp(4.6rem,10vw,8.8rem)] font-semibold uppercase leading-[.82] tracking-[-.09em] text-[#990000] font-serif"
                   data-testid="text-floor"
                 >
-                  {completion?.floorLabel || "Destination"}
+                  {completion?.floorLabel || content.complete.destinationFallback}
                 </h1>
                 <div className="mt-7 flex items-center gap-4 border-l-[5px] border-[#990000] pl-5">
                   <MapPin size={32} className="shrink-0 text-[#990000]" />
                   <p className="text-[clamp(1.8rem,3.3vw,3rem)] font-bold leading-none tracking-[-.05em] text-[#3d2626]" data-testid="text-waiting-area">
-                    {completion?.waitingArea || "Waiting area"}
+                    {completion?.waitingArea || content.complete.waitingAreaFallback}
                   </p>
                 </div>
               </div>
@@ -896,7 +902,7 @@ export function CheckInFlow() {
                 <h1
                   className="max-w-[570px] text-[clamp(3rem,5.1vw,5.2rem)] font-semibold leading-[.96] tracking-[-.07em] text-[#990000] font-serif"
                 >
-                  Finishing up...
+                  {content.checking.heading}
                 </h1>
               </div>
             ) : (
@@ -910,18 +916,18 @@ export function CheckInFlow() {
                 <h1
                   className="mt-3 max-w-[520px] text-[clamp(2.75rem,4.6vw,4.7rem)] font-semibold leading-[.97] tracking-[-.065em] text-[#990000] font-serif"
                 >
-                  {screen === "appointment" && (session?.appointments?.length ? "Let's find your visit." : "Let's find your next step.")}
+                  {screen === "appointment" && (session?.appointments?.length ? content.appointment.scheduledHeading : content.appointment.noAppointmentHeading)}
                   {screen === "demographics" && "Let's make sure we have it right."}
                   {screen === "coverage" && "How will today's visit be covered?"}
                   {screen === "consent" && "A quick review before we begin."}
-                  {screen === "questionnaire" && "A few things for your care team."}
+                  {screen === "questionnaire" && content.questions.heading}
                 </h1>
                 <p className="mt-6 max-w-[430px] text-[16px] leading-7 text-[#806960]">
-                  {screen === "appointment" && (session?.appointments?.length ? "Choose the appointment you're here for today." : "The front desk can help, or you can schedule online.")}
+                  {screen === "appointment" && (session?.appointments?.length ? content.appointment.scheduledDescription : content.appointment.noAppointmentDescription)}
                   {screen === "demographics" && "Review your details so we can keep your visit moving smoothly."}
                   {screen === "coverage" && "Choose the option that best describes your plan today."}
                   {screen === "consent" && "Please read the short notice, then sign to acknowledge."}
-                  {screen === "questionnaire" && "Your answers help us prepare for a more useful conversation."}
+                  {screen === "questionnaire" && content.questions.description}
                 </p>
               </div>
             )}
@@ -929,7 +935,7 @@ export function CheckInFlow() {
             {screen !== "complete" && screen !== "checking" && (
               <div className="mt-10 flex items-center gap-2 text-xs font-medium text-[#9a8478]">
                 <LockKeyhole size={14} />
-                <span>For your privacy, please use this screen alone.</span>
+                <span>{content.welcome.privacyNote}</span>
               </div>
             )}
           </section>
@@ -938,9 +944,9 @@ export function CheckInFlow() {
             {screen === "welcome" && (
               <div className="kiosk-fade relative">
                 <div className="mb-7">
-                  <p className="text-xs font-bold uppercase tracking-[.18em] text-[#9a8074]">Start your check-in</p>
+                  <p className="text-xs font-bold uppercase tracking-[.18em] text-[#9a8074]">{content.welcome.startEyebrow}</p>
                   <h2 className="mt-3 text-[clamp(2.1rem,3.5vw,2.9rem)] font-semibold leading-[1.03] tracking-[-.055em] text-[#990000] font-serif">
-                    How would you like to begin?
+                    {content.welcome.startTitle}
                   </h2>
                 </div>
 
@@ -977,9 +983,9 @@ export function CheckInFlow() {
                         <ScanLine size={42} strokeWidth={1.6} />
                         <span className="absolute inset-3 rounded-lg border-2 border-[#990000]/35" />
                       </div>
-                      <p className="mt-4 text-sm font-bold text-[#632f2f]">Use the QR code from your text</p>
+                       <p className="mt-4 text-sm font-bold text-[#632f2f]">{content.welcome.qrPrompt}</p>
                       <p className="mx-auto mt-1.5 max-w-[350px] text-xs leading-5 text-[#9a8074]">
-                        This demo simulates the iPad camera using a sample QR token. No image is captured or stored.
+                         {content.welcome.qrDescription}
                       </p>
                     </div>
                   ) : (
@@ -1032,7 +1038,7 @@ export function CheckInFlow() {
 
                   {mode === "universityId" && (
                     <p className="mt-4 text-center text-xs leading-5 text-[#9a8074]">
-                      Demo: use <span className="font-bold text-[#806259]">iu123456</span> for scheduled visits or <span className="font-bold text-[#806259]">iu000000</span> for no scheduled appointment, with 10/14/2003.
+                      {content.welcome.demoInstructions}
                     </p>
                   )}
 
@@ -1040,7 +1046,7 @@ export function CheckInFlow() {
 
                   <div className="mt-8">
                     {primaryButton(
-                      mode === "qr" ? "Use demo QR code" : "Find my visit",
+                       mode === "qr" ? content.welcome.qrButton : content.welcome.findVisitButton,
                       handleContinue,
                       !canContinue,
                       undefined,
@@ -1057,7 +1063,7 @@ export function CheckInFlow() {
                 {showSchedulingHandoff ? (
                   <>
                     <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
-                      Schedule an appointment online
+                      {content.appointment.schedulingHeading}
                     </h2>
                     <div
                       className="rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] p-5 sm:p-6"
@@ -1088,7 +1094,7 @@ export function CheckInFlow() {
                         </a>
                       ) : (
                         <div className="mt-6 rounded-xl bg-[#f4e6d5] p-4 text-sm font-semibold leading-6 text-[#632f2f]">
-                          The scheduler connection is not available on this kiosk. Ask the front desk for the current scheduling QR code or link.
+                          {content.appointment.schedulingUnavailable}
                         </div>
                       )}
                     </div>
@@ -1098,13 +1104,13 @@ export function CheckInFlow() {
                       onClick={() => setShowSchedulingHandoff(false)}
                       className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-5 text-sm font-bold text-[#632f2f] transition hover:bg-[#f4e6d5] focus:outline-none focus:ring-4 focus:ring-[#990000]/15"
                     >
-                      <ArrowLeft size={17} /> Back to appointment options
+                       <ArrowLeft size={17} /> {content.appointment.backToOptionsButton}
                     </button>
                   </>
                 ) : session?.appointments?.length ? (
                   <>
                     <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
-                      Which appointment are you checking in for?
+                      {content.appointment.scheduledHeading}
                     </h2>
                     <div className="space-y-3">
                       {session.appointments.map((apt) => (
@@ -1151,16 +1157,16 @@ export function CheckInFlow() {
                     </div>
                     {renderError()}
                     <div className="mt-8">
-                      {primaryButton("Confirm appointment", continueAppointment, !selectedAppointment, undefined, "button-save-appointment")}
+                       {primaryButton(content.appointment.confirmButton, continueAppointment, !selectedAppointment, undefined, "button-save-appointment")}
                     </div>
                   </>
                 ) : (
                   <>
                     <h2 className="mb-3 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
-                      No scheduled appointment found
+                      {content.appointment.noAppointmentHeading}
                     </h2>
                     <p className="mb-6 text-sm leading-6 text-[#806960]">
-                      You can still get help today. Choose the option that works best for you.
+                      {content.appointment.noAppointmentDescription}
                     </p>
                     <div className="grid gap-3" data-testid="no-appointment-options">
                       <button
@@ -1176,8 +1182,8 @@ export function CheckInFlow() {
                           <Stethoscope size={21} />
                         </span>
                         <span>
-                          <span className="block font-bold text-[#632f2f]">Visit the front desk</span>
-                          <span className="mt-1 block text-xs leading-5 text-[#806960]">A team member can look for your visit or help you make an appointment.</span>
+                           <span className="block font-bold text-[#632f2f]">{content.appointment.frontDeskLabel}</span>
+                           <span className="mt-1 block text-xs leading-5 text-[#806960]">{content.appointment.frontDeskDescription}</span>
                         </span>
                       </button>
                       <button
@@ -1193,14 +1199,14 @@ export function CheckInFlow() {
                           <QrCode size={21} />
                         </span>
                         <span>
-                          <span className="block font-bold text-[#632f2f]">Schedule online</span>
-                          <span className="mt-1 block text-xs leading-5 text-[#806960]">Use the self-service scheduler QR code or link.</span>
+                           <span className="block font-bold text-[#632f2f]">{content.appointment.scheduleLabel}</span>
+                           <span className="mt-1 block text-xs leading-5 text-[#806960]">{content.appointment.scheduleDescription}</span>
                         </span>
                       </button>
                     </div>
                     {frontDeskSelected && (
                       <div className="mt-5 rounded-xl bg-[#e6f0e5] p-4 text-sm font-semibold leading-6 text-[#316148]" role="status">
-                        Please take your student ID to the front desk. You do not need to enter more information here.
+                         {content.appointment.frontDeskConfirmation}
                       </div>
                     )}
                   </>
@@ -1212,7 +1218,7 @@ export function CheckInFlow() {
               <div className="kiosk-fade relative">
                 {renderBack()}
                 <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
-                  Contact details
+                  {content.details.heading}
                 </h2>
                 
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -1298,7 +1304,7 @@ export function CheckInFlow() {
 
                 <div className="mt-8">
                   {primaryButton(
-                    "Looks good",
+                     content.details.continueButton,
                     continueDemographics,
                     !addressLine1 || !city || !state || !zip || !phone,
                     undefined,
@@ -1314,15 +1320,15 @@ export function CheckInFlow() {
                 {showInsuranceInfo ? (
                   <>
                     <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
-                      Insurance information
+                      {content.coverage.insuranceHeading}
                     </h2>
                     <div className="rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] p-5" data-testid="insurance-information">
                       {coverage === "self" ? (
                         <div className="flex items-start gap-3">
                           <CreditCard size={20} className="mt-0.5 shrink-0 text-[#990000]" />
                           <div>
-                            <p className="font-bold text-[#632f2f]">Self Pay</p>
-                            <p className="mt-1 text-sm leading-6 text-[#806960]">No insurance plan will be billed for this visit.</p>
+                            <p className="font-bold text-[#632f2f]">{content.coverage.selfPayTitle}</p>
+                            <p className="mt-1 text-sm leading-6 text-[#806960]">{content.coverage.selfPayDescription}</p>
                           </div>
                         </div>
                       ) : (
@@ -1350,20 +1356,20 @@ export function CheckInFlow() {
                       }}
                       className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-5 text-sm font-bold text-[#632f2f] transition hover:bg-[#f4e6d5] focus:outline-none focus:ring-4 focus:ring-[#990000]/15"
                     >
-                      <PenLine size={17} /> Return and update insurance information
+                       <PenLine size={17} /> {content.coverage.updateInsuranceButton}
                     </button>
                   </>
                 ) : (
                   <>
                     <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
-                      Billing & Coverage
+                      {content.coverage.heading}
                     </h2>
 
                     <div className="space-y-3">
                       {([
-                        ["iu", "Bill IU Student Insurance", "We have your plan on file."],
-                        ["other", "Bill a different insurance plan", "Enter the information from your insurance card."],
-                        ["self", "Self Pay", "No insurance will be billed."],
+                        ["iu", content.coverage.iuOptionTitle, content.coverage.iuOptionDescription],
+                        ["other", content.coverage.otherOptionTitle, content.coverage.otherOptionDescription],
+                        ["self", content.coverage.selfPayTitle, content.coverage.selfPayDescription],
                       ] as const).map(([val, title, desc]) => (
                         <label
                           key={val}
@@ -1436,14 +1442,14 @@ export function CheckInFlow() {
                       }}
                       className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#d9c6b5] bg-[#fffaf1] px-5 text-sm font-bold text-[#632f2f] transition hover:bg-[#f4e6d5] focus:outline-none focus:ring-4 focus:ring-[#990000]/15"
                     >
-                      <Info size={17} /> View insurance information
+                       <Info size={17} /> {content.coverage.viewInsuranceButton}
                     </button>
 
                     {renderError()}
 
                     <div className="mt-6">
                       {primaryButton(
-                        "Confirm coverage",
+                         content.coverage.confirmButton,
                         continueCoverage,
                         !coverage || (coverage === "other" && (!insuranceCarrier || !memberId || !subscriberName)),
                         undefined,
@@ -1459,15 +1465,15 @@ export function CheckInFlow() {
               <div className="kiosk-fade relative">
                 {renderBack()}
                 <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
-                  Consent to Treat
+                  {content.consent.heading}
                 </h2>
 
                 <div className="mb-6 max-h-48 overflow-y-auto rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] p-4 text-sm font-medium leading-relaxed text-[#806960]">
                   <p className="mb-3">
-                    By proceeding, I voluntarily consent to medical care, diagnostic procedures, and treatment by IU Student Health Center personnel. I understand that I have the right to ask questions about my treatment and discuss any concerns with my provider.
+                     {content.consent.noticeFirstParagraph}
                   </p>
                   <p>
-                    I also acknowledge receipt of the Notice of Privacy Practices, detailing how my health information may be used and disclosed.
+                     {content.consent.noticeSecondParagraph}
                   </p>
                 </div>
 
@@ -1486,12 +1492,12 @@ export function CheckInFlow() {
                     />
                   </div>
                   <span className="text-[15px] font-bold text-[#632f2f]">
-                    I have read and agree to the Consent to Treat
+                    {content.consent.agreementLabel}
                   </span>
                 </label>
 
                 <div className="mt-6">
-                  <label htmlFor="signature" className="mb-2 block text-sm font-bold text-[#632f2f]">Type your full name to sign</label>
+                  <label htmlFor="signature" className="mb-2 block text-sm font-bold text-[#632f2f]">{content.consent.signatureLabel}</label>
                   <div className="relative">
                     <PenLine size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#9a8074]" />
                     <input
@@ -1500,7 +1506,7 @@ export function CheckInFlow() {
                       data-testid="input-signature"
                       value={signatureName}
                       onChange={(e) => { setSignatureName(e.target.value); clearError(); }}
-                      placeholder="Your name"
+                      placeholder={content.consent.signaturePlaceholder}
                       className="min-h-14 w-full rounded-2xl border border-[#d9c6b5] bg-[#fffaf1] pl-11 pr-4 font-serif text-[18px] font-medium tracking-wide text-[#632f2f] outline-none transition placeholder:font-sans placeholder:text-sm placeholder:font-semibold placeholder:tracking-normal placeholder:text-[#b7a49a] focus:border-[#990000] focus:bg-[#fff6e8] focus:ring-4 focus:ring-[#990000]/10"
                     />
                   </div>
@@ -1509,7 +1515,7 @@ export function CheckInFlow() {
                 {renderError()}
 
                 <div className="mt-8">
-                  {primaryButton("Sign and continue", continueConsent, !consentAccepted || signatureName.length < 2, undefined, "button-save-consent")}
+                  {primaryButton(content.consent.continueButton, continueConsent, !consentAccepted || signatureName.length < 2, undefined, "button-save-consent")}
                 </div>
               </div>
             )}
@@ -1518,7 +1524,7 @@ export function CheckInFlow() {
               <div className="kiosk-fade relative">
                 {renderBack()}
                 <h2 className="mb-6 text-[clamp(1.7rem,2.5vw,2rem)] font-semibold leading-[1.03] tracking-[-.04em] text-[#990000] font-serif">
-                  Pre-visit questions
+                  {content.questions.heading}
                 </h2>
 
                 <div className="space-y-6">
@@ -1553,7 +1559,7 @@ export function CheckInFlow() {
                 {renderError()}
 
                 <div className="mt-8">
-                  {primaryButton("Save answers", continueQuestions, Object.keys(answers).length !== questions.length, undefined, "button-save-questionnaire")}
+                  {primaryButton(content.questions.continueButton, continueQuestions, Object.keys(answers).length !== questions.length, undefined, "button-save-questionnaire")}
                 </div>
               </div>
             )}
@@ -1565,8 +1571,8 @@ export function CheckInFlow() {
                   <span className="h-3 w-3 rounded-full bg-[#990000]" />
                   <span className="h-3 w-3 rounded-full bg-[#990000]" />
                 </span>
-                <p className="text-lg font-bold text-[#632f2f]">Finalizing your check-in...</p>
-                <p className="mt-2 text-sm text-[#806960]">Securely saving your responses.</p>
+                  <p className="text-lg font-bold text-[#632f2f]">{content.checking.heading}</p>
+                  <p className="mt-2 text-sm text-[#806960]">{content.checking.description}</p>
               </div>
             )}
 
@@ -1574,19 +1580,19 @@ export function CheckInFlow() {
               <div className="kiosk-fade flex min-h-[510px] flex-col">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-[#806960]">
                   <Check size={16} className="text-[#316148]" />
-                  Visit confirmed
+                  {content.complete.visitConfirmed}
                 </div>
                 <dl className="mt-6 divide-y divide-[#e7d9c7]">
                   <div className="py-4 first:pt-0">
-                    <dt className="text-xs font-semibold uppercase tracking-[.12em] text-[#806960]">Provider</dt>
+                    <dt className="text-xs font-semibold uppercase tracking-[.12em] text-[#806960]">{content.complete.providerLabel}</dt>
                     <dd className="mt-1 text-lg font-bold text-[#3d2626]" data-testid="text-provider">{completion?.provider}</dd>
                   </div>
                   <div className="py-4">
-                    <dt className="text-xs font-semibold uppercase tracking-[.12em] text-[#806960]">Visit</dt>
+                    <dt className="text-xs font-semibold uppercase tracking-[.12em] text-[#806960]">{content.complete.visitLabel}</dt>
                     <dd className="mt-1 text-lg font-bold text-[#3d2626]" data-testid="text-visit-type">{completion?.visitType}</dd>
                   </div>
                   <div className="py-4">
-                    <dt className="text-xs font-semibold uppercase tracking-[.12em] text-[#806960]">Time</dt>
+                    <dt className="text-xs font-semibold uppercase tracking-[.12em] text-[#806960]">{content.complete.timeLabel}</dt>
                     <dd className="mt-1 text-lg font-bold text-[#3d2626]" data-testid="text-appointment-time">{completion?.appointmentTime}</dd>
                   </div>
                 </dl>
@@ -1596,11 +1602,11 @@ export function CheckInFlow() {
                   onClick={startOver}
                   className="mt-auto flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#990000] px-6 text-[16px] font-bold text-[#fff9ed] shadow-[0_10px_22px_rgba(122,0,0,.18)] transition hover:-translate-y-0.5 hover:bg-[#7d0000] focus:outline-none focus:ring-4 focus:ring-[#990000]/20"
                 >
-                  Done
+                  {content.complete.doneButton}
                   <ArrowRight size={18} />
                 </button>
                 <p className="mt-4 text-center text-[11px] leading-5 text-[#806960]">
-                  Demo / sample data only. No patient information is displayed.
+                  {content.complete.demoNotice}
                 </p>
               </div>
             )}
