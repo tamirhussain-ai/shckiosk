@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "ZOTZE4mzNvozyCXy1s9Ze"
+uri = "file://docs/ecw-screen-data-flow.md"
+type = "text"
+title = "IU Student Check-In eCW Screen Data Flow"
+description = "Screen-by-screen mapping of browser API requests, native eCW actions, direct MySQL questionnaire and consent persistence, and current safety boundaries."
+logical_id = "65698e44-4fb2-4720-b982-e46c01885505"
+content_hash = "sha256:60c164ffdf7bc6b1352ddb72fba10d473ca051fee929a87336a024af90ef90e5"
+size = 18964
+mtime_ms = 1788280344316
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:cc2854b5-3955-4d19-898a-fc70d3ed5e46/65698e44-4fb2-4720-b982-e46c01885505/3159452c-f6a1-45ea-a4a8-e48026d4d660"
+storage_version_token = "1788280354297920"
+content_type = "text/markdown"
